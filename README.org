@@ -14,31 +14,39 @@ Goals:
 
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
+  - [[#install][Install]]
+  - [[#configure][Configure]]
+  - [[#maintain][Maintain]]
 - [[#configuration-files][Configuration Files]]
   - [[#initel][init.el]]
     - [[#garbage-collection][Garbage Collection]]
       - [[#gc-cons-percentage][gc-cons-percentage]]
       - [[#gc-cons-threshold][gc-cons-threshold]]
-    - [[#handling-custom-configuration][Handling Custom Configuration]]
+    - [[#handling-customel][Handling custom.el]]
     - [[#encoding][Encoding]]
     - [[#environment][Environment]]
     - [[#appearance][Appearance]]
       - [[#disable-toolbars][Disable toolbars]]
-      - [[#disable-startup-buffers-and-actions][Disable startup buffers and actions]]
-      - [[#re-use-frames-rather-than-creating-new-ones][Re-use frames rather than creating new ones]]
-      - [[#set-a-basic-theme-and-font][Set a basic theme and font]]
-      - [[#improve-editing-generic-files][Improve editing generic files]]
-      - [[#show-line-numbers-when-editing-files][Show line numbers when editing files.]]
-      - [[#remove-trailing-whitespace-on-save][Remove trailing whitespace on save]]
-    - [[#bootstrap][Bootstrap]]
-  - [[#configel][config.el]]
+      - [[#disable-splash-screen][Disable splash screen]]
+      - [[#re-use-frames-and-windows][Re-use Frames and Windows]]
+      - [[#font][Font]]
+      - [[#theme][Theme]]
+    - [[#editing][Editing]]
+      - [[#clipboard][Clipboard]]
+      - [[#scrolling][Scrolling]]
+      - [[#line-numbers][Line Numbers]]
+      - [[#parenthesis-matching][Parenthesis Matching]]
+      - [[#modeline][Modeline]]
+      - [[#whitespace][Whitespace]]
+      - [[#word-wrap][Word Wrap]]
     - [[#input][Input]]
       - [[#keyboard][Keyboard]]
       - [[#mouse][Mouse]]
-      - [[#scrolling][Scrolling]]
-      - [[#misc][Misc]]
+    - [[#bootstrap][Bootstrap]]
+  - [[#configel][config.el]]
     - [[#package-management][Package Management]]
       - [[#use-package][use-package]]
+      - [[#no-littering][no-littering]]
     - [[#packages][Packages]]
       - [[#async][async]]
       - [[#auto-compile][auto-compile]]
@@ -104,27 +112,60 @@ Goals:
 
 * Usage
 
-This file may be used to fully replicate my setup, and acts as both
-documentation as well as configuration.  There are two strategies you
-may choose from to deploy this configuration:
+This singular file is all that is needed to fully replicate this
+configuration.  While you may simply download a copy of this file and
+place it within ~/.emacs.d, the steps below will reflect using git to
+retrieve and manage your copy of the configuration.
 
-1. Use Emacs to evaluate this file via command line:
+** Install
+
+Be sure to move any existing ~/.emacs{,.d} before performing the
+following steps.
+
+1. Clone this repository
 
 #+BEGIN_SRC shell :eval no :export no :tangle no
-  emacs --eval='(org-babel-load-file "~/.emacs.d/README.org")'
+  $ git clone https://github.com/jcmdln/baemacs.git
 #+END_SRC
 
-2. Configure Emacs by loading this file
+2. Create a symlink to ~/.emacs.d
+
+#+BEGIN_SRC shell :eval no :export no :tangle no
+  $ ln -sf $(pwd)/baemacs ~/.emacs.d
+#+END_SRC
+
+** Configure
+
+There are two ways of loading the configuration, either of which are
+perfectly suitable depending on personal preference.
+
+1. Configure by evaluating this file via command line:
+
+#+BEGIN_SRC shell :eval no :export no :tangle no
+  $ emacs --eval='(org-babel-load-file "~/.emacs.d/README.org")'
+#+END_SRC
+
+2. Configure by loading this file within Emacs
 
 #+BEGIN_SRC emacs-lisp :eval no :export no :tangle no
   M-x org-babel-load-file RET ~/.emacs.d/README.org
 #+END_SRC
 
+** Maintain
+
+Ideally you would have your own fork and modify this file how you see
+fit, managing portability between systems with some VCS like git.
+
+There is no right or wrong way, so I'll leave this section ambiguous
+for now.
+
 * Configuration Files
 
 To make the most effective use of the various startup files that Emacs
-will check for, each file listed in this section will detail the
-configurations that they contain.
+will check for, each file listed in this section will detail the changes
+they contain.  The intention is to ensure that we don't force Emacs to
+load everything during initialization, instead loading the following
+configuration file at the end of initialization.
 
 ** init.el
 
@@ -135,51 +176,68 @@ ship with Emacs and should be changed early.
 *** Garbage Collection
 
 Emacs has some considerations for older and more memory restricted
-systems in terms of how the garbage collector is configured.  On systems
-with restrictive amounts of memory, you may want to adjust or remove
-these changes.
+systems in terms of how the garbage collector is configured.
+
+On systems with restrictive amounts of memory you may want to prevent
+these changes from being tangled, which effectively disables them.
 
 **** gc-cons-percentage
 
 For the purposes of initialization, we'll increase `gc-cons-percentage`
-to defer garbage collection.  The settings below mean that garbage
-collection is deferred until reaching 67% of the total heap size.  After
-init completes, we lower this value to 34% of the total heap size.
+to decrease garbage collection pauses.  The settings below mean that
+garbage collection is deferred until reaching 80% of the total heap
+size.  After initialization completes we lower this value to 20% of
+the total heap size to prevent garbage collection passes from becoming
+too large to be handled quickly.
+
+At the time of writing, the default is 10% so we are effectively
+attempting to halve the amount of garbage collection pauses we would
+experience as a result of reaching the defined threshold of the total
+heap size.
+
+Should you want to compare against the default value, we preserve it as
+shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq gc-cons-percentage-default gc-cons-percentage
-        gc-cons-percentage-init    0.667
-        gc-cons-percentage-tuned   0.334
+        gc-cons-percentage-init    0.8
+        gc-cons-percentage-tuned   0.2
         gc-cons-percentage         gc-cons-percentage-init)
 
   (add-hook 'after-init-hook
             (lambda ()
-              (setq gc-cons-percentage gc-cons-percentage-tuned)))
+              (setq gc-cons-percentage gc-cons-percentage-tuned)
+              (garbage-collect)))
 #+END_SRC
 
 **** gc-cons-threshold
 
-Now we will increase the `gc-cons-threshold`, which refers to the
-total bytes of storage for lisp objects that must be allocated to
-trigger subsequent garbage collections.
+Now we will increase the `gc-cons-threshold`, which refers to the total
+bytes of storage for lisp objects that must be allocated to trigger
+subsequent garbage collections.  On 32-bit systems this threshold is
+400000 objects, while on 64-bit systems it is 800000 objects.
 
-On 32-bit systems this threshold is 400KB, while on 64-bit systems it
-is 800KB.  The idea is that by specifying a larger threshold, garbage
-collection will occur less often, meaning fewer GC pauses.
+Modifying this value is generally not recommended and considered an act
+of performance voodoo, though the idea is that by specifying a larger
+threshold, garbage collection will occur less often, meaning fewer GC
+pauses.
 
-We'll set this value to 2MB globally, which will significantly reduce
-the total number of GC pauses we experience, also storing the default
-value in case it must be referenced.
+We'll set this value to 2000000 globally, which ideally will reduce the
+total number of GC pauses we experience by more than half.
+
+The default value is also stored so you may evaluate this change as
+shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq gc-cons-threshold-default gc-cons-threshold
         gc-cons-threshold         (* 1024 1024 2))
 #+END_SRC
 
-*** Handling Custom Configuration
+*** Handling custom.el
 
-Specify our `custom-file` so that our generated configuration files
-won't have a configuration block uncleanly appended to them:
+Rather than Emacs customization being appended to the end of the
+configuration file, in our case 'init.el', we may specify the location
+of `custom-file` early on to keep ~/.emacs.d relatively clean.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq custom-file "~/.emacs.d/custom.el")
@@ -187,7 +245,8 @@ won't have a configuration block uncleanly appended to them:
 
 *** Encoding
 
-Here we will attempt to enforce using utf-8 encoding:
+Another thing we want to handle very early is attempting to enforce the
+use of UTF-8 encoding.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq prefer-coding-system       'utf-8
@@ -198,10 +257,13 @@ Here we will attempt to enforce using utf-8 encoding:
 
 *** Environment
 
-Emacs already inherits much of what is currently in the system's
-environment, though here we'll modify our environment slightly so that
-the current Emacs session is our default editor, and disable
-PROMPT_COMMAND which might cause problems with ssh connections:
+Emacs will inherit your system's current environment, though we may
+adjust some key variables for quality of life.
+
+- Set Emacs as our default EDITOR when in Emacs
+- Set PAGER to an Emacs built-in, which doesn't require ansi-term
+- Unset PROMPT_COMMAND, which causes issues with ssh connections
+- Attempt to get/set variables, in case they differ
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setenv "EDITOR"         "emacsclient")
@@ -217,13 +279,15 @@ PROMPT_COMMAND which might cause problems with ssh connections:
 *** Appearance
 
 In terms of appearance, I prefer to have as little wasted space and
-visual clutter while using built-in themes.
+visual clutter as possible.  I make no attempt to completely restyle
+Emacs, preferring instead to make slight modifications.
 
 **** Disable toolbars
 
-I don't find the toolbars to be useful.  The following will disable the
-various toolbars when their functions are bound, which prevents them
-from ever loading or being fully initialized:
+I don't find the toolbars to be useful comparatively to the amount of
+visual space they consume.  The following will disable the various
+toolbars when their functions are bound, which prevents them from ever
+being initialized:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (when (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
@@ -231,10 +295,14 @@ from ever loading or being fully initialized:
   (when (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 #+END_SRC
 
-**** Disable startup buffers and actions
+**** Disable splash screen
 
-Disable the various buffers and actions that occur post-init, other
-than showing an empty scratch buffer:
+After initialization completes, we'll end up with some clutter that is
+not very helpful for long-time Emacs users.
+
+- Remove the default scratch buffer message
+- Disable the splash screen
+- Disable the startup buffer menu
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq initial-scratch-message     ""
@@ -242,15 +310,26 @@ than showing an empty scratch buffer:
         inhibit-startup-buffer-menu t)
 #+END_SRC
 
-**** Re-use frames rather than creating new ones
+**** Re-use Frames and Windows
 
 One big annoyance is Emacs arbitrary splitting my window to show a
 newly created buffer.  This is especially annoying when I run a command
-myself such as man which causes arbitrary splits, disrupting my
-workflow.
+myself such as 'M-x man' which causes arbitrary splits.
 
-Here we will enforce always re-using the currently selected frame when a
-new buffer is opened or focused.
+Here we will enforce always re-using the currently selected frame when
+a new buffer is opened or focused.  This works in most cases, though as
+shown below certain things like 'man' will not respect our choices and
+require specific adjustment.  Some things like 'gnus' should still make
+splits as they want, so we won't look for every possible edge condition
+to normalize this behavior.
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (add-to-list 'display-buffer-alist
+               '("*Help*" display-buffer-same-window))
+
+  (add-to-list 'display-buffer-alist
+               '("*Man*" display-buffer-same-window))
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq pop-up-frames     nil
@@ -259,71 +338,94 @@ new buffer is opened or focused.
         Man-notify-method 'pushy)
 #+END_SRC
 
-**** Set a basic theme and font
-
-Tango-Dark, a monospace font, what else do you need?
+**** Font
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (load-theme 'tango-dark)
   (set-face-attribute :family "Monospace")
 #+END_SRC
 
-**** Improve editing generic files
+**** Theme
 
-At the very least, I like to see the column number, ensure that \n
-always precedes EOF, tweak the paren matching delay, and disable the
-visual bell:
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (load-theme 'tango-dark)
+#+END_SRC
+
+*** Editing
+
+There are some general-purpose changes to make for editing files, which
+ideally if I ever get around to incorporating site-start.el will allow
+loading a slim, nimble instance of Emacs when needed.  For now I'll
+leave these changes here.
+
+**** Clipboard
+
+This part is a bit unorganized though reduces clutter by inhibiting
+buffers and adjusting how Emacs' clipboard works.
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (setq save-interprogram-paste-before-kill t
+        select-enable-primary               nil)
+#+END_SRC
+
+**** Scrolling
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (setq auto-window-vscroll             nil
+        scroll-conservatively           101
+        scroll-margin                   0
+        scroll-preserve-screen-position 1
+        scroll-step                     1
+        scroll-up-aggressively          0.0
+        scroll-down-aggressively        0.0)
+#+END_SRC
+
+**** Line Numbers
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (add-hook 'lisp-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (add-hook 'org-mode-hook 'display-line-numbers-mode)
+  (add-hook 'text-mode-hook 'display-line-numbers-mode)
+#+END_SRC
+
+**** Parenthesis Matching
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (add-hook 'after-init-hook
+            (lambda()
+              (setq show-paren-delay 0.33)
+              (show-paren-mode t)))
+#+END_SRC
+
+**** Modeline
+
+- Show column numbers
+- Ensure '\n' always precedes EOF
+- When show-paren-mode is enabled, delay showing match for 330ms
+- Disable the visual-bell
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq column-number-mode    t
         require-final-newline t
         show-paren-delay      0.33
         visible-bell          nil)
-
-  (show-paren-mode t)
 #+END_SRC
 
-**** Show line numbers when editing files.
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'lisp-mode-hook 'display-line-numbers-mode)
-  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (add-hook 'text-mode-hook 'display-line-numbers-mode)
-
-  (global-visual-line-mode t)
-#+END_SRC
-
-**** Remove trailing whitespace on save
+**** Whitespace
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+END_SRC
 
-*** Bootstrap
+**** Word Wrap
 
-On init, ensure that the generated config files are always newer than
-this file.  By doing so, we only have to make edits to this file and
-the changes will cause our configuration to be regenerated.
+When Visual Line mode is enabled, ‘word-wrap’ is turned on in this
+buffer, and simple editing commands are redefined to act on visual
+lines, not logical lines.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (defun emacs-reconfig()
-    "Build and compile 'org-mode' config."
-    (interactive)
-    (require 'org)
-    (org-babel-load-file "~/.emacs.d/README.org")
-    (byte-compile-file   "~/.emacs.d/init.el")
-    (byte-compile-file   "~/.emacs.d/config.el"))
-
-  (if (file-newer-than-file-p "~/.emacs.d/README.org"
-                              "~/.emacs.d/config.el")
-      (emacs-reconfig)
-    (load "~/.emacs.d/config.el"))
+  (global-visual-line-mode t)
 #+END_SRC
-
-** config.el
-
-Emacs won't be looking for this file itself, though our init.el will
-load this file which contains changes we want to make post-init.
 
 *** Input
 
@@ -373,7 +475,8 @@ xterm support:
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (setq mouse-wheel-follow-mouse      't
         mouse-wheel-progressive-speed nil
-        mouse-wheel-scroll-amount     '(1 ((shift) . 1)))
+        mouse-wheel-scroll-amount     '(1 ((shift) . 1))
+        mouse-yank-at-point           t)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -392,41 +495,40 @@ xterm support:
                     (scroll-up-line 3)))
 #+END_SRC
 
-**** Scrolling
+*** Bootstrap
 
-I prefer scrolling to behave more like other editors, where the cursor
-reaches the final line before scrolling and the cursor scrolls one line
-at a time. This does cause Emacs to use additional resources, though I
-prefer this behavior to the default.
+Something we can do to slightly improve the total duration needed for
+Emacs to complete its initialization phase is byte-compile the
+configuration files we create.  If performed conditionally, we only
+have to pay the cost of byte-compiling when we make a change to this
+configuration file for the entire configuration to be rebuild.
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (setq auto-window-vscroll             nil
-        scroll-conservatively           101
-        scroll-margin                   0
-        scroll-preserve-screen-position 1
-        scroll-step                     1
-        scroll-up-aggressively          0.0
-        scroll-down-aggressively        0.0)
+At the end of initialization, ensure that 'README.org' is not newer
+than 'config.el', otherwise rebuild our configuration files and
+byte-compile them.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (defun emacs-reconfig()
+    "Build and compile 'org-mode' config."
+    (interactive)
+    (require 'org)
+    (org-babel-load-file "~/.emacs.d/README.org")
+    (byte-compile-file   "~/.emacs.d/init.el")
+    (byte-compile-file   "~/.emacs.d/config.el"))
+
+  (if (file-newer-than-file-p "~/.emacs.d/README.org"
+                              "~/.emacs.d/config.el")
+      (emacs-reconfig)
+    (load "~/.emacs.d/config.el"))
 #+END_SRC
 
-**** Misc
+** config.el
 
-This part is a bit unorganized though reduces clutter by inhibiting
-buffers and adjusting how Emacs' clipboard works.
+This is a non-standard file that is referenced at the end of 'init.el'
+which contains
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (setq mouse-yank-at-point                 t
-        save-interprogram-paste-before-kill t
-        select-enable-primary               nil)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (add-to-list 'display-buffer-alist
-               '("*Help*" display-buffer-same-window))
-
-  (add-to-list 'display-buffer-alist
-               '("*Man*" display-buffer-same-window))
-#+END_SRC
+Emacs won't be looking for this file itself, though our init.el will
+load this file which contains changes we want to make post-init.
 
 *** Package Management
 
@@ -489,7 +591,7 @@ before attempting to initialize:
         use-package-check-before-init t)
 #+END_SRC
 
-***** no-littering
+**** no-littering
 
 The second package will keep our ~/.emacs.d nice and tidy by adjusting
 the locations of configuration files.  It uses a unix-y format, which
@@ -1276,9 +1378,9 @@ https:github.com/emacs-lsp/lsp-mode#supported-languages
 **** GDScript
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-(use-package gdscript-mode
-  :config
-  (setq gdscript-godot-executable "flatpak run org.godotengine.Godot"))
+  (use-package gdscript-mode
+    :config
+    (setq gdscript-godot-executable "flatpak run org.godotengine.Godot"))
 #+END_SRC
 
 **** Git
@@ -1299,7 +1401,7 @@ These packages provide modes that make git-related files more readable.
 **** Go
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-
+  (use-package go-mode)
 #+END_SRC
 
 **** Jinja2
@@ -1360,22 +1462,46 @@ These packages provide modes that make git-related files more readable.
 **** Org
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (add-hook 'org-mode-hook
-            (lambda()
-              (add-hook 'org-metaup-hook    'windmove-up)
-              (add-hook 'org-metaleft-hook  'windmove-left)
-              (add-hook 'org-metadown-hook  'windmove-down)
-              (add-hook 'org-metaright-hook 'windmove-right)
+  (use-package org
+    :demand t
+    :bind
+    (:map org-mode-map
+          ([remap backward-paragraph] . nil)
+          ([remap forward-paragraph]  . nil)
+          ("C-S-<down>" . nil)
+          ("C-S-<up>"   . nil)
+          ("S-<left>"   . nil)
+          ("S-<right>"  . nil))
 
-              (org-defkey org-mode-map [remap backward-paragraph] nil)
-              (org-defkey org-mode-map [remap forward-paragraph] nil)
+    :hook
+    ((org-metadown . windmove-down)
+     (org-metaleft . windmove-left)
+     (org-metaright . windmove-right)
+     (org-metaup . windmove-up))
 
-              (setq org-support-shift-select t
-                    org-src-fontify-natively t
-                    org-src-tab-acts-natively t)
+    :config
+    (add-to-list 'org-babel-load-languages
+                 '((C          . t)
+                   (C++        . t)
+                   (awk        . t)
+                   (emacs-lisp . t)
+                   (eshell     . t)
+                   (lua        . t)
+                   (js         . t)
+                   (lisp       . t)
+                   (perl       . t)
+                   (python     . t)
+                   (R          . t)
+                   (sed        . t)
+                   (sh         . t)
+                   (sql        . t)
+                   (sqlite     . t)))
 
-              (set-face-attribute 'org-block nil
-                                  :background "#222222")))
+    (set-face-attribute 'org-block nil :background "#222222")
+
+    (setq org-support-shift-select 'always
+          org-src-fontify-natively t
+          org-src-tab-acts-natively t))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1388,6 +1514,7 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package toc-org
     :after org
+    :commands (toc-org-enable)
     :hook (org-mode . toc-org-enable))
 #+END_SRC
 
@@ -1414,9 +1541,7 @@ These packages provide modes that make git-related files more readable.
 **** Python
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (add-hook 'python-mode
-            (lambda()
-              (add-to-list 'org-babel-load-languages '((python . t)))))
+  (use-package python-mode)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
