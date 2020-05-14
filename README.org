@@ -1,5 +1,5 @@
 # -*- mode : org -*-
-#+TITLE: Baemacs - A Literate GNU/Emacs Configuration in Org-Mode
+#+TITLE: Baemacs - A Literate GNU/Emacs Configuration
 #+STARTUP: indent
 #+LANGUAGE: en
 
