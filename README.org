@@ -42,11 +42,11 @@ Goals:
     - [[#input][Input]]
       - [[#keyboard][Keyboard]]
       - [[#mouse][Mouse]]
-    - [[#bootstrap][Bootstrap]]
-  - [[#configel][config.el]]
     - [[#package-management][Package Management]]
       - [[#use-package][use-package]]
       - [[#no-littering][no-littering]]
+    - [[#bootstrap][Bootstrap]]
+  - [[#configel][config.el]]
     - [[#packages][Packages]]
       - [[#async][async]]
       - [[#auto-compile][auto-compile]]
@@ -177,11 +177,15 @@ ship with Emacs and should be changed early.
 
 *** Garbage Collection
 
-Emacs has some considerations for older and more memory restricted
-systems in terms of how the garbage collector is configured.
+Emacs makes some considerations for older and more memory restricted
+systems in terms of how the garbage collector is configured.  On modern
+64-bit systems these considerations may be far too conservative for
+users who run many elisp programs such as gnus, elfeed, circe, etc.
 
-On systems with restrictive amounts of memory you may want to prevent
-these changes from being tangled, which effectively disables them.
+As Emacs develops its concurrency, parallelism, and events primitives
+these adjustments will need to be revisited.  Note that for memory
+constrained environments you may want to disable the changes to the
+garbage collector made in this section.
 
 **** gc-cons-percentage
 
@@ -222,10 +226,8 @@ subsequent garbage collections.  On 32-bit systems this threshold is
 Modifying this value is generally not recommended and considered an act
 of performance voodoo, though the idea is that by specifying a larger
 threshold, garbage collection will occur less often, meaning fewer GC
-pauses.
-
-We'll set this value to 2000000 globally, which ideally will reduce the
-total number of GC pauses we experience by more than half.
+pauses. We'll set this value to 2000000 globally, which ideally will
+reduce the total number of GC pauses we experience by more than half.
 
 The default value is also stored so you may evaluate this change as
 shown below:
@@ -325,7 +327,7 @@ require specific adjustment.  Some things like 'gnus' should still make
 splits as they want, so we won't look for every possible edge condition
 to normalize this behavior.
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (add-to-list 'display-buffer-alist
                '("*Help*" display-buffer-same-window))
 
@@ -364,14 +366,14 @@ leave these changes here.
 This part is a bit unorganized though reduces clutter by inhibiting
 buffers and adjusting how Emacs' clipboard works.
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (setq save-interprogram-paste-before-kill t
         select-enable-primary               nil)
 #+END_SRC
 
 **** Scrolling
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (setq auto-window-vscroll             nil
         scroll-conservatively           101
         scroll-margin                   0
@@ -445,7 +447,7 @@ From my time of using tmux + vim I had grown to prefer some custom
 keybinds I made for handling splits or navigating through panes. Here
 I've attempted to recreated the subjective ease of navigation I prefer:
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (global-set-key (kbd "M--")
                   (lambda()
                     (interactive)
@@ -461,7 +463,7 @@ I've attempted to recreated the subjective ease of navigation I prefer:
                     (switch-to-next-buffer)))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (global-set-key (kbd "C-c c")     'comment-or-uncomment-region)
   (global-set-key (kbd "<M-down>")  'windmove-down)
   (global-set-key (kbd "<M-left>")  'windmove-left)
@@ -474,14 +476,14 @@ I've attempted to recreated the subjective ease of navigation I prefer:
 In terms of the mouse, I really only adjust scrolling behavior and add
 xterm support:
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (setq mouse-wheel-follow-mouse      't
         mouse-wheel-progressive-speed nil
         mouse-wheel-scroll-amount     '(1 ((shift) . 1))
         mouse-yank-at-point           t)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (add-hook 'after-init-hook
             (lambda()
               (xterm-mouse-mode 1)))
@@ -495,6 +497,83 @@ xterm support:
                   (lambda()
                     (interactive)
                     (scroll-up-line 3)))
+#+END_SRC
+
+*** Package Management
+
+Package management isn't loaded by default, so we have to explicitly
+require it be loaded now:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (require 'package)
+#+END_SRC
+
+Here we're defining where to put packages, where we should get packages
+from, and the priority we should retrieve packages if a package with the
+same name exists on multiple sources.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq package-user-dir "~/.emacs.d/pkg/"
+
+        package-archives
+        '(("GNU ELPA"     . "https://elpa.gnu.org/packages/")
+          ("MELPA Stable" . "https://stable.melpa.org/packages/")
+          ("MELPA"        . "https://melpa.org/packages/"))
+
+        package-archive-priorities
+        '(("GNU ELPA"     . 3)
+          ("MELPA Stable" . 2)
+          ("MELPA"        . 1)))
+#+END_SRC
+
+With the above changes made, we may now initialize the package module:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+(package-initialize)
+#+END_SRC
+
+**** use-package
+
+The first package we'll ensure exists is use-package, which the rest of
+this file relies on for handling per-package configuration.  In newer
+versions of Emacs use-package is now a built-in, but we should check to
+be nice to older versions:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
+  (eval-when-compile
+    (require 'use-package)
+    (require 'bind-key))
+#+END_SRC
+
+Some decent use-package tweaks are to defer loading a package unless
+demanded, ensure a package exists or can be retrieved before loading
+its configuration, and check that use-package is installed and active
+before attempting to initialize:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq use-package-always-defer      t
+        use-package-always-ensure     t
+        use-package-check-before-init t)
+#+END_SRC
+
+**** no-littering
+
+The second package will keep our ~/.emacs.d nice and tidy by adjusting
+the locations of configuration files.  It uses a unix-y format, which
+is a nice change.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (use-package no-littering
+    :demand t
+    :commands (no-littering-expand-var-file-name)
+
+    :config
+    (setq auto-save-file-name-transforms
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
 
 *** Bootstrap
@@ -527,91 +606,9 @@ byte-compile them.
 ** config.el
 
 This is a non-standard file that is referenced at the end of 'init.el'
-which contains
-
-Emacs won't be looking for this file itself, though our init.el will
-load this file which contains changes we want to make post-init.
-
-*** Package Management
-
-Package management isn't loaded by default, so we have to explicitly
-require it be loaded now:
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (require 'package)
-#+END_SRC
-
-Here we're defining where to put packages, where we should get packages
-from, and the priority we should retrieve packages if a package with the
-same name exists on multiple sources.
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (setq package-user-dir "~/.emacs.d/pkg/"
-
-        package-archives
-        '(("GNU ELPA"     . "https://elpa.gnu.org/packages/")
-          ("MELPA Stable" . "https://stable.melpa.org/packages/")
-          ("MELPA"        . "https://melpa.org/packages/"))
-
-        package-archive-priorities
-        '(("GNU ELPA"     . 3)
-          ("MELPA Stable" . 2)
-          ("MELPA"        . 1)))
-#+END_SRC
-
-With the above changes made, we may now initialize the package module:
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-(package-initialize)
-#+END_SRC
-
-**** use-package
-
-The first package we'll ensure exists is use-package, which the rest of
-this file relies on for handling per-package configuration.  In newer
-versions of Emacs use-package is now a built-in, but we should check to
-be nice to older versions:
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-
-  (eval-when-compile
-    (require 'use-package)
-    (require 'bind-key))
-#+END_SRC
-
-Some decent use-package tweaks are to defer loading a package unless
-demanded, ensure a package exists or can be retrieved before loading
-its configuration, and check that use-package is installed and active
-before attempting to initialize:
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (setq use-package-always-defer      t
-        use-package-always-ensure     t
-        use-package-check-before-init t)
-#+END_SRC
-
-**** no-littering
-
-The second package will keep our ~/.emacs.d nice and tidy by adjusting
-the locations of configuration files.  It uses a unix-y format, which
-is a nice change.
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package no-littering
-    :demand t
-    :commands (no-littering-expand-var-file-name)
-
-    :config
-    (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
-#+END_SRC
+which contains our extra package and language definitions.
 
 *** Packages
-
-These are packages that Emacs currently ships with.
 
 **** async
 
