@@ -124,15 +124,15 @@ following steps.
 
 1. Clone this repository
 
-#+BEGIN_SRC shell :eval no :export no :tangle no
-  $ git clone https://github.com/jcmdln/baemacs.git
-#+END_SRC
+  #+BEGIN_SRC shell :eval no :export no :tangle no
+     $ git clone https://github.com/jcmdln/baemacs.git
+  #+END_SRC
 
 2. Create a symlink to ~/.emacs.d
 
-#+BEGIN_SRC shell :eval no :export no :tangle no
-  $ ln -sf $(pwd)/baemacs ~/.emacs.d
-#+END_SRC
+  #+BEGIN_SRC shell :eval no :export no :tangle no
+    $ ln -sf $(pwd)/baemacs ~/.emacs.d
+  #+END_SRC
 
 ** Configure
 
@@ -141,15 +141,15 @@ perfectly suitable depending on personal preference.
 
 1. Configure by evaluating this file via command line:
 
-#+BEGIN_SRC shell :eval no :export no :tangle no
-  $ emacs --eval='(org-babel-load-file "~/.emacs.d/README.org")'
-#+END_SRC
+  #+BEGIN_SRC shell :eval no :export no :tangle no
+    $ emacs --eval='(org-babel-load-file "~/.emacs.d/README.org")'
+  #+END_SRC
 
 2. Configure by loading this file within Emacs
 
-#+BEGIN_SRC emacs-lisp :eval no :export no :tangle no
-  M-x org-babel-load-file RET ~/.emacs.d/README.org
-#+END_SRC
+  #+BEGIN_SRC emacs-lisp :eval no :export no :tangle no
+    M-x org-babel-load-file RET ~/.emacs.d/README.org
+  #+END_SRC
 
 ** Maintain
 
