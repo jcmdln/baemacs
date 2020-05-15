@@ -698,26 +698,24 @@ even over irssi, weechat, or other clients I've used in the past.
     :commands (enable-lui-logging-globally lui-set-prompt)
 
     :init
+    (add-hook 'circe-server-mode-hook
+              (lambda()
+                (require 'circe-chanop)))
+
     (add-hook 'circe-chat-mode-hook
               (lambda()
                 (lui-set-prompt
                  (concat (propertize
                           (concat (buffer-name) ":")
                           'face 'circe-prompt-face)
-                         " ")))
-
-              (enable-circe-color-nicks))
+                         " "))))
 
     (add-hook 'lui-mode-hook
               (lambda()
                 (setq fringes-outside-margins t
                       left-margin-width       9
                       word-wrap               t
-                      wrap-prefix             "")
-
-                (setf (cdr
-                       (assoc 'continuation fringe-indicator-alist))
-                      nil)))
+                      wrap-prefix             "")))
 
     :config
     (setq circe-default-part-message ""
@@ -735,7 +733,8 @@ even over irssi, weechat, or other clients I've used in the past.
 
     (load "lui-logging" nil t)
     (enable-lui-logging-globally)
-    (require 'circe-chanop)
+    (enable-circe-color-nicks)
+
     (if (file-exists-p "~/.emacs.d/usr/circe.el")
         (load-file     "~/.emacs.d/usr/circe.el")))
 #+END_SRC
@@ -819,9 +818,14 @@ Source: https://github.com/abo-abo/define-word
   (use-package diff-hl
     :demand t
     :commands (diff-hl-mode diff-hl-margin-mode)
-    :hook
-    (((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
-     ((conf-mode org-mode prog-mode text-mode) . diff-hl-margin-mode)))
+    :hook ((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
+    :init
+    (if (window-system nil)
+        (lambda()
+          (add-hook 'conf-mode-hook 'diff-hl-margin-mode)
+          (add-hook 'org-mode-hook 'diff-hl-margin-mode)
+          (add-hook 'prog-mode-hook 'diff-hl-margin-mode)
+          (add-hook 'text-mode-hook 'diff-hl-margin-mode))))
 #+END_SRC
 
 **** dimmer
