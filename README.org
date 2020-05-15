@@ -1551,7 +1551,18 @@ These packages provide modes that make git-related files more readable.
 **** Rust
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package rust-mode)
+  (use-package rust-mode
+    :commands (rust-format-buffer rust-mode)
+    :hook (before-save . rust-format-buffer)
+    :config
+    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package cargo
+    :after (rust-mode)
+    :commands (cargo-minor-mode)
+    :hook (rust-mode . cargo-minor-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
