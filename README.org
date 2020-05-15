@@ -6,10 +6,7 @@
 Baemacs is yet another take on a literate GNU/Emacs configuration that
 intends to remain close to the default behaviors and appearance.
 
-#+NAME: fig:1
-#+CAPTION: What Baemacs looks like on startup
-#+ATTR_HTML: :style margin: inherit auto;
-[[./img/baemacs.png]]]
+#+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
 To understand what Baemacs is attempting to do differently, let's cover
 some of the important goals and intentions of this configuration.
