@@ -3,6 +3,19 @@
 # Ignore everything
 *
 
+# Traverse directories
+!*/
+
+# Exclude directories
+elpa
+etc
+pkg
+usr
+var
+
+# Include specific directories
+!img/*
+
 # Include specific files
 !.gitignore
 !LICENSE.md

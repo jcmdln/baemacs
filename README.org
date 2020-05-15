@@ -3,14 +3,65 @@
 #+STARTUP: indent
 #+LANGUAGE: en
 
-Baemacs is a literate GNU/Emacs configuration using org-mode and
-use-package.
+Baemacs is yet another take on a literate GNU/Emacs configuration that
+intends to remain close to the default behaviors and appearance.
 
-Goals:
-- Preserve (most) core GNU/Emacs functionality
-- Fully document changes with context and reasoning (eventually)
-- Leverage use-package for predictability
-- Performance and init time is a concern, though avoid voodoo
+#+NAME: fig:1
+#+CAPTION: What Baemacs looks like on startup
+#+ATTR_HTML: :style margin: inherit auto;
+[[./img/baemacs.png]]]
+
+To understand what Baemacs is attempting to do differently, let's cover
+some of the important goals and intentions of this configuration.
+
+1. Preserve (most) core GNU/Emacs functionality
+
+  Unlike other configurations, there is no evil-mode support and we
+  don't remap any (useful) default keybinds.  If you are comfortable
+  with plain GNU/Emacs, you should feel empowered by Baemacs.
+
+  Vi/Vim and evil-mode users should most likely look at one of the many
+  alternatives that provides or defaults to evil-mode.
+
+2. Fully document changes with context and reasoning (eventually)
+
+   Having documentation, context of why something was added, and
+   reasoning of whether it is a good/bad/subjective addition allows you
+   as the user to better understand how each component ties together.
+
+   Even better, you don't need to hunt any of this down, it's all in
+   this file!
+
+3. Leverage use-package for predictability
+
+   Creating logic of when packages should conditionally be loaded is a
+   bit easier with use-package.  Also it reads a little better than
+   huge blocks of elisp.
+
+4. Performance is a concern, though avoid voodoo
+
+   There's two things done in this configuration that appear to impact
+   performance in a positive way:
+
+   - Tweaking the garbage collector
+
+     This is primarily to decrease garbage collection pauses, but the
+     changes made will at minimum halve the number of pauses we
+     experience. See [[#garbage-collection][Garbage Collection]] for clarification.
+
+   - Compiling configuration files
+
+     This is primarily to decrease initialization time.  When using a
+     non-Org config you ordinarily would make a change in an '.el' file
+     expecting that to be changed, and if you didn't re-byte-compile
+     you would inherit the value from '.elc', which is no longer the
+     expected behavior.  There may be some other implications though
+     this is the main argument I've heard against byte-compiling config
+     files.
+
+     In our case since everything should be in 'README.org', which acts
+     as our staging ground for changes, we may tangle and byte-compile
+     configuration files with less apprehension.
 
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
