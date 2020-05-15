@@ -571,7 +571,6 @@ is a nice change.
   (use-package no-littering
     :demand t
     :commands (no-littering-expand-var-file-name)
-
     :config
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
@@ -647,7 +646,6 @@ even over irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
     :commands (enable-lui-logging-globally lui-set-prompt)
-
     :hook
     (circe-message-option-functions . my-circe-message-option-chanserv)
 
@@ -708,7 +706,6 @@ even over irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company
     :hook ((lisp-mode prog-mode text-mode) . company-mode)
-
     :config
     (setq company-tooltip-limit  20
           company-idle-delay     0.3
@@ -776,10 +773,9 @@ Source: https://github.com/abo-abo/define-word
   (use-package diff-hl
     :demand t
     :commands (diff-hl-mode diff-hl-margin-mode)
-
     :hook
-    (((lisp-mode org-mode prog-mode text-mode) . diff-hl-mode)
-     ((lisp-mode org-mode prog-mode text-mode) . diff-hl-margin-mode)))
+    (((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
+     ((conf-mode org-mode prog-mode text-mode) . diff-hl-margin-mode)))
 #+END_SRC
 
 **** dimmer
@@ -824,7 +820,6 @@ behave and look like typical unix shells, so maybe try it for yourself.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
     :commands (eshell eshell/basename eshell/pwd)
-
     :config
     (setq eshell-banner-message             ""
           eshell-cmpl-cycle-completions     nil
@@ -873,7 +868,6 @@ toggle displaying images in a specific buffer, you may now do so.
   (use-package eww
     :commands (eww eww-mode eww-reload eww-toggle-images eww-new)
     :init (setq browse-url-browser-function 'eww-browse-url)
-
     :config
     (setq shr-blocked-images "")
 
@@ -899,11 +893,10 @@ toggle displaying images in a specific buffer, you may now do so.
     :after eww
     :commands (eww-lnum-follow eww-lnum-universal)
     :hook (eww-mode)
-
     :bind
     (:map eww-mode-map
-     ("f" . eww-lnum-follow)
-     ("F" . eww-lnum-universal)))
+          ("f" . eww-lnum-follow)
+          ("F" . eww-lnum-universal)))
 #+END_SRC
 
 **** flycheck
@@ -946,13 +939,13 @@ clients.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gnus
-    :bind
-    (("<M-down>" . windmove-down)
-     ("<M-up>"   . windmove-up))
-
     :hook
     ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
      (gnus-group-mode       . gnus-group-sort-groups-by-alphabet))
+
+    :bind
+    (("<M-down>" . windmove-down)
+     ("<M-up>"   . windmove-up))
 
     :config
     (setq gnus-show-threads                      t
@@ -986,9 +979,9 @@ Source: https://github.com/Wilfred/helpful
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package highlight-indent-guides
-    :config (setq highlight-indent-guides-method 'character)
     :demand t
-    :hook (prog-mode . highlight-indent-guides-mode))
+    :hook (prog-mode . highlight-indent-guides-mode)
+    :config (setq highlight-indent-guides-method 'character))
 #+END_SRC
 
 **** ibuffer
@@ -999,16 +992,15 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ibuffer
+    :commands (ibuffer-switch-to-saved-filter-groups)
+    :hook
+    ((ibuffer      . ibuffer-auto-mode)
+     (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
+
     :bind
     (("C-x C-b"         . ibuffer)
      ("<C-tab>"         . next-buffer)
      ("<C-iso-lefttab>" . previous-buffer))
-
-    :commands (ibuffer-switch-to-saved-filter-groups)
-
-    :hook
-    ((ibuffer      . ibuffer-auto-mode)
-     (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
 
     :init
     (add-hook 'ibuffer-auto-mode-hook
@@ -1088,11 +1080,11 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ivy
+    :commands (ivy-mode)
     :bind
     (("C-c C-r" . ivy-resume)
      ("<f6>"    . ivy-resume))
 
-    :commands (ivy-mode)
     :init (ivy-mode 1)
 
     :config
@@ -1117,7 +1109,8 @@ Source: https://github.com/wasamasa/nov.el
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nov
     :disabled
-    :config (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+    :config
+    (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 #+END_SRC
 
 **** package-utils
@@ -1146,7 +1139,8 @@ https://github.com/politza/pdf-tools#installation
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rainbow-delimiters
     :demand t
-    :hook ((markdown-mode prog-mode text-mode) . rainbow-delimiters-mode))
+    :hook
+    ((markdown-mode prog-mode text-mode) . rainbow-delimiters-mode))
 #+END_SRC
 
 **** ranger
@@ -1188,8 +1182,8 @@ you may appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package server
     :after (package-utils)
-    :bind ("C-x C-c" . server-stop)
     :commands (package-utils-upgrade-all server-start)
+    :bind ("C-x C-c" . server-stop)
 
     :init
     (unless (and (fboundp 'server-running-p)
@@ -1223,7 +1217,9 @@ you may appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
     :demand t
-    :hook ((markdown-mode prog-mode text-mode) . smartparens-mode)
+    :hook
+    (((conf-mode eshell-mode prog-mode text-mode) . smartparens-mode)
+     ((markdown-mode org-mode) . smartparens-mode))
 
     :config
     (setq sp-highlight-pair-overlay     nil
@@ -1267,7 +1263,6 @@ https:github.com/emacs-lsp/lsp-mode#supported-languages
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package lsp-mode
     :commands (lsp lsp-deferred)
-
     :hook
     ((c-mode      . lsp-deferred)
      (c++-mode    . lsp-deferred)
@@ -1277,9 +1272,9 @@ https:github.com/emacs-lsp/lsp-mode#supported-languages
 
     :config
     (defvar c-default-style)
-    (setq c-default-style '((c-mode      . "bsd")
-                            (c++-mode    . "ellemtel")
-                            (other       . "bsd"))
+    (setq c-default-style '((c-mode   . "bsd")
+                            (c++-mode . "ellemtel")
+                            (other    . "bsd"))
 
           lsp-pyls-server-command "~/.local/bin/pyls"))
 #+END_SRC
@@ -1469,6 +1464,12 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org
     :demand t
+    :hook
+    ((org-metadown . windmove-down)
+     (org-metaleft . windmove-left)
+     (org-metaright . windmove-right)
+     (org-metaup . windmove-up))
+
     :bind
     (:map org-mode-map
           ([remap backward-paragraph] . nil)
@@ -1477,12 +1478,6 @@ These packages provide modes that make git-related files more readable.
           ("C-S-<up>"   . nil)
           ("S-<left>"   . nil)
           ("S-<right>"  . nil))
-
-    :hook
-    ((org-metadown . windmove-down)
-     (org-metaleft . windmove-left)
-     (org-metaright . windmove-right)
-     (org-metaup . windmove-up))
 
     :config
     (add-to-list 'org-babel-load-languages
@@ -1512,15 +1507,14 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-bullets
     :commands (org-bullets-mode)
-    :config
-    (add-hook 'org-mode-hook (lambda() (org-bullets-mode 1))))
+    :hook (org-mode . (lambda() (org-bullets-mode 1))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package toc-org
     :after org
-    :commands (toc-org-enable)
-    :hook (org-mode . toc-org-enable))
+    :hook (org-mode . toc-org-enable)
+    :commands (toc-org-enable))
 #+END_SRC
 
 **** PHP (Disabled)
