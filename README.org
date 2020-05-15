@@ -818,14 +818,9 @@ Source: https://github.com/abo-abo/define-word
   (use-package diff-hl
     :demand t
     :commands (diff-hl-mode diff-hl-margin-mode)
-    :hook ((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
-    :init
-    (if (window-system nil)
-        (lambda()
-          (add-hook 'conf-mode-hook 'diff-hl-margin-mode)
-          (add-hook 'org-mode-hook 'diff-hl-margin-mode)
-          (add-hook 'prog-mode-hook 'diff-hl-margin-mode)
-          (add-hook 'text-mode-hook 'diff-hl-margin-mode))))
+    :hook
+    (((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
+     ((conf-mode org-mode prog-mode text-mode) . diff-hl-margin-mode)))
 #+END_SRC
 
 **** dimmer
@@ -1528,7 +1523,6 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org
-    :demand t
     :hook
     ((org-metadown  . windmove-down)
      (org-metaleft  . windmove-left)
