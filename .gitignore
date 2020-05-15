@@ -1,0 +1,9 @@
+# .gitignore
+
+# Ignore everything
+*
+
+# Include specific files
+!.gitignore
+!LICENSE.md
+!README.org
