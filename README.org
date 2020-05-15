@@ -429,8 +429,8 @@ buffer, and simple editing commands are redefined to act on visual
 lines, not logical lines.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'after-init-hook 
-            (lambda() 
+  (add-hook 'after-init-hook
+            (lambda()
               (global-visual-line-mode t)))
 #+END_SRC
 
@@ -1013,9 +1013,9 @@ readable sizes, and define a ton of filter groups.
     (define-ibuffer-column size-h
       (:name "Size" :inline t)
       (cond
-       ((> (buffer-size) 1000000) 
+       ((> (buffer-size) 1000000)
         (format "%7.1fM" (/ (buffer-size) 1000000.0)))
-       ((> (buffer-size) 1000) 
+       ((> (buffer-size) 1000)
         (format "%7.1fk" (/ (buffer-size) 1000.0)))
        (t (format "%8d" (buffer-size)))))
 
@@ -1266,7 +1266,7 @@ https:github.com/emacs-lsp/lsp-mode#supported-languages
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package lsp-mode
-    :commands (lsp lsp-deferred)
+    :commands (lsp lsp-deferred lsp-format-buffer lsp-organize-imports)
     :hook
     ((c-mode      . lsp-deferred)
      (c++-mode    . lsp-deferred)
@@ -1405,7 +1405,13 @@ These packages provide modes that make git-related files more readable.
 **** Go
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package go-mode)
+  (use-package go-mode
+    :after (lsp-mode)
+    :hook (before-save . gofmt)
+    :mode ("\\.go\\'" . go-mode)
+    :config
+    (setq tab-width        4
+          indent-tabs-mode t))
 #+END_SRC
 
 **** Jinja2
@@ -1471,10 +1477,10 @@ These packages provide modes that make git-related files more readable.
   (use-package org
     :demand t
     :hook
-    ((org-metadown . windmove-down)
-     (org-metaleft . windmove-left)
+    ((org-metadown  . windmove-down)
+     (org-metaleft  . windmove-left)
      (org-metaright . windmove-right)
-     (org-metaup . windmove-up))
+     (org-metaup    . windmove-up))
 
     :bind
     (:map org-mode-map
@@ -1505,8 +1511,8 @@ These packages provide modes that make git-related files more readable.
 
     (set-face-attribute 'org-block nil :background "#222222")
 
-    (setq org-support-shift-select 'always
-          org-src-fontify-natively t
+    (setq org-support-shift-select  'always
+          org-src-fontify-natively  t
           org-src-tab-acts-natively t))
 #+END_SRC
 
@@ -1560,8 +1566,7 @@ These packages provide modes that make git-related files more readable.
   (use-package rust-mode
     :commands (rust-format-buffer rust-mode)
     :hook (before-save . rust-format-buffer)
-    :config
-    (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
+    :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
