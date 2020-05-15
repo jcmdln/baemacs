@@ -386,6 +386,7 @@ buffers and adjusting how Emacs' clipboard works.
 **** Line Numbers
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (add-hook 'conf-mode-hook 'display-line-numbers-mode)
   (add-hook 'lisp-mode-hook 'display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   (add-hook 'org-mode-hook 'display-line-numbers-mode)
