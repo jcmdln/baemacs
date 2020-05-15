@@ -1407,8 +1407,13 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package go-mode
     :after (lsp-mode)
-    :hook (before-save . gofmt)
     :mode ("\\.go\\'" . go-mode)
+
+    :init
+    (add-hook 'go-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook 'gofmt nil 'local)))
+
     :config
     (setq tab-width        4
           indent-tabs-mode t))
@@ -1565,8 +1570,12 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rust-mode
     :commands (rust-format-buffer rust-mode)
-    :hook (before-save . rust-format-buffer)
-    :mode ("\\.rs\\'" . rust-mode))
+    :mode ("\\.rs\\'" . rust-mode)
+    :init
+    (add-hook 'rust-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          'rust-format-buffer nil 'local))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
