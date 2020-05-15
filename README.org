@@ -389,7 +389,7 @@ buffers and adjusting how Emacs' clipboard works.
   (add-hook 'conf-mode-hook 'display-line-numbers-mode)
   (add-hook 'lisp-mode-hook 'display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (add-hook 'org-mode-hook 'display-line-numbers-mode)
+  (add-hook 'org-mode-hook  'display-line-numbers-mode)
   (add-hook 'text-mode-hook 'display-line-numbers-mode)
 #+END_SRC
 
@@ -429,7 +429,9 @@ buffer, and simple editing commands are redefined to act on visual
 lines, not logical lines.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (global-visual-line-mode t)
+  (add-hook 'after-init-hook 
+            (lambda() 
+              (global-visual-line-mode t)))
 #+END_SRC
 
 *** Input
@@ -789,7 +791,7 @@ Source: https://github.com/gonewest818/dimmer.el
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dimmer
     :commands (dimmer-mode)
-    :init (dimmer-mode))
+    :hook (after-init . dimmer-mode))
 #+END_SRC
 
 **** elfeed
@@ -1011,8 +1013,10 @@ readable sizes, and define a ton of filter groups.
     (define-ibuffer-column size-h
       (:name "Size" :inline t)
       (cond
-       ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
-       ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+       ((> (buffer-size) 1000000) 
+        (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+       ((> (buffer-size) 1000) 
+        (format "%7.1fk" (/ (buffer-size) 1000.0)))
        (t (format "%8d" (buffer-size)))))
 
     (setq ibuffer-show-empty-filter-groups nil
@@ -1436,7 +1440,9 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package markdown-mode)
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package markdown-preview-mode
     :disabled)
 #+END_SRC
