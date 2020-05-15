@@ -172,13 +172,13 @@ following steps.
 
 First, clone this repository:
 
-#+BEGIN_SRC shell :eval no :export no :tangle no
+#+BEGIN_SRC shell :eval no :tangle no
   $ git clone https://github.com/jcmdln/baemacs.git
 #+END_SRC
 
 Create a symlink to '~/.emacs.d':
 
-#+BEGIN_SRC shell :eval no :export no :tangle no
+#+BEGIN_SRC shell :eval no :tangle no
   $ ln -sf $(pwd)/baemacs ~/.emacs.d
 #+END_SRC
 
@@ -696,8 +696,6 @@ even over irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
     :commands (enable-lui-logging-globally lui-set-prompt)
-    :hook
-    (circe-message-option-functions . my-circe-message-option-chanserv)
 
     :init
     (add-hook 'circe-chat-mode-hook
@@ -705,21 +703,23 @@ even over irssi, weechat, or other clients I've used in the past.
                 (lui-set-prompt
                  (concat (propertize
                           (concat (buffer-name) ":")
-                          'face 'circe-prompt-face) " "))))
+                          'face 'circe-prompt-face)
+                         " ")))
+
+              (enable-circe-color-nicks))
 
     (add-hook 'lui-mode-hook
               (lambda()
-                (setq fringes-outside-margins t)
-                (setq left-margin-width       9)
-                (setq word-wrap               t)
-                (setq wrap-prefix             "")))
+                (setq fringes-outside-margins t
+                      left-margin-width       9
+                      word-wrap               t
+                      wrap-prefix             "")
+
+                (setf (cdr
+                       (assoc 'continuation fringe-indicator-alist))
+                      nil)))
 
     :config
-    (defun my-circe-message-option-chanserv (nick user host command args)
-      (when (and (string= "ChanServ" nick)
-                 (string-match "^\\[#.+?\\]" (cadr args)))
-        '((dont-display . t))))
-
     (setq circe-default-part-message ""
           circe-default-quit-message ""
           circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
@@ -735,11 +735,7 @@ even over irssi, weechat, or other clients I've used in the past.
 
     (load "lui-logging" nil t)
     (enable-lui-logging-globally)
-
     (require 'circe-chanop)
-    (enable-circe-color-nicks)
-    (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil)
-
     (if (file-exists-p "~/.emacs.d/usr/circe.el")
         (load-file     "~/.emacs.d/usr/circe.el")))
 #+END_SRC
@@ -1545,24 +1541,7 @@ These packages provide modes that make git-related files more readable.
           ("S-<right>"  . nil))
 
     :config
-    (add-to-list 'org-babel-load-languages
-                 '((C          . t)
-                   (C++        . t)
-                   (awk        . t)
-                   (emacs-lisp . t)
-                   (eshell     . t)
-                   (lua        . t)
-                   (js         . t)
-                   (lisp       . t)
-                   (perl       . t)
-                   (python     . t)
-                   (R          . t)
-                   (sed        . t)
-                   (sh         . t)
-                   (sql        . t)
-                   (sqlite     . t)))
-
-    (set-face-attribute 'org-block nil :background "#222222")
+    (set-face-attribute 'org-block nil :background "#262626")
 
     (setq org-support-shift-select  'always
           org-src-fontify-natively  t
