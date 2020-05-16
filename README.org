@@ -818,9 +818,15 @@ Source: https://github.com/abo-abo/define-word
   (use-package diff-hl
     :demand t
     :commands (diff-hl-mode diff-hl-margin-mode)
-    :hook
-    (((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
-     ((conf-mode org-mode prog-mode text-mode) . diff-hl-margin-mode)))
+    :hook ((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
+    :init
+    (when (eq window-system nil)
+      (add-hook 'after-init-hook
+                (lambda()
+                  (add-hook 'conf-mode-hook 'diff-hl-margin-mode)
+                  (add-hook 'org-mode-hook  'diff-hl-margin-mode)
+                  (add-hook 'prog-mode-hook 'diff-hl-margin-mode)
+                  (add-hook 'text-mode-hook 'diff-hl-margin-mode)))))
 #+END_SRC
 
 **** dimmer
@@ -873,6 +879,7 @@ behave and look like typical unix shells, so maybe try it for yourself.
           eshell-history-size               4096
           eshell-prefer-lisp-functions      t
           eshell-save-history-on-exit       t
+
           eshell-scroll-to-bottom-on-input  nil
           eshell-scroll-to-bottom-on-output nil
           eshell-scroll-show-maximum-output nil
@@ -1539,11 +1546,11 @@ These packages provide modes that make git-related files more readable.
           ("S-<right>"  . nil))
 
     :config
-    (set-face-attribute 'org-block nil :background "#262626")
-
     (setq org-support-shift-select  'always
           org-src-fontify-natively  t
-          org-src-tab-acts-natively t))
+          org-src-tab-acts-natively t)
+
+    (set-face-attribute 'org-block nil :background "#262626"))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
