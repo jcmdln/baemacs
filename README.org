@@ -921,15 +921,16 @@ toggle displaying images in a specific buffer, you may now do so.
     :commands (eww eww-mode eww-reload eww-toggle-images eww-new)
     :init (setq browse-url-browser-function 'eww-browse-url)
     :config
-    (setq shr-blocked-images "")
+    (when window-system
+      (setq shr-blocked-images "")
 
-    (defun eww-toggle-images()
-      "Toggle blocking images in eww."
-      (interactive)
-      (if (bound-and-true-p shr-blocked-images)
-          (setq-local shr-blocked-images nil)
-        (setq-local shr-blocked-images ""))
-      (eww-reload))
+      (defun eww-toggle-images()
+        "Toggle blocking images in eww."
+        (interactive)
+        (if (bound-and-true-p shr-blocked-images)
+            (setq-local shr-blocked-images nil)
+          (setq-local shr-blocked-images ""))
+        (eww-reload)))
 
     (defun eww-new()
       "Open a new instance of eww."
@@ -944,7 +945,6 @@ toggle displaying images in a specific buffer, you may now do so.
   (use-package eww-lnum
     :after eww
     :commands (eww-lnum-follow eww-lnum-universal)
-    :hook (eww-mode)
     :bind
     (:map eww-mode-map
           ("f" . eww-lnum-follow)
