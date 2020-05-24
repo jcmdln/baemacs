@@ -321,7 +321,7 @@ adjust some key variables for quality of life.
   (setenv "EDITOR"         "emacsclient")
   (setenv "GIT_EDITOR"     "emacsclient")
   (setenv "MANPATH"        (getenv "MANPATH"))
-  (setenv "PAGER"          "less")
+  (setenv "PAGER"          "cat")
   (setenv "PATH"           (getenv "PATH"))
   (setenv "PROMPT_COMMAND" "")
   (setenv "SHELL"          (getenv "SHELL"))
