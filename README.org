@@ -1376,12 +1376,9 @@ https:github.com/emacs-lsp/lsp-mode#supported-languages
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (add-hook 'c-mode-hook
             (lambda()
-              (defvar c-basic-offset)
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-              (add-hook 'before-save-hook
-                        (lambda()
-                          (tabify (point-min) (point-max)))
-                        nil 't)
+
+              (defvar c-basic-offset)
               (setq-local c-basic-offset   8)
               (setq-local indent-tabs-mode t)
               (setq-local tab-width        8)))
@@ -1392,12 +1389,9 @@ https:github.com/emacs-lsp/lsp-mode#supported-languages
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (add-hook 'c++-mode-hook
             (lambda()
-              (defvar c-basic-offset)
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-              (add-hook 'before-save-hook
-                        (lambda()
-                          (tabify (point-min) (point-max)))
-                        nil 't)
+
+              (defvar c-basic-offset)
               (setq-local c-basic-offset   4)
               (setq-local indent-tabs-mode t)
               (setq-local tab-width        4)))
