@@ -173,7 +173,7 @@ following steps.
 First, clone this repository:
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ git clone https://github.com/jcmdln/baemacs.git
+  $ git clone https://gitlab.com/jcmdln/baemacs.git
 #+END_SRC
 
 Create a symlink to '~/.emacs.d':
