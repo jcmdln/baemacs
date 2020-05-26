@@ -1105,6 +1105,7 @@ readable sizes, and define a ton of filter groups.
                    ("irc"
                     (or (mode . circe-mode)
                         (mode . circe-channel-mode)
+                        (mode . circe-query-mode)
                         (mode . circe-server-mode)))
 
                    ("dev"
