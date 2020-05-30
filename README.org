@@ -1309,50 +1309,14 @@ you may appreciate the additional functions.
 
 *** Languages
 
-Language support for completion, debugging, etc is provided by LSP
-whenever possible.  LSP doesn't support every language, but see the
-following for more info on getting setup:
-
-https:github.com/emacs-lsp/lsp-mode#supported-languages
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package lsp-mode
-    :commands (lsp lsp-deferred lsp-format-buffer lsp-organize-imports)
+  (use-package eglot
     :hook
-    ((c-mode      . lsp-deferred)
-     (c++-mode    . lsp-deferred)
-     (go-mode     . lsp-deferred)
-     (python-mode . lsp-deferred)
-     (rust-mode   . lsp-deferred))
-
-    :config
-    (defvar c-default-style)
-    (setq c-default-style '((c-mode   . "bsd")
-                            (c++-mode . "ellemtel")
-                            (other    . "bsd"))
-
-          lsp-pyls-server-command "~/.local/bin/pyls"))
+    ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-lsp
-    :after lsp-mode
-    :commands (company-lsp))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dap-mode
-    :after lsp-mode)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package lsp-ivy
-    :after lsp-mode
-    :commands (lsp-ivy-workspace-symbol))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package lsp-ui)
+  (use-package dap-mode)
 #+END_SRC
 
 **** Ansible
@@ -1618,7 +1582,7 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-rust
-    :after (lsp-mode rust-mode)
+    :after (rust-mode)
     :commands (flycheck-rust-setup)
     :hook (flycheck-mode . flycheck-rust-setup))
 #+END_SRC
