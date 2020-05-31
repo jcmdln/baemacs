@@ -103,22 +103,24 @@ some of the important goals and intentions of this configuration.
       - [[#clang-format-disabled][clang-format (Disabled)]]
       - [[#company][company]]
       - [[#counsel][counsel]]
-      - [[#define-word-disabled][define-word (Disabled)]]
+      - [[#dap][dap]]
+      - [[#define-word][define-word]]
       - [[#diff-hl][diff-hl]]
       - [[#dimmer][dimmer]]
+      - [[#eglot][eglot]]
       - [[#elfeed][elfeed]]
       - [[#eshell][eshell]]
       - [[#eww][eww]]
       - [[#flycheck][flycheck]]
       - [[#flyspell][flyspell]]
-      - [[#gist-disabled][gist (Disabled)]]
+      - [[#gist][gist]]
       - [[#gnus][gnus]]
       - [[#helpful][helpful]]
       - [[#highlight-indent-guides][highlight-indent-guides]]
       - [[#ibuffer][ibuffer]]
       - [[#ivy][ivy]]
       - [[#magit][magit]]
-      - [[#nov-disabled][nov (Disabled)]]
+      - [[#nov][nov]]
       - [[#package-utils][package-utils]]
       - [[#pdf-tools-disabled][pdf-tools (Disabled)]]
       - [[#rainbow-delimiters][rainbow-delimiters]]
@@ -151,8 +153,8 @@ some of the important goals and intentions of this configuration.
       - [[#nginx][NGINX]]
       - [[#ninja][Ninja]]
       - [[#org][Org]]
-      - [[#php-disabled][PHP (Disabled)]]
-      - [[#protobuf-disabled][Protobuf (Disabled)]]
+      - [[#php][PHP]]
+      - [[#protobuf][Protobuf]]
       - [[#python][Python]]
       - [[#rust][Rust]]
       - [[#systemd-disabled][SystemD (Disabled)]]
@@ -800,16 +802,20 @@ even over irssi, weechat, or other clients I've used in the past.
     :demand t)
 #+END_SRC
 
-**** define-word (Disabled)
+**** dap
 
-This package lets you quickly see the definition of a word or a phrase,
-and is disabled by default.
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package dap-mode)
+#+END_SRC
+
+**** define-word
+
+This package lets you quickly see the definition of a word or a phrase.
 
 Source: https://github.com/abo-abo/define-word
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package define-word
-    :disabled)
+  (use-package define-word)
 #+END_SRC
 
 **** diff-hl
@@ -841,6 +847,14 @@ Source: https://github.com/gonewest818/dimmer.el
   (use-package dimmer
     :commands (dimmer-mode)
     :hook (after-init . dimmer-mode))
+#+END_SRC
+
+**** eglot
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package eglot
+    :hook
+    ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure))
 #+END_SRC
 
 **** elfeed
@@ -976,11 +990,10 @@ toggle displaying images in a specific buffer, you may now do so.
      (text-mode     . flyspell-mode)))
 #+END_SRC
 
-**** gist (Disabled)
+**** gist
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package gist
-    :disabled)
+  (use-package gist)
 #+END_SRC
 
 **** gnus
@@ -1155,15 +1168,14 @@ readable sizes, and define a ton of filter groups.
     :bind ("C-c C-c" . with-editor-finish))
 #+END_SRC
 
-**** nov (Disabled)
+**** nov
 
 This package provides a major mode for reading EPUB documents.
 
-Source: https://github.com/wasamasa/nov.el
+Source: https://depp.brause.cc/nov.el/
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nov
-    :disabled
     :config
     (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 #+END_SRC
@@ -1177,11 +1189,10 @@ Source: https://github.com/wasamasa/nov.el
 
 **** pdf-tools (Disabled)
 
-This package allows viewing PDF's within Emacs, though in order to use
-this package you must install the required dependencies and compile the
-package as outlined in the following url:
+This package allows viewing PDF's within Emacs, though requires some
+setup.
 
-https://github.com/politza/pdf-tools#installation
+Source: https://github.com/politza/pdf-tools#installation
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package pdf-tools
@@ -1273,8 +1284,8 @@ you may appreciate the additional functions.
   (use-package smartparens
     :demand t
     :hook
-    (((conf-mode eshell-mode prog-mode text-mode) . smartparens-mode)
-     ((markdown-mode org-mode) . smartparens-mode))
+    ((conf-mode eshell-mode markdown-mode org-mode prog-mode text-mode)
+     . smartparens-mode)
 
     :config
     (setq sp-highlight-pair-overlay     nil
@@ -1308,16 +1319,6 @@ you may appreciate the additional functions.
 #+END_SRC
 
 *** Languages
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package eglot
-    :hook
-    ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dap-mode)
-#+END_SRC
 
 **** Ansible
 
@@ -1533,24 +1534,21 @@ These packages provide modes that make git-related files more readable.
     :commands (toc-org-enable))
 #+END_SRC
 
-**** PHP (Disabled)
+**** PHP
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package php-mode
-    :disabled)
+  (use-package php-mode)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company-php
-    :disabled
     :after (company php-mode))
 #+END_SRC
 
-**** Protobuf (Disabled)
+**** Protobuf
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package protobuf-mode
-    :disabled)
+  (use-package protobuf-mode)
 #+END_SRC
 
 **** Python
