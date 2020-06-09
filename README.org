@@ -107,6 +107,7 @@ some of the important goals and intentions of this configuration.
       - [[#define-word][define-word]]
       - [[#diff-hl][diff-hl]]
       - [[#dimmer][dimmer]]
+      - [[#eldoc][eldoc]]
       - [[#eglot][eglot]]
       - [[#elfeed][elfeed]]
       - [[#eshell][eshell]]
@@ -849,12 +850,31 @@ Source: https://github.com/gonewest818/dimmer.el
     :hook (after-init . dimmer-mode))
 #+END_SRC
 
+**** eldoc
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package eldoc
+    :init
+    (global-eldoc-mode -1))
+#+END_SRC
+
 **** eglot
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eglot
     :hook
-    ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure))
+    ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
+
+    :config
+    (setq eglot-auto-display-help-buffer nil
+          eglot-put-doc-in-help-buffer   nil)
+
+    (add-to-list 'eglot-server-programs
+                 '(c-mode . ("clangd" "--clang-tidy"
+                             "--clang-tidy-checks=clang-analyzer-*,-clang-analyzer-cplusplus*")))
+    (add-to-list 'eglot-server-programs
+                 '(c++-mode . ("clangd" "--clang-tidy"
+                               "--clang-tidy-checks=clang-analyzer-*"))))
 #+END_SRC
 
 **** elfeed
