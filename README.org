@@ -98,13 +98,11 @@ some of the important goals and intentions of this configuration.
     - [[#packages][Packages]]
       - [[#async][async]]
       - [[#auto-compile][auto-compile]]
-      - [[#auto-dictionary][auto-dictionary]]
       - [[#circe][circe]]
       - [[#clang-format-disabled][clang-format (Disabled)]]
       - [[#company][company]]
       - [[#counsel][counsel]]
       - [[#dap][dap]]
-      - [[#define-word][define-word]]
       - [[#diff-hl][diff-hl]]
       - [[#dimmer][dimmer]]
       - [[#eldoc][eldoc]]
@@ -123,7 +121,6 @@ some of the important goals and intentions of this configuration.
       - [[#magit][magit]]
       - [[#nov][nov]]
       - [[#package-utils][package-utils]]
-      - [[#pdf-tools-disabled][pdf-tools (Disabled)]]
       - [[#rainbow-delimiters][rainbow-delimiters]]
       - [[#ranger][ranger]]
       - [[#scratch][scratch]]
@@ -158,7 +155,6 @@ some of the important goals and intentions of this configuration.
       - [[#protobuf][Protobuf]]
       - [[#python][Python]]
       - [[#rust][Rust]]
-      - [[#systemd-disabled][SystemD (Disabled)]]
       - [[#yaml][YAML]]
 
 * Usage
@@ -680,17 +676,6 @@ which contains our extra package and language definitions.
     (auto-compile-on-save-mode))
 #+END_SRC
 
-**** auto-dictionary
-
-Source: https://github.com/nschum/auto-dictionary-mode
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package auto-dictionary
-    :after (flyspell)
-    :commands (auto-dictionary-mode)
-    :hook (flyspell-mode . auto-dictionary-mode))
-#+END_SRC
-
 **** circe
 
 This package adds _another_ IRC client, which is my preferred client
@@ -772,12 +757,6 @@ even over irssi, weechat, or other clients I've used in the past.
     :after (company))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-web
-    :disabled
-    :after (company))
-#+END_SRC
-
 **** counsel
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -807,16 +786,6 @@ even over irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dap-mode)
-#+END_SRC
-
-**** define-word
-
-This package lets you quickly see the definition of a word or a phrase.
-
-Source: https://github.com/abo-abo/define-word
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package define-word)
 #+END_SRC
 
 **** diff-hl
@@ -1207,19 +1176,6 @@ Source: https://depp.brause.cc/nov.el/
     :demand t)
 #+END_SRC
 
-**** pdf-tools (Disabled)
-
-This package allows viewing PDF's within Emacs, though requires some
-setup.
-
-Source: https://github.com/politza/pdf-tools#installation
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package pdf-tools
-    :disabled
-    :config (pdf-loader-install))
-#+END_SRC
-
 **** rainbow-delimiters
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1491,11 +1447,6 @@ These packages provide modes that make git-related files more readable.
   (use-package markdown-mode)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package markdown-preview-mode
-    :disabled)
-#+END_SRC
-
 **** Meson
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1603,13 +1554,6 @@ These packages provide modes that make git-related files more readable.
     :after (rust-mode)
     :commands (flycheck-rust-setup)
     :hook (flycheck-mode . flycheck-rust-setup))
-#+END_SRC
-
-**** SystemD (Disabled)
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package systemd
-    :disabled)
 #+END_SRC
 
 **** YAML
