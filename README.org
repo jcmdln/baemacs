@@ -1003,7 +1003,10 @@ toggle displaying images in a specific buffer, you may now do so.
     :hook
     ((markdown-mode . flyspell-mode)
      (prog-mode     . flyspell-prog-mode)
-     (text-mode     . flyspell-mode)))
+     (text-mode     . flyspell-mode))
+
+    :config
+    (setq ispell-program-name (executable-find "hunspell")))
 #+END_SRC
 
 **** gist
