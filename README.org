@@ -100,6 +100,7 @@ some of the important goals and intentions of this configuration.
       - [[#auto-compile][auto-compile]]
       - [[#circe][circe]]
       - [[#clang-format-disabled][clang-format (Disabled)]]
+      - [[#cmake-ide][cmake-ide]]
       - [[#company][company]]
       - [[#counsel][counsel]]
       - [[#dap][dap]]
@@ -734,6 +735,21 @@ even over irssi, weechat, or other clients I've used in the past.
     :disabled)
 #+END_SRC
 
+**** cmake-ide
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package cmake-ide
+    :commands (cmake-ide-maybe-run-cmake)
+    :init
+    (add-hook 'c-mode-hook
+              (lambda()
+                (cmake-ide-maybe-run-cmake)))
+
+    (add-hook 'c++-mode-hook
+              (lambda()
+                (cmake-ide-maybe-run-cmake))))
+#+END_SRC
+
 **** company
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -744,6 +760,13 @@ even over irssi, weechat, or other clients I've used in the past.
           company-idle-delay     0.3
           company-echo-delay     0
           company-begin-commands '(self-insert-command)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package company-c-headers
+    :after (company)
+    :config
+    (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -823,6 +846,7 @@ Source: https://github.com/gonewest818/dimmer.el
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eldoc
+    :commands (global-eldoc-mode)
     :init
     (global-eldoc-mode -1))
 #+END_SRC
@@ -831,6 +855,7 @@ Source: https://github.com/gonewest818/dimmer.el
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eglot
+    :commands (eglot-ensure)
     :hook
     ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
 
@@ -839,10 +864,12 @@ Source: https://github.com/gonewest818/dimmer.el
           eglot-put-doc-in-help-buffer   nil)
 
     (add-to-list 'eglot-server-programs
-                 '(c-mode . ("clangd" "--clang-tidy"
+                 '(c-mode . ("clangd"
+                             "--clang-tidy"
                              "--clang-tidy-checks=clang-analyzer-*,-clang-analyzer-cplusplus*")))
     (add-to-list 'eglot-server-programs
-                 '(c++-mode . ("clangd" "--clang-tidy"
+                 '(c++-mode . ("clangd"
+                               "--clang-tidy"
                                "--clang-tidy-checks=clang-analyzer-*"))))
 #+END_SRC
 
