@@ -1006,7 +1006,8 @@ toggle displaying images in a specific buffer, you may now do so.
      (text-mode     . flyspell-mode))
 
     :config
-    (setq ispell-program-name (executable-find "hunspell")))
+    (setq ispell-program-name (executable-find "hunspell")
+          ispell-dictionary   "en_US"))
 #+END_SRC
 
 **** gist
