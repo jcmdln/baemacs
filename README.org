@@ -4,7 +4,7 @@
 #+LANGUAGE: en
 
 Baemacs is yet another take on a literate GNU/Emacs configuration that
-intends to remain close to the default behaviors and appearance.
+intends to remain close to the default behavior and appearance.
 
 #+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
@@ -1109,7 +1109,7 @@ readable sizes, and define a ton of filter groups.
                     (mode . exwm-mode))
 
                    ("emacs"
-                    (or (name . "^\\*scratch\\*$")
+                    (or (name . "^\\*scratch\\*.*$")
                         (name . "^\\*Messages\\*$")
                         (name . "^\\*Help\\*$")
                         (name . "^\\*Completions\\*$")
@@ -1532,8 +1532,8 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package toc-org
     :after org
-    :hook (org-mode . toc-org-enable)
-    :commands (toc-org-enable))
+    :commands (toc-org-enable)
+    :hook (org-mode . toc-org-enable))
 #+END_SRC
 
 **** PHP
@@ -1575,14 +1575,12 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package cargo
-    :after (rust-mode)
     :commands (cargo-minor-mode)
     :hook (rust-mode . cargo-minor-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-rust
-    :after (rust-mode)
     :commands (flycheck-rust-setup)
     :hook (flycheck-mode . flycheck-rust-setup))
 #+END_SRC
