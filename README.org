@@ -70,7 +70,7 @@ some of the important goals and intentions of this configuration.
     - [[#garbage-collection][Garbage Collection]]
       - [[#gc-cons-percentage][gc-cons-percentage]]
       - [[#gc-cons-threshold][gc-cons-threshold]]
-    - [[#handling-customel][Handling custom.el]]
+    - [[#custom][Custom]]
     - [[#encoding][Encoding]]
     - [[#environment][Environment]]
     - [[#appearance][Appearance]]
@@ -83,8 +83,8 @@ some of the important goals and intentions of this configuration.
       - [[#clipboard][Clipboard]]
       - [[#scrolling][Scrolling]]
       - [[#line-numbers][Line Numbers]]
-      - [[#parenthesis-matching][Parenthesis Matching]]
       - [[#modeline][Modeline]]
+      - [[#parenthesis-matching][Parenthesis Matching]]
       - [[#whitespace][Whitespace]]
       - [[#word-wrap][Word Wrap]]
     - [[#input][Input]]
@@ -99,21 +99,18 @@ some of the important goals and intentions of this configuration.
       - [[#async][async]]
       - [[#auto-compile][auto-compile]]
       - [[#circe][circe]]
-      - [[#clang-format-disabled][clang-format (Disabled)]]
-      - [[#cmake-ide][cmake-ide]]
+      - [[#clang-format][clang-format]]
       - [[#company][company]]
       - [[#counsel][counsel]]
-      - [[#dap][dap]]
       - [[#diff-hl][diff-hl]]
       - [[#dimmer][dimmer]]
-      - [[#eldoc][eldoc]]
       - [[#eglot][eglot]]
+      - [[#eldoc][eldoc]]
       - [[#elfeed][elfeed]]
       - [[#eshell][eshell]]
       - [[#eww][eww]]
       - [[#flycheck][flycheck]]
       - [[#flyspell][flyspell]]
-      - [[#gist][gist]]
       - [[#gnus][gnus]]
       - [[#helpful][helpful]]
       - [[#highlight-indent-guides][highlight-indent-guides]]
@@ -223,6 +220,15 @@ Emacs will look for this specific file once it reaches the
 initialization phase.  Here we will make modifications to things that
 ship with Emacs and should be changed early.
 
+#+BEGIN_SRC emacs-lisp :tangle init.el
+;;; init.el ---- Baemacs initialization file
+;;; Commentary:
+;; Emacs will look for this specific file once it reaches the
+;; initialization phase.  Here we will make modifications to things that
+;; ship with Emacs and should be changed early.
+;;; Code:
+#+END_SRC
+
 *** Garbage Collection
 
 Emacs makes some considerations for older and more memory restricted
@@ -253,6 +259,10 @@ Should you want to compare against the default value, we preserve it as
 shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar gc-cons-percentage-default)
+  (defvar gc-cons-percentage-init)
+  (defvar gc-cons-percentage-tuned)
+
   (setq gc-cons-percentage-default gc-cons-percentage
         gc-cons-percentage-init    0.8
         gc-cons-percentage-tuned   0.2
@@ -281,11 +291,13 @@ The default value is also stored so you may evaluate this change as
 shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar gc-cons-threshold-default)
+
   (setq gc-cons-threshold-default gc-cons-threshold
         gc-cons-threshold         (* 1024 1024 2))
 #+END_SRC
 
-*** Handling custom.el
+*** Custom
 
 Rather than Emacs customization being appended to the end of the
 configuration file, in our case 'init.el', we may specify the location
@@ -301,6 +313,11 @@ Another thing we want to handle very early is attempting to enforce the
 use of UTF-8 encoding.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar prefer-coding-system)
+  (defvar set-default-coding-systems)
+  (defvar set-language-environment)
+  (defvar set-locale-environment)
+
   (setq prefer-coding-system       'utf-8
         set-default-coding-systems 'utf-8
         set-language-environment   "UTF-8"
@@ -384,9 +401,12 @@ to normalize this behavior.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar reusable-frames)
+  (defvar Man-notify-method)
+
   (setq pop-up-frames     nil
         pop-up-windows    nil
-        reusabe-frames    't
+        reusable-frames   't
         Man-notify-method 'pushy)
 #+END_SRC
 
@@ -441,15 +461,6 @@ buffers and adjusting how Emacs' clipboard works.
   (add-hook 'text-mode-hook 'display-line-numbers-mode)
 #+END_SRC
 
-**** Parenthesis Matching
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'after-init-hook
-            (lambda()
-              (setq show-paren-delay 0.33)
-              (show-paren-mode t)))
-#+END_SRC
-
 **** Modeline
 
 - Show column numbers
@@ -458,10 +469,20 @@ buffers and adjusting how Emacs' clipboard works.
 - Disable the visual-bell
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar show-paren-delay)
+
   (setq column-number-mode    t
         require-final-newline t
         show-paren-delay      0.33
         visible-bell          nil)
+#+END_SRC
+
+**** Parenthesis Matching
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (add-hook 'after-init-hook
+            (lambda()
+              (show-paren-mode t)))
 #+END_SRC
 
 **** Whitespace
@@ -528,6 +549,10 @@ In terms of the mouse, I really only adjust scrolling behavior and add
 xterm support:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar mouse-wheel-follow-mouse)
+  (defvar mouse-wheel-progressive-speed)
+  (defvar mouse-wheel-scroll-amount)
+
   (setq mouse-wheel-follow-mouse      't
         mouse-wheel-progressive-speed nil
         mouse-wheel-scroll-amount     '(1 ((shift) . 1))
@@ -658,6 +683,16 @@ byte-compile them.
 This is a non-standard file that is referenced at the end of 'init.el'
 which contains our extra package and language definitions.
 
+Before we add anything to this file, first we'll add the file header:
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+;;; config.el ---- Baemacs configuration file
+;;; Commentary:
+;; This is a non-standard file that is referenced at the end of 'init.el'
+;; which contains our extra package and language definitions.
+;;; Code:
+#+END_SRC
+
 *** Packages
 
 **** async
@@ -707,6 +742,9 @@ even over irssi, weechat, or other clients I've used in the past.
                       wrap-prefix             "")))
 
     :config
+    (defvar lui-flyspell-p)
+    (defvar lui-logging-directory)
+
     (setq circe-default-part-message ""
           circe-default-quit-message ""
           circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
@@ -728,26 +766,10 @@ even over irssi, weechat, or other clients I've used in the past.
         (load-file     "~/.emacs.d/usr/circe.el")))
 #+END_SRC
 
-**** clang-format (Disabled)
+**** clang-format
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package clang-format
-    :disabled)
-#+END_SRC
-
-**** cmake-ide
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package cmake-ide
-    :commands (cmake-ide-maybe-run-cmake)
-    :init
-    (add-hook 'c-mode-hook
-              (lambda()
-                (cmake-ide-maybe-run-cmake)))
-
-    (add-hook 'c++-mode-hook
-              (lambda()
-                (cmake-ide-maybe-run-cmake))))
+  (use-package clang-format)
 #+END_SRC
 
 **** company
@@ -775,11 +797,6 @@ even over irssi, weechat, or other clients I've used in the past.
     :after (company))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-shell
-    :after (company))
-#+END_SRC
-
 **** counsel
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -803,12 +820,6 @@ even over irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package swiper
     :demand t)
-#+END_SRC
-
-**** dap
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dap-mode)
 #+END_SRC
 
 **** diff-hl
@@ -842,15 +853,6 @@ Source: https://github.com/gonewest818/dimmer.el
     :hook (after-init . dimmer-mode))
 #+END_SRC
 
-**** eldoc
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package eldoc
-    :commands (global-eldoc-mode)
-    :init
-    (global-eldoc-mode -1))
-#+END_SRC
-
 **** eglot
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -873,6 +875,15 @@ Source: https://github.com/gonewest818/dimmer.el
                                "--clang-tidy-checks=clang-analyzer-*"))))
 #+END_SRC
 
+**** eldoc
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package eldoc
+    :commands (global-eldoc-mode)
+    :init
+    (global-eldoc-mode -1))
+#+END_SRC
+
 **** elfeed
 
 This package provides an extensible web feed reader, supporting both
@@ -884,6 +895,8 @@ Source: https://github.com/skeeto/elfeed
   (use-package elfeed
     :bind ("C-x w" . elfeed)
     :config
+    (defvar elfeed-search-filter)
+
     (setq elfeed-search-filter "@1-week-ago +unread "
           url-queue-timeout    10)
 
@@ -902,6 +915,15 @@ behave and look like typical unix shells, so maybe try it for yourself.
   (use-package eshell
     :commands (eshell eshell/basename eshell/pwd)
     :config
+    (defvar eshell-banner-message)
+    (defvar eshell-cmpl-cycle-completions)
+    (defvar eshell-hist-ignoredups)
+    (defvar eshell-history-size)
+    (defvar eshell-save-history-on-exit)
+    (defvar eshell-prompt-regexp)
+    (defvar eshell-prompt-function)
+    (defvar eshell-visual-commands)
+
     (setq eshell-banner-message             ""
           eshell-cmpl-cycle-completions     nil
           eshell-error-if-no-glob           t
@@ -1010,12 +1032,6 @@ toggle displaying images in a specific buffer, you may now do so.
           ispell-dictionary   "en_US"))
 #+END_SRC
 
-**** gist
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package gist)
-#+END_SRC
-
 **** gnus
 
 I've bounced between using "real" email clients and gnus quite a few
@@ -1033,6 +1049,17 @@ clients.
      ("<M-up>"   . windmove-up))
 
     :config
+    (defvar gnus-show-threads)
+    (defvar gnus-sum-thread-tree-false-root)
+    (defvar gnus-sum-thread-tree-indent)
+    (defvar gnus-sum-thread-tree-leaf-with-other)
+    (defvar gnus-sum-thread-tree-root)
+    (defvar gnus-sum-thread-tree-single-leaf)
+    (defvar gnus-sum-thread-tree-vertical)
+    (defvar gnus-summary-thread-gathering-function)
+    (defvar gnus-thread-hide-subtree)
+    (defvar gnus-thread-sort-functions)
+
     (setq gnus-show-threads                      t
           gnus-sum-thread-tree-false-root        ""
           gnus-sum-thread-tree-indent            "  "
@@ -1101,6 +1128,9 @@ readable sizes, and define a ton of filter groups.
        ((> (buffer-size) 1000)
         (format "%7.1fk" (/ (buffer-size) 1000.0)))
        (t (format "%8d" (buffer-size)))))
+
+    (defvar ibuffer-show-empty-filter-groups)
+    (defvar ibuffer-saved-filter-groups)
 
     (setq ibuffer-show-empty-filter-groups nil
           ibuffer-saved-filter-groups
@@ -1441,7 +1471,7 @@ These packages provide modes that make git-related files more readable.
 
     :config
     (setq tab-width        4
-          indent-tabs-mode t))
+          indent-tabs-mode 't))
 #+END_SRC
 
 **** Jinja2
@@ -1462,8 +1492,9 @@ These packages provide modes that make git-related files more readable.
   (add-hook 'lisp-mode-hook
             (lambda()
               (defvar c-basic-offset)
-              (setq-local c-basic-offset 2)
-              (setq-local tab-width      2)))
+              (setq-local c-basic-offset   2)
+              (setq-local indent-tabs-mode nil)
+              (setq-local tab-width        2)))
 #+END_SRC
 
 **** Lua
@@ -1515,6 +1546,11 @@ These packages provide modes that make git-related files more readable.
           ("S-<left>"   . nil)
           ("S-<right>"  . nil))
 
+    :init
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (setq-local indent-tabs-mode nil)))
+
     :config
     (setq org-support-shift-select  'always
           org-src-fontify-natively  t
@@ -1539,12 +1575,12 @@ These packages provide modes that make git-related files more readable.
 **** PHP
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package php-mode)
+  (use-package company-php
+    :after (company php-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-php
-    :after (company php-mode))
+  (use-package php-mode)
 #+END_SRC
 
 **** Protobuf
@@ -1559,19 +1595,7 @@ These packages provide modes that make git-related files more readable.
   (use-package python-mode)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package py-autopep8
-    :hook (python-mode . py-autopep8-enable-on-save))
-#+END_SRC
-
 **** Rust
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package rust-mode
-    :commands (rust-format-buffer rust-mode)
-    :hook (rust-mode . rust-enable-format-on-save)
-    :mode ("\\.rs\\'" . rust-mode))
-#+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package cargo
@@ -1583,6 +1607,13 @@ These packages provide modes that make git-related files more readable.
   (use-package flycheck-rust
     :commands (flycheck-rust-setup)
     :hook (flycheck-mode . flycheck-rust-setup))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package rust-mode
+    :commands (rust-format-buffer rust-mode)
+    :hook (rust-mode . rust-enable-format-on-save)
+    :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
 **** YAML
