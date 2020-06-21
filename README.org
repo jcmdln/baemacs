@@ -717,16 +717,12 @@ Simplify calling asynchronous functions and processes.  See the
 documentation for `async-start' and `async-start-process' for more
 information.
 
-Source - https://stable.melpa.org/#/async
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package async
     :config (async-bytecomp-package-mode '(all)))
 #+END_SRC
 
 **** auto-compile
-
-Source - https://stable.melpa.org/#/auto-compile
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package auto-compile
@@ -740,8 +736,6 @@ Source - https://stable.melpa.org/#/auto-compile
 
 This package adds _another_ IRC client, which is my preferred client
 even over irssi, weechat, or other clients I've used in the past.
-
-Source - https://stable.melpa.org/#/circe
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
@@ -794,15 +788,11 @@ Source - https://stable.melpa.org/#/circe
 
 **** clang-format
 
-Source - https://stable.melpa.org/#/clang-format
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package clang-format)
 #+END_SRC
 
 **** company
-
-Source - https://stable.melpa.org/#/company
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company
@@ -814,16 +804,12 @@ Source - https://stable.melpa.org/#/company
           company-begin-commands '(self-insert-command)))
 #+END_SRC
 
-Source - https://melpa.org/#/company-c-headers
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company-c-headers
     :after (company)
     :config
     (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
-
-Source - https://stable.melpa.org/#/company-emoji
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company-emoji
@@ -832,8 +818,6 @@ Source - https://stable.melpa.org/#/company-emoji
 #+END_SRC
 
 **** counsel
-
-Source - https://stable.melpa.org/#/counsel
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package counsel
@@ -881,8 +865,6 @@ This package provides a minor mode which dims inactive buffers, namely
 the buffers the cursor is not currently active in. It can be helpful
 for those who use many buffers.
 
-Source: https://github.com/gonewest818/dimmer.el
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dimmer
     :commands (dimmer-mode)
@@ -924,8 +906,6 @@ Source: https://github.com/gonewest818/dimmer.el
 
 This package provides an extensible web feed reader, supporting both
 RSS and Atom.
-
-Source: https://github.com/skeeto/elfeed
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package elfeed
@@ -1117,8 +1097,6 @@ clients.
 This package provides an alternative to the built-in Emacs help that
 provides much more contextual information.
 
-Source: https://github.com/Wilfred/helpful
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package helpful)
 #+END_SRC
@@ -1232,8 +1210,6 @@ readable sizes, and define a ton of filter groups.
 
 **** ivy
 
-Source - https://stable.melpa.org/#/ivy
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ivy
     :commands (ivy-mode)
@@ -1248,9 +1224,14 @@ Source - https://stable.melpa.org/#/ivy
           enable-recursive-minibuffers t))
 #+END_SRC
 
-**** magit
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package flyspell-correct-ivy
+    :bind ("C-\\" . flyspell-correct-wrapper)
+    :config
+    (setq flyspell-correct-interface #'flyspell-correct-ivy))
+#+END_SRC
 
-Source - https://stable.melpa.org/#/magit
+**** magit
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package magit
@@ -1261,8 +1242,6 @@ Source - https://stable.melpa.org/#/magit
 **** nov
 
 This package provides a major mode for reading EPUB documents.
-
-Source - https://stable.melpa.org/#/nov
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nov
@@ -1291,8 +1270,6 @@ Source - https://stable.melpa.org/#/nov
 This package adds a minor mode that runs within ~dired~ that emulates
 much of the features provided by the ~ranger~ terminal file browser.
 Hardcore ~dired~ users may want to disable this.
-
-Source: [[https://github.com/ralesi/ranger.el]]
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ranger
