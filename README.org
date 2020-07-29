@@ -49,12 +49,12 @@ some of the important goals and intentions of this configuration.
    - Compiling configuration files
 
      This is primarily to decrease initialization time.  When using a
-     non-Org config you ordinarily would make a change in an '.el' file
-     expecting that to be changed, and if you didn't re-byte-compile
-     you would inherit the value from '.elc', which is no longer the
-     expected behavior.  There may be some other implications though
-     this is the main argument I've heard against byte-compiling config
-     files.
+     non-Org config might ordinarily change an '.el' file, expecting
+     that change to be reflected on startup.  In reality if you didn't
+     byte-compile your configuration after making changes, you would
+     inherit the value from '.elc', which is no longer the expected
+     behavior.  There may be some other implications though this is the
+     main argument I've heard against byte-compiling config files.
 
      In our case since everything should be in 'README.org', which acts
      as our staging ground for changes, we may tangle and byte-compile
@@ -284,7 +284,7 @@ subsequent garbage collections.  On 32-bit systems this threshold is
 Modifying this value is generally not recommended and considered an act
 of performance voodoo, though the idea is that by specifying a larger
 threshold, garbage collection will occur less often, meaning fewer GC
-pauses. We'll set this value to 2000000 globally, which ideally will
+pauses. We'll set this value to 200000 globally, which ideally will
 reduce the total number of GC pauses we experience by more than half.
 
 The default value is also stored so you may evaluate this change as
@@ -294,7 +294,7 @@ shown below:
   (defvar gc-cons-threshold-default)
 
   (setq gc-cons-threshold-default gc-cons-threshold
-        gc-cons-threshold         (* 1024 1024 2))
+        gc-cons-threshold         (* 1000 1000 2))
 #+END_SRC
 
 *** Custom
@@ -655,8 +655,8 @@ before attempting to initialize:
 **** no-littering
 
 The second package will keep our ~/.emacs.d nice and tidy by adjusting
-the locations of configuration files.  It uses a unix-y format, which
-is a nice change.
+the locations of configuration files.  It uses a unixy format, which is
+a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (use-package no-littering
@@ -673,7 +673,7 @@ Something we can do to slightly improve the total duration needed for
 Emacs to complete its initialization phase is byte-compile the
 configuration files we create.  If performed conditionally, we only
 have to pay the cost of byte-compiling when we make a change to this
-configuration file for the entire configuration to be rebuild.
+configuration file for the entire configuration to be rebuilt.
 
 At the end of initialization, ensure that 'README.org' is not newer
 than 'config.el', otherwise rebuild our configuration files and
@@ -1200,12 +1200,11 @@ readable sizes, and define a ton of filter groups.
                         (name . "^\\*WoMan")
                         (mode . pdf-view-mode))))))
 
-          ibuffer-formats
-          '((mark modified read-only " "
-                  (name 35 35 :left :nil) " "
-                  (size-h 9 -1 :right) " "
-                  (mode 16 16 :left :elide) " "
-                  filename-and-process))))
+          ibuffer-formats '((mark modified read-only " "
+                                  (name 35 35 :left :nil) " "
+                                  (size-h 9 -1 :right) " "
+                                  (mode 16 16 :left :elide) " "
+                                  filename-and-process))))
 #+END_SRC
 
 **** ivy
