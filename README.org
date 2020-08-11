@@ -608,14 +608,17 @@ same name exists on multiple sources.
   (setq package-user-dir "~/.emacs.d/pkg/"
 
         package-archives
-        '(("GNU ELPA"     . "https://elpa.gnu.org/packages/")
-          ("MELPA Stable" . "https://stable.melpa.org/packages/")
-          ("MELPA"        . "https://melpa.org/packages/"))
+        '(("elpa"         . "https://elpa.gnu.org/packages/")
+          ("melpa-stable" . "https://stable.melpa.org/packages/")
+          ("melpa"        . "https://melpa.org/packages/"))
 
         package-archive-priorities
-        '(("GNU ELPA"     . 3)
-          ("MELPA Stable" . 2)
-          ("MELPA"        . 1)))
+        '(("elpa"         . 1)
+          ("melpa-stable" . 2)
+          ("melpa"        . 3))
+
+        package-pinned-packages
+        '((use-package . "melpa")))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
