@@ -613,9 +613,9 @@ same name exists on multiple sources.
           ("melpa"        . "https://melpa.org/packages/"))
 
         package-archive-priorities
-        '(("elpa"         . 1)
+        '(("elpa"         . 3)
           ("melpa-stable" . 2)
-          ("melpa"        . 3))
+          ("melpa"        . 1))
 
         package-pinned-packages
         '((use-package . "melpa")))
