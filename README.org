@@ -932,7 +932,7 @@ behave and look like typical unix shells, so maybe try it for yourself.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
-    :commands (eshell eshell/basename eshell/pwd)
+    :commands (eshell eshell/basename eshell/clear eshell/pwd)
     :config
     (defvar eshell-banner-message)
     (defvar eshell-cmpl-cycle-completions)
@@ -968,10 +968,12 @@ behave and look like typical unix shells, so maybe try it for yourself.
           '("alsamixer" "atop" "htop" "less" "mosh" "nano" "ssh" "tail"
             "top" "vi" "vim" "watch"))
 
-    (defun eshell/clear()
-      "Hide previous scrollback to provide a clear view."
-      (interactive)
-      (recenter 0))
+    (add-hook 'eshell-mode-hook
+              (lambda ()
+                (defun eshell/clear()
+                  "Hide previous scrollback to provide a clear view."
+                  (interactive)
+                  (recenter 0))))
 
     (defun eshell-new()
       "Open a new instance of eshell."
