@@ -1154,41 +1154,17 @@ readable sizes, and define a ton of filter groups.
     (setq ibuffer-show-empty-filter-groups nil
           ibuffer-saved-filter-groups
           (quote (("default"
-                   ("exwm"
-                    (mode . exwm-mode))
-
                    ("emacs"
-                    (or (name . "^\\*scratch\\*.*$")
-                        (name . "^\\*Messages\\*$")
-                        (name . "^\\*Help\\*$")
-                        (name . "^\\*Completions\\*$")
-                        (name . "^\\*Compile-Log\\*")
+                    (or (name . "^\\*Completions\\*$")
                         (name . "^\\*Customize\\*")
-                        (name . "^\\*Disabled Command\\*$")))
+                        (name . "^\\*Disabled\s.*\\*$")
+                        (name . "^\\*Help\\*$")
+                        (name . "^\\*Messages\\*$")
+                        (name . "^\\*scratch\\*.*$")))
 
                    ("apps"
                     (or (mode . dired-mode)
                         (mode . eshell-mode)))
-
-                   ("mail"
-                    (or (mode . message-mode)
-                        (mode . bbdb-mode)
-                        (mode . mail-mode)
-                        (mode . gnus-group-mode)
-                        (mode . gnus-summary-mode)
-                        (mode . gnus-article-mode)
-                        (name . "^\\.bbdb$")
-                        (name . "^\\.newsrc-dribble")))
-
-                   ("feed"
-                    (or (mode . eww-mode)
-                        (name . "^\\*elfeed")))
-
-                   ("irc"
-                    (or (mode . circe-mode)
-                        (mode . circe-channel-mode)
-                        (mode . circe-query-mode)
-                        (mode . circe-server-mode)))
 
                    ("dev"
                     (or (name . "^\\*clang")
@@ -1201,15 +1177,43 @@ readable sizes, and define a ton of filter groups.
                         (name . "^\\*Flyspell")))
 
                    ("docs"
-                    (or (name . "^\\*Man ")
-                        (name . "^\\*WoMan")
-                        (mode . pdf-view-mode))))))
+                    (or (name . "^\\*Man\s.*\s.*\\*$")
+                        (name . "^\\*WoMan\s.*\s.*\\*$")
+                        (mode . pdf-view-mode)))
 
-          ibuffer-formats '((mark modified read-only " "
-                                  (name 35 35 :left :nil) " "
-                                  (size-h 9 -1 :right) " "
-                                  (mode 16 16 :left :elide) " "
-                                  filename-and-process))))
+                   ("irc"
+                    (or (mode . circe-mode)
+                        (mode . circe-channel-mode)
+                        (mode . circe-query-mode)
+                        (mode . circe-server-mode)))
+
+                   ("logs"
+                    (or (name . "^\\*EGLOT.*")
+                        (name . "^\\*eldoc\\*$")
+                        (name . "-Log\\*$")
+                        (name . "\slog\\*$")))
+
+                   ("mail"
+                    (or (mode . message-mode)
+                        (mode . bbdb-mode)
+                        (mode . mail-mode)
+                        (mode . gnus-group-mode)
+                        (mode . gnus-summary-mode)
+                        (mode . gnus-article-mode)
+                        (name . "^\\.bbdb$")
+                        (name . "^\\.newsrc-dribble")))
+
+                   ("web"
+                    (or (mode . eww-mode)
+                        (name . "^\\*elfeed")))
+                   )))
+
+          ibuffer-formats '((mark
+                             modified read-only " "
+                             (name 35 35 :left :nil) " "
+                             (size-h 9 -1 :right) " "
+                             (mode 16 16 :left :elide) " "
+                             filename-and-process))))
 #+END_SRC
 
 **** ivy
