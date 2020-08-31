@@ -304,7 +304,7 @@ configuration file, in our case 'init.el', we may specify the location
 of `custom-file` early on to keep ~/.emacs.d relatively clean.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (setq custom-file "~/.emacs.d/custom.el")
+  (setq custom-file "~/.config/emacs/custom.el")
 #+END_SRC
 
 *** Encoding
@@ -605,7 +605,7 @@ from, and the priority we should retrieve packages if a package with the
 same name exists on multiple sources.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (setq package-user-dir "~/.emacs.d/pkg/"
+  (setq package-user-dir "~/.config/emacs/pkg/"
 
         package-archives
         '(("elpa"         . "https://elpa.gnu.org/packages/")
@@ -687,14 +687,14 @@ byte-compile them.
     "Build and compile 'org-mode' config."
     (interactive)
     (require 'org)
-    (org-babel-load-file "~/.emacs.d/README.org")
-    (byte-compile-file   "~/.emacs.d/init.el")
-    (byte-compile-file   "~/.emacs.d/config.el"))
+    (org-babel-load-file "~/.config/emacs/README.org")
+    (byte-compile-file   "~/.config/emacs/init.el")
+    (byte-compile-file   "~/.config/emacs/config.el"))
 
-  (if (file-newer-than-file-p "~/.emacs.d/README.org"
-                              "~/.emacs.d/config.el")
+  (if (file-newer-than-file-p "~/.config/emacs/README.org"
+                              "~/.config/emacs/config.el")
       (emacs-reconfig)
-    (load "~/.emacs.d/config.el"))
+    (load "~/.config/emacs/config.el"))
 #+END_SRC
 
 ** config.el
@@ -1618,6 +1618,13 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package python-mode)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package python-black
+    :demand t
+    :after (python-mode)
+    :hook (python-mode . python-black-on-save-mode))
 #+END_SRC
 
 **** Rust
