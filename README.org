@@ -292,9 +292,11 @@ shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defvar gc-cons-threshold-default)
+  (defvar gc-cons-threshold-tuned)
 
   (setq gc-cons-threshold-default gc-cons-threshold
-        gc-cons-threshold         (* 1000 1000 2))
+        gc-cons-threshold-tuned   (* 1000 1000 2)
+        gc-cons-threshold         gc-cons-threshold-tuned)
 #+END_SRC
 
 *** Custom
@@ -606,25 +608,21 @@ same name exists on multiple sources.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq package-user-dir "~/.config/emacs/pkg/"
-
         package-archives
         '(("elpa"         . "https://elpa.gnu.org/packages/")
           ("melpa-stable" . "https://stable.melpa.org/packages/")
           ("melpa"        . "https://melpa.org/packages/"))
-
         package-archive-priorities
         '(("elpa"         . 3)
           ("melpa-stable" . 2)
           ("melpa"        . 1))
-
-        package-pinned-packages
-        '((use-package . "melpa")))
+        package-pinned-packages '((use-package . "melpa")))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-(package-initialize)
+  (package-initialize)
 #+END_SRC
 
 **** use-package
@@ -743,12 +741,8 @@ even over irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
     :commands (enable-lui-logging-globally lui-set-prompt)
-
     :init
-    (add-hook 'circe-server-mode-hook
-              (lambda()
-                (require 'circe-chanop)))
-
+    (add-hook 'circe-server-mode-hook (lambda() (require 'circe-chanop)))
     (add-hook 'circe-chat-mode-hook
               (lambda()
                 (lui-set-prompt
@@ -785,8 +779,8 @@ even over irssi, weechat, or other clients I've used in the past.
     (enable-lui-logging-globally)
     (enable-circe-color-nicks)
 
-    (if (file-exists-p "~/.emacs.d/usr/circe.el")
-        (load-file     "~/.emacs.d/usr/circe.el")))
+    (if (file-exists-p "~/.config/emacs/usr/circe.el")
+        (load-file     "~/.config/emacs/usr/circe.el")))
 #+END_SRC
 
 **** clang-format
@@ -810,8 +804,7 @@ even over irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company-c-headers
     :after (company)
-    :config
-    (add-to-list 'company-backends 'company-c-headers))
+    :config (add-to-list 'company-backends 'company-c-headers))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -879,9 +872,7 @@ for those who use many buffers.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eglot
     :commands (eglot-ensure)
-    :hook
-    ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
-
+    :hook ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
     :config
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
@@ -890,6 +881,7 @@ for those who use many buffers.
                  '(c-mode . ("clangd"
                              "--clang-tidy"
                              "--clang-tidy-checks=clang-analyzer-*,-clang-analyzer-cplusplus*")))
+
     (add-to-list 'eglot-server-programs
                  '(c++-mode . ("clangd"
                                "--clang-tidy"
@@ -901,8 +893,7 @@ for those who use many buffers.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eldoc
     :commands (global-eldoc-mode)
-    :init
-    (global-eldoc-mode -1))
+    :init (global-eldoc-mode -1))
 #+END_SRC
 
 **** elfeed
@@ -943,26 +934,27 @@ behave and look like typical unix shells, so maybe try it for yourself.
     (defvar eshell-prompt-function)
     (defvar eshell-visual-commands)
 
+    (defun baemacs/eshell-prompt-function()
+      (interactive)
+      (lambda ()
+        (concat "[" (user-login-name) "@"
+                (car (split-string (system-name) "\\.")) " "
+                (if (string= (eshell/pwd) (getenv "HOME"))
+                    "~" (eshell/basename (eshell/pwd))) "]"
+                (if (= (user-uid) 0) "# " "$ "))))
+
     (setq eshell-banner-message             ""
           eshell-cmpl-cycle-completions     nil
           eshell-error-if-no-glob           t
           eshell-hist-ignoredups            t
           eshell-history-size               4096
           eshell-prefer-lisp-functions      t
+          eshell-prompt-function            (baemacs/eshell-prompt-function)
+          eshell-prompt-regexp              "^[^#$\n]*[#$] "
           eshell-save-history-on-exit       t
-
           eshell-scroll-to-bottom-on-input  nil
           eshell-scroll-to-bottom-on-output nil
           eshell-scroll-show-maximum-output nil
-
-          eshell-prompt-regexp              "^[^#$\n]*[#$] "
-          eshell-prompt-function
-          (lambda ()
-            (concat "[" (user-login-name) "@"
-                    (car (split-string (system-name) "\\.")) " "
-                    (if (string= (eshell/pwd) (getenv "HOME"))
-                        "~" (eshell/basename (eshell/pwd))) "]"
-                    (if (= (user-uid) 0) "# " "$ ")))
 
           eshell-visual-commands
           '("alsamixer" "atop" "htop" "less" "mosh" "nano" "ssh" "tail"
@@ -1235,8 +1227,7 @@ readable sizes, and define a ton of filter groups.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flyspell-correct-ivy
     :bind ("C-\\" . flyspell-correct-wrapper)
-    :config
-    (setq flyspell-correct-interface #'flyspell-correct-ivy))
+    :config (setq flyspell-correct-interface #'flyspell-correct-ivy))
 #+END_SRC
 
 **** magit
@@ -1253,8 +1244,7 @@ This package provides a major mode for reading EPUB documents.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nov
-    :config
-    (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+    :config (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
 #+END_SRC
 
 **** package-utils
@@ -1269,8 +1259,7 @@ This package provides a major mode for reading EPUB documents.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rainbow-delimiters
     :demand t
-    :hook
-    ((markdown-mode prog-mode text-mode) . rainbow-delimiters-mode))
+    :hook ((markdown-mode prog-mode text-mode) . rainbow-delimiters-mode))
 #+END_SRC
 
 **** ranger
@@ -1312,7 +1301,6 @@ you may appreciate the additional functions.
     :after (package-utils)
     :commands (package-utils-upgrade-all server-start)
     :bind ("C-x C-c" . server-stop)
-
     :init
     (unless (and (fboundp 'server-running-p)
                  (server-running-p))
@@ -1405,7 +1393,6 @@ you may appreciate the additional functions.
   (add-hook 'c-mode-hook
             (lambda()
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-
               (defvar c-basic-offset)
               (setq-local c-basic-offset   8)
               (setq-local indent-tabs-mode t)
@@ -1418,7 +1405,6 @@ you may appreciate the additional functions.
   (add-hook 'c++-mode-hook
             (lambda()
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-
               (defvar c-basic-offset)
               (setq-local c-basic-offset   4)
               (setq-local indent-tabs-mode t)
@@ -1488,7 +1474,6 @@ These packages provide modes that make git-related files more readable.
   (use-package go-mode
     :commands (gofmt)
     :mode ("\\.go\\'" . go-mode)
-
     :init
     (add-hook 'go-mode-hook
               (lambda()
