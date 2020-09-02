@@ -877,6 +877,10 @@ for those who use many buffers.
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
 
+    (add-hook 'eglot-managed-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))
+
     (add-to-list 'eglot-server-programs
                  '(c-mode . ("clangd"
                              "--clang-tidy"
@@ -1474,11 +1478,6 @@ These packages provide modes that make git-related files more readable.
   (use-package go-mode
     :commands (gofmt)
     :mode ("\\.go\\'" . go-mode)
-    :init
-    (add-hook 'go-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook 'gofmt nil 'local)))
-
     :config
     (setq tab-width        4
           indent-tabs-mode 't))
@@ -1605,13 +1604,6 @@ These packages provide modes that make git-related files more readable.
   (use-package python-mode)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package python-black
-    :demand t
-    :after (python-mode)
-    :hook (python-mode . python-black-on-save-mode))
-#+END_SRC
-
 **** Rust
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1629,7 +1621,6 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rust-mode
     :commands (rust-format-buffer rust-mode)
-    :hook (rust-mode . rust-enable-format-on-save)
     :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
