@@ -771,7 +771,7 @@ even over irssi, weechat, or other clients I've used in the past.
           lui-fill-type              nil
           lui-flyspell-alist         '((".*" "american"))
           lui-flyspell-p             t
-          lui-logging-directory      "~/.emacs.d/var/circe"
+          lui-logging-directory      "~/.config/emacs/var/circe"
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
 
@@ -874,22 +874,14 @@ for those who use many buffers.
     :commands (eglot-ensure)
     :hook ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
     :config
-    (setq eglot-auto-display-help-buffer nil
-          eglot-put-doc-in-help-buffer   nil)
-
+    (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
+    (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
     (add-hook 'eglot-managed-mode-hook
               (lambda()
                 (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))
 
-    (add-to-list 'eglot-server-programs
-                 '(c-mode . ("clangd"
-                             "--clang-tidy"
-                             "--clang-tidy-checks=clang-analyzer-*,-clang-analyzer-cplusplus*")))
-
-    (add-to-list 'eglot-server-programs
-                 '(c++-mode . ("clangd"
-                               "--clang-tidy"
-                               "--clang-tidy-checks=clang-analyzer-*"))))
+    (setq eglot-auto-display-help-buffer nil
+          eglot-put-doc-in-help-buffer   nil))
 #+END_SRC
 
 **** eldoc
@@ -914,8 +906,8 @@ RSS and Atom.
     (setq elfeed-search-filter "@1-week-ago +unread "
           url-queue-timeout    10)
 
-    (if (file-exists-p "~/.emacs.d/usr/elfeed.el")
-        (load-file     "~/.emacs.d/usr/elfeed.el")))
+    (if (file-exists-p "~/.config/emacs/usr/elfeed.el")
+        (load-file     "~/.config/emacs/usr/elfeed.el")))
 #+END_SRC
 
 **** eshell
@@ -1089,8 +1081,8 @@ clients.
           gnus-thread-hide-subtree               t
           gnus-thread-sort-functions             '(gnus-thread-sort-by-date))
 
-    (if (file-exists-p "~/.emacs.d/usr/gnus.el")
-        (load-file     "~/.emacs.d/usr/gnus.el")))
+    (if (file-exists-p "~/.config/emacs/usr/gnus.el")
+        (load-file     "~/.config/emacs/usr/gnus.el")))
 #+END_SRC
 
 **** helpful
