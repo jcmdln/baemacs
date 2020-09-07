@@ -3,62 +3,60 @@
 #+STARTUP: indent
 #+LANGUAGE: en
 
-Baemacs is yet another take on a literate GNU/Emacs configuration that
-intends to remain close to the default behavior and appearance.
+Baemacs is yet another take on a literate GNU/Emacs configuration that intends
+to remain close to the default behavior and appearance.
 
 #+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
-To understand what Baemacs is attempting to do differently, let's cover
-some of the important goals and intentions of this configuration.
+To understand what Baemacs is attempting to do differently, let's cover some of
+the important goals and intentions of this configuration.
 
 1. Preserve (most) core GNU/Emacs functionality
 
-  Unlike other configurations, there is no evil-mode support and we
-  don't remap any (useful) default keybinds.  If you are comfortable
-  with plain GNU/Emacs, you should feel empowered by Baemacs.
+  Unlike other configurations, there is no evil-mode support and we don't remap
+  any (useful) default keybinds.  If you are comfortable with plain GNU/Emacs,
+  you should feel empowered by Baemacs.
 
   Vi/Vim and evil-mode users should most likely look at one of the many
   alternatives that provides or defaults to evil-mode.
 
 2. Fully document changes with context and reasoning (eventually)
 
-   Having documentation, context of why something was added, and
-   reasoning of whether it is a good/bad/subjective addition allows you
-   as the user to better understand how each component ties together.
+   Having documentation, context of why something was added, and reasoning of
+   whether it is a good/bad/subjective addition allows you as the user to better
+   understand how each component ties together.
 
-   Even better, you don't need to hunt any of this down, it's all in
-   this file!
+   Even better, you don't need to hunt any of this down, it's all in this file!
 
 3. Leverage use-package for predictability
 
-   Creating logic of when packages should conditionally be loaded is a
-   bit easier with use-package.  Also it reads a little better than
-   huge blocks of elisp.
+   Creating logic of when packages should conditionally be loaded is a bit
+   easier with use-package.  Also it reads a little better than huge blocks of
+   elisp.
 
 4. Performance is a concern, though avoid voodoo
 
-   There's two things done in this configuration that appear to impact
-   performance in a positive way:
+   There are two config changes that (hopefully) will have a positive effect on
+   overall performance:
 
    - Tweaking the garbage collector
 
-     This is primarily to decrease garbage collection pauses, but the
-     changes made will at minimum halve the number of pauses we
-     experience. See [[#garbage-collection][Garbage Collection]] for clarification.
+     This is primarily to decrease garbage collection pauses, but the changes
+     made will at minimum halve the number of pauses we experience. See
+     [[#garbage-collection][Garbage Collection]] for clarification.
 
    - Compiling configuration files
 
-     This is primarily to decrease initialization time.  When using a
-     non-Org config might ordinarily change an '.el' file, expecting
-     that change to be reflected on startup.  In reality if you didn't
-     byte-compile your configuration after making changes, you would
-     inherit the value from '.elc', which is no longer the expected
-     behavior.  There may be some other implications though this is the
-     main argument I've heard against byte-compiling config files.
+     This is primarily to decrease initialization time.  When using a non-Org
+     config might ordinarily change an '.el' file, expecting that change to be
+     reflected on startup.  In reality if you didn't byte-compile your config
+     after making changes, you would inherit the value from '.elc', which is no
+     longer the expected behavior.  There may be some other implications though
+     this is the main argument I've heard against byte-compiling config files.
 
-     In our case since everything should be in 'README.org', which acts
-     as our staging ground for changes, we may tangle and byte-compile
-     configuration files with less apprehension.
+     In our case since everything should be in 'README.org', which acts as our
+     staging ground for changes, we may tangle and byte-compile config files
+     with less apprehension.
 
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
@@ -137,11 +135,12 @@ some of the important goals and intentions of this configuration.
       - [[#d][D]]
       - [[#docker][Docker]]
       - [[#dotenv][DotEnv]]
-      - [[#gdscript][GDScript]]
+      - [[#gdscript-disabled][GDScript (Disabled)]]
       - [[#git][Git]]
       - [[#go][Go]]
       - [[#jinja2][Jinja2]]
       - [[#json][JSON]]
+      - [[#julia][Julia]]
       - [[#lisp][Lisp]]
       - [[#lua][Lua]]
       - [[#markdown][Markdown]]
@@ -153,19 +152,21 @@ some of the important goals and intentions of this configuration.
       - [[#protobuf][Protobuf]]
       - [[#python][Python]]
       - [[#rust][Rust]]
+      - [[#sed][Sed]]
+      - [[#verilog][Verilog]]
       - [[#yaml][YAML]]
+      - [[#zig][Zig]]
 
 * Usage
 
-This singular file is all that is needed to fully replicate this
-configuration.  While you may simply download a copy of this file and
-place it within ~/.emacs.d, the steps below will reflect using git to
-retrieve and manage your copy of the configuration.
+This singular file is all that is needed to fully replicate this config.  While
+you may simply download a copy of this file and place it within ~/.emacs.d, the
+steps below will reference using git to retrieve and manage your copy of the
+config, which will hopefully simplify incorporating your own changes.
 
 ** Install
 
-Be sure to move any existing ~/.emacs{,.d} before performing the
-following steps.
+Be sure to move any existing config before performing the following steps.
 
 First, clone this repository:
 
@@ -181,8 +182,8 @@ Create a symlink to '~/.emacs.d':
 
 ** Configure
 
-There are two ways of loading the configuration, either of which are
-perfectly suitable depending on personal preference.
+There are two ways of loading the configuration, either of which are perfectly
+suitable depending on personal preference.
 
 Configure by evaluating this file via command line:
 
@@ -200,25 +201,24 @@ Configure by loading this file within Emacs:
 
 ** Maintain
 
-Ideally you would have your own fork and modify this file how you see
-fit, managing portability between systems with some VCS like git.
+Ideally you would have your own fork and modify this file how you see fit,
+managing portability between systems with some VCS like git.
 
-There is no right or wrong way, so I'll leave this section ambiguous
-for now.
+There is no right or wrong way, so I'll leave this section ambiguous for now.
 
 * Configuration Files
 
-To make the most effective use of the various startup files that Emacs
-will check for, each file listed in this section will detail the changes
-they contain.  The intention is to ensure that we don't force Emacs to
-load everything during initialization, instead loading the following
-configuration file at the end of initialization.
+To make the most effective use of the various startup files that Emacs will
+check for, each file listed in this section will detail the changes they
+contain.  The intention is to ensure that we don't force Emacs to load
+everything during initialization, instead loading the following config file at
+the end of initialization.
 
 ** init.el
 
-Emacs will look for this specific file once it reaches the
-initialization phase.  Here we will make modifications to things that
-ship with Emacs and should be changed early.
+Emacs will look for this specific file once it reaches the init phase.  Here we
+will make modifications to things that ship with Emacs and should be changed as
+early as possible.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
 ;;; init.el ---- Baemacs initialization file
@@ -231,32 +231,31 @@ ship with Emacs and should be changed early.
 
 *** Garbage Collection
 
-Emacs makes some considerations for older and more memory restricted
-systems in terms of how the garbage collector is configured.  On modern
-64-bit systems these considerations may be far too conservative for
-users who run many elisp programs such as gnus, elfeed, circe, etc.
+Emacs makes some considerations for older and more memory restricted systems in
+terms of how the garbage collector is configured.  On modern 64-bit systems
+these considerations may be far too conservative for users who run many elisp
+programs such as gnus, elfeed, circe, etc.
 
-As Emacs develops its concurrency, parallelism, and events primitives
-these adjustments will need to be revisited.  Note that for memory
-constrained environments you may want to disable the changes to the
-garbage collector made in this section.
+As Emacs develops its concurrency, parallelism, and events primitives these
+adjustments will need to be revisited.  Note that for memory constrained
+environments you may want to disable the changes to the garbage collector made
+in this section.
 
 **** gc-cons-percentage
 
-For the purposes of initialization, we'll increase `gc-cons-percentage`
-to decrease garbage collection pauses.  The settings below mean that
-garbage collection is deferred until reaching 80% of the total heap
-size.  After initialization completes we lower this value to 20% of
-the total heap size to prevent garbage collection passes from becoming
-too large to be handled quickly.
+For the purposes of initialization, we'll increase `gc-cons-percentage` to
+decrease garbage collection pauses.  The settings below mean that garbage
+collection is deferred until reaching 80% of the total heap size.  After
+initialization completes we lower this value to 20% of the total heap size to
+prevent garbage collection passes from becoming too large to be handled
+quickly.
 
-At the time of writing, the default is 10% so we are effectively
-attempting to halve the amount of garbage collection pauses we would
-experience as a result of reaching the defined threshold of the total
-heap size.
+At the time of writing, the default is 10% so we are effectively attempting to
+halve the amount of garbage collection pauses we would experience as a result
+of reaching the defined threshold of the total heap size.
 
-Should you want to compare against the default value, we preserve it as
-shown below:
+Should you want to compare these changes against the default values, they are
+preserved as shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defvar gc-cons-percentage-default)
@@ -276,19 +275,19 @@ shown below:
 
 **** gc-cons-threshold
 
-Now we will increase the `gc-cons-threshold`, which refers to the total
-bytes of storage for lisp objects that must be allocated to trigger
-subsequent garbage collections.  On 32-bit systems this threshold is
-400000 objects, while on 64-bit systems it is 800000 objects.
+Now we will increase the `gc-cons-threshold`, which refers to the total bytes
+of storage for lisp objects that must be allocated to trigger subsequent
+garbage collections.  On 32-bit systems this threshold is 400000 objects, while
+on 64-bit systems it is 800000 objects.
 
-Modifying this value is generally not recommended and considered an act
-of performance voodoo, though the idea is that by specifying a larger
-threshold, garbage collection will occur less often, meaning fewer GC
-pauses. We'll set this value to 200000 globally, which ideally will
-reduce the total number of GC pauses we experience by more than half.
+Modifying this value is generally not recommended and considered an act of
+performance voodoo, though the idea is that by specifying a larger threshold,
+garbage collection will occur less often, meaning fewer GC pauses. We'll set
+this value to 200000 globally, which ideally will reduce the total number of GC
+pauses we experience by more than half.
 
-The default value is also stored so you may evaluate this change as
-shown below:
+The default value is also stored so you may evaluate this change as shown
+below:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defvar gc-cons-threshold-default)
@@ -301,9 +300,9 @@ shown below:
 
 *** Custom
 
-Rather than Emacs customization being appended to the end of the
-configuration file, in our case 'init.el', we may specify the location
-of `custom-file` early on to keep ~/.emacs.d relatively clean.
+Rather than Emacs customization being appended to the end of the configuration
+file, in our case 'init.el', we may specify the location of `custom-file` early
+on to keep our configuration directory relatively clean.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq custom-file "~/.config/emacs/custom.el")
@@ -311,8 +310,8 @@ of `custom-file` early on to keep ~/.emacs.d relatively clean.
 
 *** Encoding
 
-Another thing we want to handle very early is attempting to enforce the
-use of UTF-8 encoding.
+Another thing we want to handle very early is attempting to enforce the use of
+UTF-8 encoding.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defvar prefer-coding-system)
@@ -328,8 +327,8 @@ use of UTF-8 encoding.
 
 *** Environment
 
-Emacs will inherit your system's current environment, though we may
-adjust some key variables for quality of life.
+Emacs will inherit your system's current environment, though we may adjust some
+key variables for quality of life.
 
 - Set Emacs as our default EDITOR when in Emacs
 - Set PAGER to an Emacs built-in, which doesn't require ansi-term
@@ -349,16 +348,15 @@ adjust some key variables for quality of life.
 
 *** Appearance
 
-In terms of appearance, I prefer to have as little wasted space and
-visual clutter as possible.  I make no attempt to completely restyle
-Emacs, preferring instead to make slight modifications.
+In terms of appearance, I prefer to have as little wasted space and visual
+clutter as possible.  I make no attempt to completely restyle Emacs, preferring
+instead to make slight modifications.
 
 **** Disable toolbars
 
-I don't find the toolbars to be useful comparatively to the amount of
-visual space they consume.  The following will disable the various
-toolbars when their functions are bound, which prevents them from ever
-being initialized:
+I don't find the toolbars to be useful comparatively to the amount of visual
+space they consume.  The following will disable the various toolbars when their
+functions are bound, which prevents them from ever being initialized:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (when (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
@@ -368,8 +366,8 @@ being initialized:
 
 **** Disable splash screen
 
-After initialization completes, we'll end up with some clutter that is
-not very helpful for long-time Emacs users.
+After initialization completes, we'll end up with some clutter that is not very
+helpful for long-time Emacs users.
 
 - Remove the default scratch buffer message
 - Disable the splash screen
@@ -383,23 +381,19 @@ not very helpful for long-time Emacs users.
 
 **** Re-use Frames and Windows
 
-One big annoyance is Emacs arbitrary splitting my window to show a
-newly created buffer.  This is especially annoying when I run a command
-myself such as 'M-x man' which causes arbitrary splits.
+One big annoyance is Emacs arbitrary splitting my window to show a newly
+created buffer.  This is especially annoying when I run a command myself such
+as 'M-x man' which causes arbitrary splits.
 
-Here we will enforce always re-using the currently selected frame when
-a new buffer is opened or focused.  This works in most cases, though as
-shown below certain things like 'man' will not respect our choices and
-require specific adjustment.  Some things like 'gnus' should still make
-splits as they want, so we won't look for every possible edge condition
-to normalize this behavior.
+Here we will enforce always re-using the currently selected frame when a new
+buffer is opened or focused.  This works in most cases, though as shown below
+certain things like 'man' will not respect our choices and require specific
+adjustment.  Some things like 'gnus' should still make splits as they want, so
+we won't look for every possible edge condition to normalize this behavior.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-to-list 'display-buffer-alist
-               '("*Help*" display-buffer-same-window))
-
-  (add-to-list 'display-buffer-alist
-               '("*Man*" display-buffer-same-window))
+  (add-to-list 'display-buffer-alist '("*Help*" display-buffer-same-window))
+  (add-to-list 'display-buffer-alist '("*Man*" display-buffer-same-window))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -431,15 +425,14 @@ Rather than include yet another theme, we'll use the tango-dark theme.
 
 *** Editing
 
-There are some general-purpose changes to make for editing files, which
-ideally if I ever get around to incorporating site-start.el will allow
-loading a slim, nimble instance of Emacs when needed.  For now I'll
-leave these changes here.
+There are some general-purpose changes to make for editing files, which ideally
+if I ever get around to incorporating site-start.el will allow loading a slim,
+nimble instance of Emacs when needed.  For now I'll leave these changes here.
 
 **** Clipboard
 
-This part is a bit unorganized though reduces clutter by inhibiting
-buffers and adjusting how Emacs' clipboard works.
+This part is a bit unorganized though reduces clutter by inhibiting buffers and
+adjusting how Emacs' clipboard works.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq save-interprogram-paste-before-kill t
@@ -511,9 +504,9 @@ Before saving, remove any trailing whitespace characters.
 
 **** Word Wrap
 
-When Visual Line mode is enabled, ‘word-wrap’ is turned on in this
-buffer, and simple editing commands are redefined to act on visual
-lines, not logical lines.
+When Visual Line mode is enabled, ‘word-wrap’ is turned on in this buffer, and
+simple editing commands are redefined to act on visual lines, not logical
+lines.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (add-hook 'after-init-hook
@@ -523,8 +516,8 @@ lines, not logical lines.
 
 *** Input
 
-I do make some minor changes to input methods, though I intend to remain
-as faithful to "the Emacs way" as I can.
+I do make some minor changes to input methods, though I intend to remain as
+faithful to "the Emacs way" as I can.
 
 **** Keyboard
 
@@ -533,9 +526,9 @@ usefulness is highly subjective.
 
 ****** Keybinds
 
-From my time of using tmux + vim I had grown to prefer some custom
-keybinds I made for handling splits or navigating through panes. Here
-I've attempted to recreated the subjective ease of navigation I prefer:
+From my time of using tmux + vim I had grown to prefer some custom keybinds I
+made for handling splits or navigating through panes. Here I've attempted to
+recreated the subjective ease of navigation I prefer:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (global-set-key (kbd "M--")
@@ -563,8 +556,8 @@ I've attempted to recreated the subjective ease of navigation I prefer:
 
 **** Mouse
 
-In terms of the mouse, I really only adjust scrolling behavior and add
-xterm support:
+In terms of the mouse, I really only adjust scrolling behavior and add xterm
+support:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defvar mouse-wheel-follow-mouse)
@@ -595,16 +588,16 @@ xterm support:
 
 *** Package Management
 
-Package management isn't loaded by default, so we have to explicitly
-require it be loaded now:
+Package management isn't loaded by default, so we have to explicitly require it
+be loaded now:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (require 'package)
 #+END_SRC
 
-Here we're defining where to put packages, where we should get packages
-from, and the priority we should retrieve packages if a package with the
-same name exists on multiple sources.
+Here we're defining where to put packages, where we should get packages from,
+and the priority we should retrieve packages if a package with the same name
+exists on multiple sources.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq package-user-dir "~/.config/emacs/pkg/"
@@ -627,10 +620,10 @@ With the above changes made, we may now initialize the package module:
 
 **** use-package
 
-The first package we'll ensure exists is use-package, which the rest of
-this file relies on for handling per-package configuration.  In newer
-versions of Emacs use-package is now a built-in, but we should check to
-be nice to older versions:
+The first package we'll ensure exists is use-package, which the rest of this
+file relies on for handling per-package configuration.  In newer versions of
+Emacs use-package is now a built-in, but we should check to be nice to older
+versions:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (unless (package-installed-p 'use-package)
@@ -642,10 +635,10 @@ be nice to older versions:
     (require 'bind-key))
 #+END_SRC
 
-Some decent use-package tweaks are to defer loading a package unless
-demanded, ensure a package exists or can be retrieved before loading
-its configuration, and check that use-package is installed and active
-before attempting to initialize:
+Some decent use-package tweaks are to defer loading a package unless demanded,
+ensure a package exists or can be retrieved before loading its configuration,
+and check that use-package is installed and active before attempting to
+initialize:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq use-package-always-defer      t
@@ -655,9 +648,9 @@ before attempting to initialize:
 
 **** no-littering
 
-The second package will keep our ~/.emacs.d nice and tidy by adjusting
-the locations of configuration files.  It uses a unixy format, which is
-a nice change.
+The second package will keep our ~/.emacs.d nice and tidy by adjusting the
+locations of configuration files.  It uses a unixy format, which is a nice
+change.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (use-package no-littering
@@ -670,15 +663,14 @@ a nice change.
 
 *** Bootstrap
 
-Something we can do to slightly improve the total duration needed for
-Emacs to complete its initialization phase is byte-compile the
-configuration files we create.  If performed conditionally, we only
-have to pay the cost of byte-compiling when we make a change to this
-configuration file for the entire configuration to be rebuilt.
+Something we can do to slightly improve the total duration needed for Emacs to
+complete its initialization phase is byte-compile the configuration files we
+create.  If performed conditionally, we only have to pay the cost of
+byte-compiling when we make a change to this configuration file for the entire
+configuration to be rebuilt.
 
-At the end of initialization, ensure that 'README.org' is not newer
-than 'config.el', otherwise rebuild our configuration files and
-byte-compile them.
+At the end of initialization, ensure that 'README.org' is not newer than
+'config.el', otherwise rebuild our configuration files and byte-compile them.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defun emacs-reconfig()
@@ -697,8 +689,8 @@ byte-compile them.
 
 ** config.el
 
-This is a non-standard file that is referenced at the end of 'init.el'
-which contains our extra package and language definitions.
+This is a non-standard file that is referenced at the end of 'init.el' which
+contains our extra package and language definitions.
 
 Before we add anything to this file, first we'll add the file header:
 
@@ -714,9 +706,8 @@ Before we add anything to this file, first we'll add the file header:
 
 **** async
 
-Simplify calling asynchronous functions and processes.  See the
-documentation for `async-start' and `async-start-process' for more
-information.
+Simplify calling asynchronous functions and processes.  See the documentation
+for `async-start' and `async-start-process' for more information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package async
@@ -735,8 +726,8 @@ information.
 
 **** circe
 
-This package adds _another_ IRC client, which is my preferred client
-even over irssi, weechat, or other clients I've used in the past.
+This package adds _another_ IRC client, which is my preferred client even over
+irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
@@ -817,20 +808,19 @@ even over irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package counsel
-    :bind
-    (("<f1> f"  . counsel-describe-function)
-     ("<f1> l"  . counsel-find-library)
-     ("<f1> v"  . counsel-describe-variable)
-     ("<f2> i"  . counsel-info-lookup-symbol)
-     ("<f2> u"  . counsel-unicode-char)
-     ("C-s"     . counsel-grep-or-swiper)
-     ("C-c g"   . counsel-git)
-     ("C-c j"   . counsel-git-grep)
-     ("C-c l"   . counsel-ag)
-     ("C-r"     . counsel-minibuffer-history)
-     ("C-x C-f" . counsel-find-file)
-     ("C-x l"   . counsel-locate)
-     ("M-x"     . counsel-M-x)))
+    :bind (("<f1> f"  . counsel-describe-function)
+           ("<f1> l"  . counsel-find-library)
+           ("<f1> v"  . counsel-describe-variable)
+           ("<f2> i"  . counsel-info-lookup-symbol)
+           ("<f2> u"  . counsel-unicode-char)
+           ("C-s"     . counsel-grep-or-swiper)
+           ("C-c g"   . counsel-git)
+           ("C-c j"   . counsel-git-grep)
+           ("C-c l"   . counsel-ag)
+           ("C-r"     . counsel-minibuffer-history)
+           ("C-x C-f" . counsel-find-file)
+           ("C-x l"   . counsel-locate)
+           ("M-x"     . counsel-M-x)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -857,9 +847,9 @@ even over irssi, weechat, or other clients I've used in the past.
 
 **** dimmer
 
-This package provides a minor mode which dims inactive buffers, namely
-the buffers the cursor is not currently active in. It can be helpful
-for those who use many buffers.
+This package provides a minor mode which dims inactive buffers, namely the
+buffers the cursor is not currently active in. It can be helpful for those who
+use many buffers.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dimmer
@@ -894,8 +884,8 @@ for those who use many buffers.
 
 **** elfeed
 
-This package provides an extensible web feed reader, supporting both
-RSS and Atom.
+This package provides an extensible web feed reader, supporting both RSS and
+Atom.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package elfeed
@@ -912,10 +902,10 @@ RSS and Atom.
 
 **** eshell
 
-The default configuration of eshell is, well, bad. The ordinary user who
-opens it once and considers it to be a bad tool is missing out of the
-full potential eshell provides. I've spent a _lot_ of time making eshell
-behave and look like typical unix shells, so maybe try it for yourself.
+The default configuration of eshell is, well, bad. The ordinary user who opens
+it once and considers it to be a bad tool is missing out of the full potential
+eshell provides. I've spent a _lot_ of time making eshell behave and look like
+typical unix shells, so maybe try it for yourself.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
@@ -971,11 +961,11 @@ behave and look like typical unix shells, so maybe try it for yourself.
 
 **** eww
 
-I like eww, but it was missing a few things for me to use it as my
-primary browser for non-interactive sites. Here we will ensure that eww
-is our primary browser when visiting links, and that images are blocked
-by default. Should you have multiple eww buffers open and want to
-toggle displaying images in a specific buffer, you may now do so.
+I like eww, but it was missing a few things for me to use it as my primary
+browser for non-interactive sites. Here we will ensure that eww is our primary
+browser when visiting links, and that images are blocked by default. Should you
+have multiple eww buffers open and want to toggle displaying images in a
+specific buffer, you may now do so.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eww
@@ -1006,10 +996,9 @@ toggle displaying images in a specific buffer, you may now do so.
   (use-package eww-lnum
     :after eww
     :commands (eww-lnum-follow eww-lnum-universal)
-    :bind
-    (:map eww-mode-map
-          ("f" . eww-lnum-follow)
-          ("F" . eww-lnum-universal)))
+    :bind (:map eww-mode-map
+                ("f" . eww-lnum-follow)
+                ("F" . eww-lnum-universal)))
 #+END_SRC
 
 **** flycheck
@@ -1031,10 +1020,8 @@ toggle displaying images in a specific buffer, you may now do so.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flyspell
-    :hook
-    ((markdown-mode . flyspell-mode)
-     (prog-mode     . flyspell-prog-mode)
-     (text-mode     . flyspell-mode))
+    :hook (((conf-mode markdown-mode text-mode) . flyspell-mode)
+           (prog-mode . flyspell-prog-mode))
 
     :config
     (setq ispell-program-name (executable-find "hunspell")
@@ -1043,19 +1030,15 @@ toggle displaying images in a specific buffer, you may now do so.
 
 **** gnus
 
-I've bounced between using "real" email clients and gnus quite a few
-times, though here we will attempt to make gnus behave like other
-clients.
+I've bounced between using "real" email clients and gnus quite a few times,
+though here we will attempt to make gnus behave like other clients.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gnus
-    :hook
-    ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
-     (gnus-group-mode       . gnus-group-sort-groups-by-alphabet))
-
-    :bind
-    (("<M-down>" . windmove-down)
-     ("<M-up>"   . windmove-up))
+    :hook ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
+           (gnus-group-mode       . gnus-group-sort-groups-by-alphabet))
+    :bind (("<M-down>" . windmove-down)
+           ("<M-up>"   . windmove-up))
 
     :config
     (defvar gnus-show-threads)
@@ -1087,8 +1070,8 @@ clients.
 
 **** helpful
 
-This package provides an alternative to the built-in Emacs help that
-provides much more contextual information.
+This package provides an alternative to the built-in Emacs help that provides
+much more contextual information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package helpful)
@@ -1112,14 +1095,11 @@ readable sizes, and define a ton of filter groups.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ibuffer
     :commands (ibuffer-switch-to-saved-filter-groups)
-    :hook
-    ((ibuffer      . ibuffer-auto-mode)
-     (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
-
-    :bind
-    (("C-x C-b"         . ibuffer)
-     ("<C-tab>"         . next-buffer)
-     ("<C-iso-lefttab>" . previous-buffer))
+    :hook ((ibuffer      . ibuffer-auto-mode)
+           (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
+    :bind (("C-x C-b"         . ibuffer)
+           ("<C-tab>"         . next-buffer)
+           ("<C-iso-lefttab>" . previous-buffer))
 
     :init
     (add-hook 'ibuffer-auto-mode-hook
@@ -1209,11 +1189,9 @@ readable sizes, and define a ton of filter groups.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ivy
     :commands (ivy-mode)
-    :bind
-    (("C-c C-r" . ivy-resume)
-     ("<f6>"    . ivy-resume))
-
-    :init (ivy-mode 1)
+    :hook (after-init . (lambda() (ivy-mode 1)))
+    :bind (("C-c C-r" . ivy-resume)
+           ("<f6>"    . ivy-resume))
 
     :config
     (setq ivy-use-virtual-buffers      t
@@ -1240,7 +1218,7 @@ This package provides a major mode for reading EPUB documents.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nov
-    :config (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+    :mode ("\\.epub\\'" . nov-mode))
 #+END_SRC
 
 **** package-utils
@@ -1255,14 +1233,14 @@ This package provides a major mode for reading EPUB documents.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rainbow-delimiters
     :demand t
-    :hook ((markdown-mode prog-mode text-mode) . rainbow-delimiters-mode))
+    :hook ((conf-mode prog-mode text-mode) . rainbow-delimiters-mode))
 #+END_SRC
 
 **** ranger
 
-This package adds a minor mode that runs within ~dired~ that emulates
-much of the features provided by the ~ranger~ terminal file browser.
-Hardcore ~dired~ users may want to disable this.
+This package adds a minor mode that runs within ~dired~ that emulates much of
+the features provided by the ~ranger~ terminal file browser.  Hardcore ~dired~
+users may want to disable this.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ranger
@@ -1272,11 +1250,12 @@ Hardcore ~dired~ users may want to disable this.
 
 **** scratch
 
-I like opening multiple scratch buffers, so I added a function to allow
-me to make a new numbered scratch buffer.
+I like opening multiple scratch buffers, so I added a function to allow me to
+make a new numbered scratch buffer.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package scratch
+    :commands (scratch-new)
     :init
     (defun scratch-new()
       "Open a new scratch buffer."
@@ -1287,10 +1266,10 @@ me to make a new numbered scratch buffer.
 
 **** server
 
-I feel that Emacs is missing some extensions for server-based functions
-and added a warning when attempting to close Emacs. Also, if you want to
-update your packages or kill Emacs without saving in a quicker fashion
-you may appreciate the additional functions.
+I feel that Emacs is missing some extensions for server-based functions and
+added a warning when attempting to close Emacs. Also, if you want to update
+your packages or kill Emacs without saving in a quicker fashion you may
+appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package server
@@ -1329,10 +1308,7 @@ you may appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
     :demand t
-    :hook
-    ((conf-mode eshell-mode markdown-mode org-mode prog-mode text-mode)
-     . smartparens-mode)
-
+    :hook ((eshell-mode org-mode prog-mode text-mode) . smartparens-mode)
     :config
     (setq sp-highlight-pair-overlay     nil
           sp-highlight-wrap-overlay     nil
@@ -1432,7 +1408,9 @@ you may appreciate the additional functions.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dockerfile-mode)
+  (use-package dockerfile-mode
+    :mode (("\\Containerfile\\'" . dockerfile-mode)
+           ("\\Dockerfile\\'"    . dockerfile-mode)))
 #+END_SRC
 
 **** DotEnv
@@ -1441,12 +1419,11 @@ you may appreciate the additional functions.
   (use-package dotenv-mode)
 #+END_SRC
 
-**** GDScript
+**** GDScript (Disabled)
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gdscript-mode
-    :config
-    (setq gdscript-godot-executable "flatpak run org.godotengine.Godot"))
+    :disabled)
 #+END_SRC
 
 **** Git
@@ -1471,20 +1448,37 @@ These packages provide modes that make git-related files more readable.
     :commands (gofmt)
     :mode ("\\.go\\'" . go-mode)
     :config
-    (setq tab-width        4
-          indent-tabs-mode 't))
+    (setq indent-tabs-mode 't
+          tab-width        4))
 #+END_SRC
 
 **** Jinja2
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package jinja2-mode)
+  (use-package jinja2-mode
+    :mode ("\\.j2\\'" . jinja2-mode))
 #+END_SRC
 
 **** JSON
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package json-mode)
+  (use-package json-mode
+    :mode ("\\.json\\'" . json-mode))
+#+END_SRC
+
+**** Julia
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package flycheck-julia
+    :after (flycheck julia-mode)
+    :config
+    (add-to-list 'flycheck-global-modes 'julia-mode)
+    (add-to-list 'flycheck-global-modes 'ess-julia-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package julia-mode
+    :mode ("\\.jl\\'" . julia-mode))
 #+END_SRC
 
 **** Lisp
@@ -1507,7 +1501,8 @@ These packages provide modes that make git-related files more readable.
 **** Markdown
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package markdown-mode)
+  (use-package markdown-mode
+    :mode ("\\.md\\'" . markdown-mode))
 #+END_SRC
 
 **** Meson
@@ -1532,25 +1527,18 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org
-    :hook
-    ((org-metadown  . windmove-down)
-     (org-metaleft  . windmove-left)
-     (org-metaright . windmove-right)
-     (org-metaup    . windmove-up))
-
-    :bind
-    (:map org-mode-map
-          ([remap backward-paragraph] . nil)
-          ([remap forward-paragraph]  . nil)
-          ("C-S-<down>" . nil)
-          ("C-S-<up>"   . nil)
-          ("S-<left>"   . nil)
-          ("S-<right>"  . nil))
-
-    :init
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (setq-local indent-tabs-mode nil)))
+    :hook ((org-metadown  . windmove-down)
+           (org-metaleft  . windmove-left)
+           (org-metaright . windmove-right)
+           (org-metaup    . windmove-up)
+           (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
+    :bind (:map org-mode-map
+                ([remap backward-paragraph] . nil)
+                ([remap forward-paragraph]  . nil)
+                ("C-S-<down>" . nil)
+                ("C-S-<up>"   . nil)
+                ("S-<left>"   . nil)
+                ("S-<right>"  . nil))
 
     :config
     (setq org-support-shift-select  'always
@@ -1616,8 +1604,31 @@ These packages provide modes that make git-related files more readable.
     :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
+**** Sed
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package sed-mode
+    :mode ("\\.sed\\'" . sed-mode))
+#+END_SRC
+
+**** Verilog
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package verilog-mode
+    :mode ("\\.v\\'" . verilog-mode))
+#+END_SRC
+
 **** YAML
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package yaml-mode)
+  (use-package yaml-mode
+    :mode (("\\.yaml\\'" . yaml-mode)
+           ("\\.yml\\'"  . yaml-mode)))
+#+END_SRC
+
+**** Zig
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package zig-mode
+    :mode ("\\.zig\\'" . zig-mode))
 #+END_SRC
