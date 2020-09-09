@@ -102,7 +102,7 @@ the important goals and intentions of this configuration.
       - [[#company][company]]
       - [[#counsel][counsel]]
       - [[#diff-hl][diff-hl]]
-      - [[#dimmer][dimmer]]
+      - [[#dimmer-disabled][dimmer (Disabled)]]
       - [[#eglot][eglot]]
       - [[#eldoc][eldoc]]
       - [[#elfeed][elfeed]]
@@ -841,7 +841,7 @@ irssi, weechat, or other clients I've used in the past.
                   (add-hook 'text-mode-hook 'diff-hl-margin-mode)))))
 #+END_SRC
 
-**** dimmer
+**** dimmer (Disabled)
 
 This package provides a minor mode which dims inactive buffers, namely the
 buffers the cursor is not currently active in. It can be helpful for those who
@@ -849,6 +849,7 @@ use many buffers.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dimmer
+    :disabled
     :commands (dimmer-mode)
     :hook (after-init . dimmer-mode))
 #+END_SRC
