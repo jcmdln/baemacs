@@ -179,8 +179,8 @@ or may not have been given a higher priority in recent releases.
 
 Paste this rather unsightly block into your terminal to use Emacs from the
 command line to tangle this file into the various configuration files, then
-byte-compile the two managed files, finally loading the ~init.el~.  This will
-result in Emacs being fully setup and configured, and will never have to be run
+byte-compile the managed files, finally loading the ~init.el~.  This will result
+in Emacs being fully setup and configured, and will never have to be run
 manually again.
 
 #+BEGIN_SRC shell :eval no :tangle no
@@ -189,7 +189,7 @@ manually again.
     (byte-compile-file \"~/.config/emacs/early-init.el\")
     (byte-compile-file \"~/.config/emacs/init.el\")
     (byte-compile-file \"~/.config/emacs/config.el\")
-    (load-file \"~/.config/emacs/init.el\")
+    (load-file \"~/.config/emacs/early-init.el\")
     (load-file \"~/.config/emacs/init.el\"))"
 #+END_SRC
 
