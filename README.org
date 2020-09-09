@@ -64,16 +64,20 @@ the important goals and intentions of this configuration.
   - [[#configure][Configure]]
   - [[#maintain][Maintain]]
 - [[#configuration-files][Configuration Files]]
-  - [[#initel][init.el]]
+  - [[#early-initel][early-init.el]]
     - [[#garbage-collection][Garbage Collection]]
       - [[#gc-cons-percentage][gc-cons-percentage]]
       - [[#gc-cons-threshold][gc-cons-threshold]]
-    - [[#custom][Custom]]
     - [[#encoding][Encoding]]
     - [[#environment][Environment]]
+    - [[#package-management][Package Management]]
+      - [[#use-package][use-package]]
+      - [[#no-littering][no-littering]]
+    - [[#disable-toolbars][Disable toolbars]]
+    - [[#custom][Custom]]
+    - [[#disable-splash-screen][Disable splash screen]]
+  - [[#initel][init.el]]
     - [[#appearance][Appearance]]
-      - [[#disable-toolbars][Disable toolbars]]
-      - [[#disable-splash-screen][Disable splash screen]]
       - [[#re-use-frames-and-windows][Re-use Frames and Windows]]
       - [[#font][Font]]
       - [[#theme][Theme]]
@@ -88,9 +92,6 @@ the important goals and intentions of this configuration.
     - [[#input][Input]]
       - [[#keyboard][Keyboard]]
       - [[#mouse][Mouse]]
-    - [[#package-management][Package Management]]
-      - [[#use-package][use-package]]
-      - [[#no-littering][no-littering]]
     - [[#bootstrap][Bootstrap]]
   - [[#configel][config.el]]
     - [[#packages][Packages]]
@@ -160,43 +161,36 @@ the important goals and intentions of this configuration.
 * Usage
 
 This singular file is all that is needed to fully replicate this config.  While
-you may simply download a copy of this file and place it within ~/.emacs.d, the
-steps below will reference using git to retrieve and manage your copy of the
-config, which will hopefully simplify incorporating your own changes.
+you may simply download a copy of this file and use it, the steps below will
+reference using git to retrieve and manage your copy of the config, which will
+hopefully simplify incorporating your own changes.
 
 ** Install
 
-Be sure to move any existing config before performing the following steps.
-
-First, clone this repository:
-
-#+BEGIN_SRC shell :eval no :tangle no
-  $ git clone https://gitlab.com/jcmdln/baemacs.git
-#+END_SRC
-
-Create a symlink to '~/.emacs.d':
+By default, this configuration uses the XDG config path ~$HOME/.config~ which
+will be ignored if any other configuration location is present.  This path may
+or may not have been given a higher priority in recent releases.
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ ln -sf $(pwd)/baemacs ~/.emacs.d
+  $ git clone https://gitlab.com/jcmdln/baemacs.git ~/.config/emacs
 #+END_SRC
 
 ** Configure
 
-There are two ways of loading the configuration, either of which are perfectly
-suitable depending on personal preference.
+Paste this rather unsightly block into your terminal to use Emacs from the
+command line to tangle this file into the various configuration files, then
+byte-compile the two managed files, finally loading the ~init.el~.  This will
+result in Emacs being fully setup and configured, and will never have to be run
+manually again.
 
-Configure by evaluating this file via command line:
-
-#+BEGIN_SRC shell :eval no :export no :tangle no
-  $ emacs --eval='(org-babel-load-file "~/.emacs.d/README.org")'
-#+END_SRC
-
-OR
-
-Configure by loading this file within Emacs:
-
-#+BEGIN_SRC emacs-lisp :eval no :export no :tangle no
-  M-x org-babel-load-file RET ~/.emacs.d/README.org
+#+BEGIN_SRC shell :eval no :tangle no
+  $ emacs --batch --eval="(progn (require 'org)
+    (org-babel-tangle-file \"~/.config/emacs/README.org\")
+    (byte-compile-file \"~/.config/emacs/early-init.el\")
+    (byte-compile-file \"~/.config/emacs/init.el\")
+    (byte-compile-file \"~/.config/emacs/config.el\")
+    (load-file \"~/.config/emacs/init.el\")
+    (load-file \"~/.config/emacs/init.el\"))"
 #+END_SRC
 
 ** Maintain
@@ -204,7 +198,7 @@ Configure by loading this file within Emacs:
 Ideally you would have your own fork and modify this file how you see fit,
 managing portability between systems with some VCS like git.
 
-There is no right or wrong way, so I'll leave this section ambiguous for now.
+There is no right or wrong way, so I'll leave this section ambiguous.
 
 * Configuration Files
 
@@ -214,20 +208,7 @@ contain.  The intention is to ensure that we don't force Emacs to load
 everything during initialization, instead loading the following config file at
 the end of initialization.
 
-** init.el
-
-Emacs will look for this specific file once it reaches the init phase.  Here we
-will make modifications to things that ship with Emacs and should be changed as
-early as possible.
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-;;; init.el ---- Baemacs initialization file
-;;; Commentary:
-;; Emacs will look for this specific file once it reaches the
-;; initialization phase.  Here we will make modifications to things that
-;; ship with Emacs and should be changed early.
-;;; Code:
-#+END_SRC
+** early-init.el
 
 *** Garbage Collection
 
@@ -257,7 +238,7 @@ of reaching the defined threshold of the total heap size.
 Should you want to compare these changes against the default values, they are
 preserved as shown below:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defvar gc-cons-percentage-default)
   (defvar gc-cons-percentage-init)
   (defvar gc-cons-percentage-tuned)
@@ -289,23 +270,13 @@ pauses we experience by more than half.
 The default value is also stored so you may evaluate this change as shown
 below:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defvar gc-cons-threshold-default)
   (defvar gc-cons-threshold-tuned)
 
   (setq gc-cons-threshold-default gc-cons-threshold
         gc-cons-threshold-tuned   (* 1000 1000 2)
         gc-cons-threshold         gc-cons-threshold-tuned)
-#+END_SRC
-
-*** Custom
-
-Rather than Emacs customization being appended to the end of the configuration
-file, in our case 'init.el', we may specify the location of `custom-file` early
-on to keep our configuration directory relatively clean.
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (setq custom-file "~/.config/emacs/custom.el")
 #+END_SRC
 
 *** Encoding
@@ -346,25 +317,104 @@ key variables for quality of life.
   (setenv "TERM"           (getenv "TERM"))
 #+END_SRC
 
-*** Appearance
+*** Package Management
 
-In terms of appearance, I prefer to have as little wasted space and visual
-clutter as possible.  I make no attempt to completely restyle Emacs, preferring
-instead to make slight modifications.
+Package management isn't loaded by default, so we have to explicitly require it
+be loaded now:
 
-**** Disable toolbars
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (require 'package)
+#+END_SRC
+
+Here we're defining where to put packages, where we should get packages from,
+and the priority we should retrieve packages if a package with the same name
+exists on multiple sources.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq package-user-dir "~/.config/emacs/pkg/"
+        package-archives
+        '(("elpa"         . "https://elpa.gnu.org/packages/")
+          ("melpa-stable" . "https://stable.melpa.org/packages/")
+          ("melpa"        . "https://melpa.org/packages/"))
+        package-archive-priorities
+        '(("elpa"         . 3)
+          ("melpa-stable" . 2)
+          ("melpa"        . 1))
+        package-pinned-packages '((use-package . "melpa")))
+#+END_SRC
+
+With the above changes made, we may now initialize the package module:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (package-initialize)
+#+END_SRC
+
+**** use-package
+
+The first package we'll ensure exists is use-package, which the rest of this
+file relies on for handling per-package configuration.  In newer versions of
+Emacs use-package is now a built-in, but we should check to be nice to older
+versions:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+
+  (eval-when-compile
+    (require 'use-package)
+    (require 'bind-key))
+#+END_SRC
+
+Some decent use-package tweaks are to defer loading a package unless demanded,
+ensure a package exists or can be retrieved before loading its configuration,
+and check that use-package is installed and active before attempting to
+initialize:
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq use-package-always-defer      t
+        use-package-always-ensure     t
+        use-package-check-before-init t)
+#+END_SRC
+
+**** no-littering
+
+The second package will keep our ~/.emacs.d nice and tidy by adjusting the
+locations of configuration files.  It uses a unixy format, which is a nice
+change.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (use-package no-littering
+    :demand t
+    :commands (no-littering-expand-var-file-name)
+    :config
+    (setq auto-save-file-name-transforms
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+#+END_SRC
+
+*** Disable toolbars
 
 I don't find the toolbars to be useful comparatively to the amount of visual
 space they consume.  The following will disable the various toolbars when their
 functions are bound, which prevents them from ever being initialized:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (when (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
   (when (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 #+END_SRC
 
-**** Disable splash screen
+*** Custom
+
+Rather than Emacs customization being appended to the end of the configuration
+file, in our case 'init.el', we may specify the location of `custom-file` early
+on to keep our configuration directory relatively clean.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq custom-file "~/.config/emacs/custom.el")
+#+END_SRC
+
+*** Disable splash screen
 
 After initialization completes, we'll end up with some clutter that is not very
 helpful for long-time Emacs users.
@@ -373,11 +423,31 @@ helpful for long-time Emacs users.
 - Disable the splash screen
 - Disable the startup buffer menu
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq initial-scratch-message     ""
         inhibit-splash-screen       t
         inhibit-startup-buffer-menu t)
 #+END_SRC
+
+** init.el
+
+Emacs will look for this specific file once it reaches the init phase.  Here we
+will make modifications to things that ship with Emacs and should be changed as
+early as possible.
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  ;;; init.el ---- Baemacs initialization file Commentary:
+  ;; Emacs will look for this specific file once it reaches the
+  ;; initialization phase.  Here we will make modifications to things that
+  ;; ship with Emacs and should be changed early.
+  ;;; Code:
+#+END_SRC
+
+*** Appearance
+
+In terms of appearance, I prefer to have as little wasted space and visual
+clutter as possible.  I make no attempt to completely restyle Emacs, preferring
+instead to make slight modifications.
 
 **** Re-use Frames and Windows
 
@@ -586,81 +656,6 @@ support:
                     (scroll-up-line 3)))
 #+END_SRC
 
-*** Package Management
-
-Package management isn't loaded by default, so we have to explicitly require it
-be loaded now:
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (require 'package)
-#+END_SRC
-
-Here we're defining where to put packages, where we should get packages from,
-and the priority we should retrieve packages if a package with the same name
-exists on multiple sources.
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (setq package-user-dir "~/.config/emacs/pkg/"
-        package-archives
-        '(("elpa"         . "https://elpa.gnu.org/packages/")
-          ("melpa-stable" . "https://stable.melpa.org/packages/")
-          ("melpa"        . "https://melpa.org/packages/"))
-        package-archive-priorities
-        '(("elpa"         . 3)
-          ("melpa-stable" . 2)
-          ("melpa"        . 1))
-        package-pinned-packages '((use-package . "melpa")))
-#+END_SRC
-
-With the above changes made, we may now initialize the package module:
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (package-initialize)
-#+END_SRC
-
-**** use-package
-
-The first package we'll ensure exists is use-package, which the rest of this
-file relies on for handling per-package configuration.  In newer versions of
-Emacs use-package is now a built-in, but we should check to be nice to older
-versions:
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package))
-
-  (eval-when-compile
-    (require 'use-package)
-    (require 'bind-key))
-#+END_SRC
-
-Some decent use-package tweaks are to defer loading a package unless demanded,
-ensure a package exists or can be retrieved before loading its configuration,
-and check that use-package is installed and active before attempting to
-initialize:
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (setq use-package-always-defer      t
-        use-package-always-ensure     t
-        use-package-check-before-init t)
-#+END_SRC
-
-**** no-littering
-
-The second package will keep our ~/.emacs.d nice and tidy by adjusting the
-locations of configuration files.  It uses a unixy format, which is a nice
-change.
-
-#+BEGIN_SRC emacs-lisp :tangle init.el
-  (use-package no-littering
-    :demand t
-    :commands (no-littering-expand-var-file-name)
-    :config
-    (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
-#+END_SRC
-
 *** Bootstrap
 
 Something we can do to slightly improve the total duration needed for Emacs to
@@ -677,7 +672,8 @@ At the end of initialization, ensure that 'README.org' is not newer than
     "Build and compile 'org-mode' config."
     (interactive)
     (require 'org)
-    (org-babel-load-file "~/.config/emacs/README.org")
+    (org-babel-tangle-file "~/.config/emacs/README.org")
+    (byte-compile-file   "~/.config/emacs/early-init.el")
     (byte-compile-file   "~/.config/emacs/init.el")
     (byte-compile-file   "~/.config/emacs/config.el"))
 
