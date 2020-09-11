@@ -668,18 +668,22 @@ At the end of initialization, ensure that 'README.org' is not newer than
 'config.el', otherwise rebuild our configuration files and byte-compile them.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (defun emacs-reconfig()
-    "Build and compile 'org-mode' config."
+  (defun baemacs-reconfig()
+    "Tangle, build, and load configuration."
     (interactive)
     (require 'org)
     (org-babel-tangle-file "~/.config/emacs/README.org")
-    (byte-compile-file   "~/.config/emacs/early-init.el")
-    (byte-compile-file   "~/.config/emacs/init.el")
-    (byte-compile-file   "~/.config/emacs/config.el"))
+
+    (byte-compile-file "~/.config/emacs/early-init.el")
+    (byte-compile-file "~/.config/emacs/init.el")
+    (byte-compile-file "~/.config/emacs/config.el")
+
+    (load "~/.config/emacs/early-init.el")
+    (load "~/.config/emacs/init.el"))
 
   (if (file-newer-than-file-p "~/.config/emacs/README.org"
                               "~/.config/emacs/config.el")
-      (emacs-reconfig)
+      (baemacs-reconfig)
     (load "~/.config/emacs/config.el"))
 #+END_SRC
 
@@ -906,15 +910,20 @@ typical unix shells, so maybe try it for yourself.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
-    :commands (eshell eshell/basename eshell/clear eshell/pwd)
+    :commands (eshell eshell/basename eshell/clear eshell/pwd
+                      baemacs/eshell-prompt-function)
     :config
     (defvar eshell-banner-message)
     (defvar eshell-cmpl-cycle-completions)
+    (defvar eshell-error-if-no-glob)
     (defvar eshell-hist-ignoredups)
     (defvar eshell-history-size)
-    (defvar eshell-save-history-on-exit)
-    (defvar eshell-prompt-regexp)
     (defvar eshell-prompt-function)
+    (defvar eshell-prompt-regexp)
+    (defvar eshell-save-history-on-exit)
+    (defvar eshell-scroll-show-maximum-output)
+    (defvar eshell-scroll-to-bottom-on-input)
+    (defvar eshell-scroll-to-bottom-on-output)
     (defvar eshell-visual-commands)
 
     (defun baemacs/eshell-prompt-function()
@@ -1227,7 +1236,15 @@ This package provides a major mode for reading EPUB documents.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package package-utils
-    :demand t)
+    :demand t
+    :commands (baemacs-update)
+    :config
+    (defun baemacs-update()
+      "Refresh package contents, then update all packages."
+      (interactive)
+      (unless package-archive-contents
+        (package-refresh-contents))
+      (package-utils-upgrade-all)))
 #+END_SRC
 
 **** rainbow-delimiters
@@ -1277,32 +1294,24 @@ appreciate the additional functions.
   (use-package server
     :after (package-utils)
     :commands (package-utils-upgrade-all server-start)
-    :bind ("C-x C-c" . server-stop)
+    :bind ("C-x C-c" . baemacs-server-stop)
     :init
     (unless (and (fboundp 'server-running-p)
                  (server-running-p))
       (server-start))
 
     :config
-    (defun server-kill()
+    (defun baemacs-server-kill()
       "Delete current Emacs server, then kill Emacs"
       (interactive)
       (if (y-or-n-p "Kill Emacs without saving? ")
           (kill-emacs)))
 
-    (defun server-stop()
+    (defun baemacs-server-stop()
       "Prompt to save buffers, then kill Emacs."
       (interactive)
       (if (y-or-n-p "Quit Emacs? ")
-          (save-buffers-kill-emacs)))
-
-    (defun server-update()
-      "Refresh package contents, then update all packages."
-      (interactive)
-      (package-initialize)
-      (unless package-archive-contents
-        (package-refresh-contents))
-      (package-utils-upgrade-all)))
+          (save-buffers-kill-emacs))))
 #+END_SRC
 
 **** smartparens
@@ -1547,7 +1556,7 @@ These packages provide modes that make git-related files more readable.
           org-src-fontify-natively  t
           org-src-tab-acts-natively t)
 
-    (set-face-attribute 'org-block nil :background "#262626"))
+    (set-face-attribute 'org-block nil :background "#111111" :extend t))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
