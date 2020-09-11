@@ -1552,9 +1552,9 @@ These packages provide modes that make git-related files more readable.
                 ("S-<right>"  . nil))
 
     :config
-    (setq org-support-shift-select  'always
-          org-src-fontify-natively  t
-          org-src-tab-acts-natively t)
+    (setq org-src-fontify-natively  t
+          org-src-tab-acts-natively t
+          org-support-shift-select  'always)
 
     (set-face-attribute 'org-block nil :background "#111111" :extend t))
 #+END_SRC
@@ -1563,6 +1563,11 @@ These packages provide modes that make git-related files more readable.
   (use-package org-bullets
     :commands (org-bullets-mode)
     :hook (org-mode . (lambda() (org-bullets-mode 1))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package org-drill
+    :demand t)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
