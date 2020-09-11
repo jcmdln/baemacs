@@ -284,7 +284,7 @@ below:
 Another thing we want to handle very early is attempting to enforce the use of
 UTF-8 encoding.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defvar prefer-coding-system)
   (defvar set-default-coding-systems)
   (defvar set-language-environment)
@@ -306,7 +306,7 @@ key variables for quality of life.
 - Unset PROMPT_COMMAND, which causes issues with ssh connections
 - Attempt to get/set variables, in case they differ
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setenv "EDITOR"         "emacsclient")
   (setenv "GIT_EDITOR"     "emacsclient")
   (setenv "MANPATH"        (getenv "MANPATH"))
@@ -322,7 +322,7 @@ key variables for quality of life.
 Package management isn't loaded by default, so we have to explicitly require it
 be loaded now:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (require 'package)
 #+END_SRC
 
@@ -330,7 +330,7 @@ Here we're defining where to put packages, where we should get packages from,
 and the priority we should retrieve packages if a package with the same name
 exists on multiple sources.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq package-user-dir "~/.config/emacs/pkg/"
         package-archives
         '(("elpa"         . "https://elpa.gnu.org/packages/")
@@ -345,7 +345,7 @@ exists on multiple sources.
 
 With the above changes made, we may now initialize the package module:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (package-initialize)
 #+END_SRC
 
@@ -356,7 +356,7 @@ file relies on for handling per-package configuration.  In newer versions of
 Emacs use-package is now a built-in, but we should check to be nice to older
 versions:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package))
@@ -371,7 +371,7 @@ ensure a package exists or can be retrieved before loading its configuration,
 and check that use-package is installed and active before attempting to
 initialize:
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq use-package-always-defer      t
         use-package-always-ensure     t
         use-package-check-before-init t)
@@ -383,7 +383,7 @@ The second package will keep our ~/.emacs.d nice and tidy by adjusting the
 locations of configuration files.  It uses a unixy format, which is a nice
 change.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package no-littering
     :demand t
     :commands (no-littering-expand-var-file-name)
@@ -410,7 +410,7 @@ Rather than Emacs customization being appended to the end of the configuration
 file, in our case 'init.el', we may specify the location of `custom-file` early
 on to keep our configuration directory relatively clean.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq custom-file "~/.config/emacs/custom.el")
 #+END_SRC
 
@@ -487,10 +487,10 @@ system-defined Monospace font.
 
 **** Theme
 
-Rather than include yet another theme, we'll use the tango-dark theme.
+Rather than include yet another theme, we’ll use the tango-dark theme.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (load-theme 'tango-dark)
+  (load-theme 'tango-dark t)
 #+END_SRC
 
 *** Editing
@@ -1071,7 +1071,12 @@ This package provides an alternative to the built-in Emacs help that provides
 much more contextual information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package helpful)
+  (use-package helpful
+    :bind (("C-h C" . #'helpful-command)
+           ("C-h F" . #'helpful-function)
+           ("C-h f" . #'helpful-callable)
+           ("C-h k" . #'helpful-key)
+           ("C-h v" . #'helpful-variable)))
 #+END_SRC
 
 **** highlight-indent-guides
