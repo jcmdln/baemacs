@@ -153,6 +153,7 @@ the important goals and intentions of this configuration.
       - [[#protobuf][Protobuf]]
       - [[#python][Python]]
       - [[#rust][Rust]]
+      - [[#shell][Shell]]
       - [[#sed][Sed]]
       - [[#verilog][Verilog]]
       - [[#yaml][YAML]]
@@ -622,6 +623,8 @@ recreated the subjective ease of navigation I prefer:
   (global-set-key (kbd "<M-left>")  'windmove-left)
   (global-set-key (kbd "<M-right>") 'windmove-right)
   (global-set-key (kbd "<M-up>")    'windmove-up)
+
+  (defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
 **** Mouse
@@ -1620,6 +1623,17 @@ These packages provide modes that make git-related files more readable.
     :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
+**** Shell
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (add-hook 'sh-mode-hook
+            (lambda()
+              (setq-local indent-tabs-mode nil)
+              (add-hook 'before-save-hook
+                        (lambda()
+                          (untabify (point-min) (point-max))) nil 'local)))
+#+END_SRC
+
 **** Sed
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1639,7 +1653,15 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package yaml-mode
     :mode (("\\.yaml\\'" . yaml-mode)
-           ("\\.yml\\'"  . yaml-mode)))
+           ("\\.yml\\'"  . yaml-mode))
+
+    :config
+    (setq-local indent-tabs-mode nil)
+    (add-hook 'sh-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda()
+                            (untabify (point-min) (point-max))) nil 'local))))
 #+END_SRC
 
 **** Zig
