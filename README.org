@@ -332,7 +332,7 @@ and the priority we should retrieve packages if a package with the same name
 exists on multiple sources.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (setq package-user-dir "~/.config/emacs/pkg/"
+  (setq package-user-dir (concat user-emacs-directory "pkg/")
         package-archives
         '(("elpa"         . "https://elpa.gnu.org/packages/")
           ("melpa-stable" . "https://stable.melpa.org/packages/")
@@ -380,9 +380,9 @@ initialize:
 
 **** no-littering
 
-The second package will keep our ~/.emacs.d nice and tidy by adjusting the
-locations of configuration files.  It uses a unixy format, which is a nice
-change.
+The second package will keep our Emacs configuration directory nice and tidy by
+adjusting the locations of configuration files.  It uses a unixy format, which
+is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package no-littering
@@ -412,7 +412,7 @@ file, in our case 'init.el', we may specify the location of `custom-file` early
 on to keep our configuration directory relatively clean.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (setq custom-file "~/.config/emacs/custom.el")
+  (setq custom-file (concat user-emacs-directory "custom.el"))
 #+END_SRC
 
 *** Disable splash screen
@@ -675,19 +675,19 @@ At the end of initialization, ensure that 'README.org' is not newer than
     "Tangle, build, and load configuration."
     (interactive)
     (require 'org)
-    (org-babel-tangle-file "~/.config/emacs/README.org")
+    (org-babel-tangle-file (concat user-emacs-directory "README.org"))
 
-    (byte-compile-file "~/.config/emacs/early-init.el")
-    (byte-compile-file "~/.config/emacs/init.el")
-    (byte-compile-file "~/.config/emacs/config.el")
+    (byte-compile-file (concat user-emacs-directory "early-init.el"))
+    (byte-compile-file (concat user-emacs-directory "init.el"))
+    (byte-compile-file (concat user-emacs-directory "config.el"))
 
-    (load "~/.config/emacs/early-init.el")
-    (load "~/.config/emacs/init.el"))
+    (load (concat user-emacs-directory "early-init.el"))
+    (load (concat user-emacs-directory "init.el"))
 
-  (if (file-newer-than-file-p "~/.config/emacs/README.org"
-                              "~/.config/emacs/config.el")
+  (if (file-newer-than-file-p (concat user-emacs-directory "README.org")
+                              (concat user-emacs-directory "config.el"))
       (baemacs-reconfig)
-    (load "~/.config/emacs/config.el"))
+    (load (concat user-emacs-directory "config.el"))))
 #+END_SRC
 
 ** config.el
@@ -765,7 +765,7 @@ irssi, weechat, or other clients I've used in the past.
           lui-fill-type              nil
           lui-flyspell-alist         '((".*" "american"))
           lui-flyspell-p             t
-          lui-logging-directory      "~/.config/emacs/var/circe"
+          lui-logging-directory      (concat user-emacs-directory "var/circe")
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
 
@@ -773,8 +773,8 @@ irssi, weechat, or other clients I've used in the past.
     (enable-lui-logging-globally)
     (enable-circe-color-nicks)
 
-    (if (file-exists-p "~/.config/emacs/usr/circe.el")
-        (load-file     "~/.config/emacs/usr/circe.el")))
+    (if (file-exists-p (concat user-emacs-directory "usr/circe.el"))
+        (load-file     (concat user-emacs-directory "usr/circe.el"))))
 #+END_SRC
 
 **** clang-format
@@ -900,8 +900,8 @@ Atom.
     (setq elfeed-search-filter "@1-week-ago +unread "
           url-queue-timeout    10)
 
-    (if (file-exists-p "~/.config/emacs/usr/elfeed.el")
-        (load-file     "~/.config/emacs/usr/elfeed.el")))
+    (if (file-exists-p (concat user-emacs-directory "usr/elfeed.el"))
+        (load-file     (concat user-emacs-directory "usr/elfeed.el"))))
 #+END_SRC
 
 **** eshell
@@ -1073,8 +1073,8 @@ though here we will attempt to make gnus behave like other clients.
           gnus-thread-hide-subtree               t
           gnus-thread-sort-functions             '(gnus-thread-sort-by-date))
 
-    (if (file-exists-p "~/.config/emacs/usr/gnus.el")
-        (load-file     "~/.config/emacs/usr/gnus.el")))
+    (if (file-exists-p (concat user-emacs-directory "usr/gnus.el"))
+        (load-file     (concat user-emacs-directory "usr/gnus.el"))))
 #+END_SRC
 
 **** helpful
