@@ -550,6 +550,9 @@ Display line numbers in most types of modes where it makes sense.
         require-final-newline t
         show-paren-delay      0.33
         visible-bell          nil)
+
+  (use-package mood-line
+    :init (mood-line-mode t))
 #+END_SRC
 
 **** Parenthesis Matching
