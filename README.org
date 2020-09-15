@@ -550,14 +550,6 @@ Display line numbers in most types of modes where it makes sense.
         require-final-newline t
         show-paren-delay      0.33
         visible-bell          nil)
-
-  (setq-default mode-line-format
-                '("%e  "
-                  mode-line-buffer-identification
-                  "%l:%c %p "
-                  mode-line-misc-info " "
-                  mode-name mode-line-process " "
-                  vc-mode))
 #+END_SRC
 
 **** Parenthesis Matching
