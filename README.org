@@ -551,8 +551,13 @@ Display line numbers in most types of modes where it makes sense.
         show-paren-delay      0.33
         visible-bell          nil)
 
-  (use-package mood-line
-    :init (mood-line-mode t))
+  (setq-default mode-line-format
+                '("%e  "
+                  mode-line-buffer-identification
+                  "%l:%c %p "
+                  mode-line-misc-info " "
+                  mode-name mode-line-process " "
+                  vc-mode))
 #+END_SRC
 
 **** Parenthesis Matching
