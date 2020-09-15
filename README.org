@@ -871,8 +871,9 @@ use many buffers.
               (lambda()
                 (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))
 
-    (setq eglot-auto-display-help-buffer nil
-          eglot-put-doc-in-help-buffer   nil))
+    (setq
+     eglot-auto-display-help-buffer  nil
+     eglot-put-doc-in-help-buffer    nil))
 #+END_SRC
 
 **** eldoc
@@ -880,7 +881,9 @@ use many buffers.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eldoc
     :commands (global-eldoc-mode)
-    :init (global-eldoc-mode -1))
+    :init (global-eldoc-mode -1)
+    :config
+    (setq eldoc-echo-area-use-multiline-p nil))
 #+END_SRC
 
 **** elfeed
