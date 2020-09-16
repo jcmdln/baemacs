@@ -61,8 +61,6 @@ the important goals and intentions of this configuration.
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
   - [[#install][Install]]
-  - [[#configure][Configure]]
-  - [[#maintain][Maintain]]
 - [[#configuration-files][Configuration Files]]
   - [[#early-initel][early-init.el]]
     - [[#garbage-collection][Garbage Collection]]
@@ -70,11 +68,12 @@ the important goals and intentions of this configuration.
       - [[#gc-cons-threshold][gc-cons-threshold]]
     - [[#encoding][Encoding]]
     - [[#environment][Environment]]
+    - [[#custom][Custom]]
     - [[#package-management][Package Management]]
       - [[#use-package][use-package]]
       - [[#no-littering][no-littering]]
+      - [[#package-utils][package-utils]]
     - [[#disable-toolbars][Disable toolbars]]
-    - [[#custom][Custom]]
     - [[#disable-splash-screen][Disable splash screen]]
   - [[#initel][init.el]]
     - [[#appearance][Appearance]]
@@ -98,7 +97,6 @@ the important goals and intentions of this configuration.
       - [[#async][async]]
       - [[#auto-compile][auto-compile]]
       - [[#circe][circe]]
-      - [[#clang-format][clang-format]]
       - [[#company][company]]
       - [[#counsel][counsel]]
       - [[#diff-hl][diff-hl]]
@@ -117,23 +115,21 @@ the important goals and intentions of this configuration.
       - [[#ivy][ivy]]
       - [[#magit][magit]]
       - [[#nov][nov]]
-      - [[#package-utils][package-utils]]
       - [[#rainbow-delimiters][rainbow-delimiters]]
       - [[#ranger][ranger]]
       - [[#scratch][scratch]]
       - [[#server][server]]
       - [[#smartparens][smartparens]]
+      - [[#swiper][swiper]]
       - [[#undo-tree][undo-tree]]
       - [[#xclip][xclip]]
       - [[#yasnippet][yasnippet]]
     - [[#languages][Languages]]
-      - [[#ansible][Ansible]]
       - [[#apache][Apache]]
       - [[#c][C]]
       - [[#c-1][C++]]
-      - [[#caddy][Caddy]]
+      - [[#caddy-disabled][Caddy (Disabled)]]
       - [[#cmake][CMake]]
-      - [[#d][D]]
       - [[#docker][Docker]]
       - [[#dotenv][DotEnv]]
       - [[#gdscript-disabled][GDScript (Disabled)]]
@@ -143,7 +139,6 @@ the important goals and intentions of this configuration.
       - [[#json][JSON]]
       - [[#julia][Julia]]
       - [[#lisp][Lisp]]
-      - [[#lua][Lua]]
       - [[#markdown][Markdown]]
       - [[#meson][Meson]]
       - [[#nginx][NGINX]]
@@ -173,10 +168,8 @@ will be ignored if any other configuration location is present.  This path may
 or may not have been given a higher priority in recent releases.
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ git clone https://gitlab.com/jcmdln/baemacs.git ~/.config/emacs
+  $ git clone --depth 1 https://gitlab.com/jcmdln/baemacs.git ~/.config/emacs
 #+END_SRC
-
-** Configure
 
 Paste this rather unsightly block into your terminal to use Emacs from the
 command line to tangle this file into the various configuration files, then
@@ -194,13 +187,6 @@ manually again.
     (load-file \"~/.config/emacs/init.el\"))"
 #+END_SRC
 
-** Maintain
-
-Ideally you would have your own fork and modify this file how you see fit,
-managing portability between systems with some VCS like git.
-
-There is no right or wrong way, so I'll leave this section ambiguous.
-
 * Configuration Files
 
 To make the most effective use of the various startup files that Emacs will
@@ -210,6 +196,14 @@ everything during initialization, instead loading the following config file at
 the end of initialization.
 
 ** early-init.el
+
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  ;;; early-init.el ---- Baemacs early initialization file
+  ;;; Commentary:
+  ;; Emacs will look for this specific file before initializing the GUI and
+  ;; other such things.
+  ;;; Code:
+#+END_SRC
 
 *** Garbage Collection
 
@@ -229,12 +223,11 @@ For the purposes of initialization, we'll increase `gc-cons-percentage` to
 decrease garbage collection pauses.  The settings below mean that garbage
 collection is deferred until reaching 80% of the total heap size.  After
 initialization completes we lower this value to 20% of the total heap size to
-prevent garbage collection passes from becoming too large to be handled
-quickly.
+prevent garbage collection passes from becoming too large to be handled quickly.
 
 At the time of writing, the default is 10% so we are effectively attempting to
-halve the amount of garbage collection pauses we would experience as a result
-of reaching the defined threshold of the total heap size.
+halve the amount of garbage collection pauses we would experience as a result of
+reaching the defined threshold of the total heap size.
 
 Should you want to compare these changes against the default values, they are
 preserved as shown below:
@@ -250,33 +243,32 @@ preserved as shown below:
         gc-cons-percentage         gc-cons-percentage-init)
 
   (add-hook 'after-init-hook
-            (lambda ()
-              (setq gc-cons-percentage gc-cons-percentage-tuned)
-              (garbage-collect)))
+            (lambda()
+              (setq gc-cons-percentage gc-cons-percentage-tuned)))
 #+END_SRC
 
 **** gc-cons-threshold
 
-Now we will increase the `gc-cons-threshold`, which refers to the total bytes
-of storage for lisp objects that must be allocated to trigger subsequent
-garbage collections.  On 32-bit systems this threshold is 400000 objects, while
-on 64-bit systems it is 800000 objects.
+Now we will increase the `gc-cons-threshold`, which refers to the total bytes of
+storage for lisp objects that must be allocated to trigger subsequent garbage
+collections.  On 32-bit systems this threshold is 400,000 objects, while on
+64-bit systems it is 800,000 objects.
 
 Modifying this value is generally not recommended and considered an act of
 performance voodoo, though the idea is that by specifying a larger threshold,
-garbage collection will occur less often, meaning fewer GC pauses. We'll set
-this value to 200000 globally, which ideally will reduce the total number of GC
-pauses we experience by more than half.
+garbage collection will occur less often, meaning fewer GC pauses.  We'll set
+this value to 4,000,000 globally, which ideally will reduce the total number of
+GC pauses we experience without garbage collection taking too long when it does
+occur.
 
-The default value is also stored so you may evaluate this change as shown
-below:
+The default value is also stored so you may evaluate this change as shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defvar gc-cons-threshold-default)
   (defvar gc-cons-threshold-tuned)
 
   (setq gc-cons-threshold-default gc-cons-threshold
-        gc-cons-threshold-tuned   (* 1000 1000 2)
+        gc-cons-threshold-tuned   (* 1000 1000 4)
         gc-cons-threshold         gc-cons-threshold-tuned)
 #+END_SRC
 
@@ -316,6 +308,16 @@ key variables for quality of life.
   (setenv "PROMPT_COMMAND" "")
   (setenv "SHELL"          (getenv "SHELL"))
   (setenv "TERM"           (getenv "TERM"))
+#+END_SRC
+
+*** Custom
+
+Rather than Emacs customization being appended to the end of the configuration
+file, in our case 'init.el', we may specify the location of `custom-file` early
+on to keep our configuration directory relatively clean.
+
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (setq custom-file (concat user-emacs-directory "custom.el"))
 #+END_SRC
 
 *** Package Management
@@ -370,8 +372,7 @@ and check that use-package is installed and active before attempting to
 initialize:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (setq use-package-always-defer      t
-        use-package-always-ensure     t
+  (setq use-package-always-ensure     t
         use-package-check-before-init t)
 #+END_SRC
 
@@ -383,11 +384,25 @@ is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package no-littering
-    :demand t
     :commands (no-littering-expand-var-file-name)
     :config
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+#+END_SRC
+
+**** package-utils
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package package-utils
+    :demand t
+    :commands (baemacs-update)
+    :config
+    (defun baemacs-update()
+      "Refresh package contents, then update all packages."
+      (interactive)
+      (unless package-archive-contents
+        (package-refresh-contents))
+      (package-utils-upgrade-all)))
 #+END_SRC
 
 *** Disable toolbars
@@ -400,16 +415,6 @@ functions are bound, which prevents them from ever being initialized:
   (when (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
   (when (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
-#+END_SRC
-
-*** Custom
-
-Rather than Emacs customization being appended to the end of the configuration
-file, in our case 'init.el', we may specify the location of `custom-file` early
-on to keep our configuration directory relatively clean.
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (setq custom-file (concat user-emacs-directory "custom.el"))
 #+END_SRC
 
 *** Disable splash screen
@@ -427,6 +432,11 @@ helpful for long-time Emacs users.
         inhibit-startup-buffer-menu t)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (provide 'early-init)
+  ;;; early-init.el ends here
+#+END_SRC
+
 ** init.el
 
 Emacs will look for this specific file once it reaches the init phase.  Here we
@@ -434,7 +444,8 @@ will make modifications to things that ship with Emacs and should be changed as
 early as possible.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  ;;; init.el ---- Baemacs initialization file Commentary:
+  ;;; init.el ---- Baemacs initialization file
+  ;;; Commentary:
   ;; Emacs will look for this specific file once it reaches the
   ;; initialization phase.  Here we will make modifications to things that
   ;; ship with Emacs and should be changed early.
@@ -680,11 +691,18 @@ At the end of initialization, ensure that 'README.org' is not newer than
 
     (load (concat user-emacs-directory "early-init.el"))
     (load (concat user-emacs-directory "init.el")))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle init.el
   (if (file-newer-than-file-p (concat user-emacs-directory "README.org")
                               (concat user-emacs-directory "config.el"))
       (baemacs-reconfig)
     (load (concat user-emacs-directory "config.el")))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (provide 'init)
+  ;;; init.el ends here
 #+END_SRC
 
 ** config.el
@@ -695,11 +713,11 @@ contains our extra package and language definitions.
 Before we add anything to this file, first we'll add the file header:
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-;;; config.el ---- Baemacs configuration file
-;;; Commentary:
-;; This is a non-standard file that is referenced at the end of 'init.el'
-;; which contains our extra package and language definitions.
-;;; Code:
+  ;;; config.el ---- Baemacs configuration file
+  ;;; Commentary:
+  ;; This is a non-standard file that is referenced at the end of 'init.el'
+  ;; which contains our extra package and language definitions.
+  ;;; Code:
 #+END_SRC
 
 *** Packages
@@ -751,33 +769,23 @@ irssi, weechat, or other clients I've used in the past.
 
     :config
     (defvar lui-flyspell-p)
-    (defvar lui-logging-directory)
 
     (setq circe-default-part-message ""
           circe-default-quit-message ""
           circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
-          circe-reduce-lurker-spam   t
-          circe-use-cycle-completion t
+          circe-reduce-lurker-spam   'true
+          circe-use-cycle-completion 'true
 
           lui-fill-type              nil
           lui-flyspell-alist         '((".*" "american"))
-          lui-flyspell-p             t
-          lui-logging-directory      (concat user-emacs-directory "var/circe")
+          lui-flyspell-p             'true
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
 
-    (load "lui-logging" nil t)
-    (enable-lui-logging-globally)
     (enable-circe-color-nicks)
 
     (if (file-exists-p (concat user-emacs-directory "usr/circe.el"))
         (load-file     (concat user-emacs-directory "usr/circe.el"))))
-#+END_SRC
-
-**** clang-format
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package clang-format)
 #+END_SRC
 
 **** company
@@ -823,16 +831,10 @@ irssi, weechat, or other clients I've used in the past.
            ("M-x"     . counsel-M-x)))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package swiper
-    :demand t)
-#+END_SRC
-
 **** diff-hl
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package diff-hl
-    :demand t
     :commands (diff-hl-mode diff-hl-margin-mode)
     :hook ((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
     :init
@@ -1014,15 +1016,13 @@ specific buffer, you may now do so.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck
-    :demand t
     :hook (prog-mode . flycheck-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-inline
-    :demand t
     :commands (turn-on-flycheck-inline)
-    :hook (flycheck-mode . turn-on-flycheck-inline))
+    :hook (flycheck-mode . (lambda() (turn-on-flycheck-inline))))
 #+END_SRC
 
 **** flyspell
@@ -1044,10 +1044,10 @@ though here we will attempt to make gnus behave like other clients.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gnus
-    :hook ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
-           (gnus-group-mode       . gnus-group-sort-groups-by-alphabet))
     :bind (("<M-down>" . windmove-down)
            ("<M-up>"   . windmove-up))
+    :hook ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
+           (gnus-group-mode       . gnus-group-sort-groups-by-alphabet))
 
     :config
     (defvar gnus-show-threads)
@@ -1095,7 +1095,6 @@ much more contextual information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package highlight-indent-guides
-    :demand t
     :hook (prog-mode . highlight-indent-guides-mode)
     :config (setq highlight-indent-guides-method 'character))
 #+END_SRC
@@ -1109,11 +1108,11 @@ readable sizes, and define a ton of filter groups.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ibuffer
     :commands (ibuffer-switch-to-saved-filter-groups)
-    :hook ((ibuffer      . ibuffer-auto-mode)
-           (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
     :bind (("C-x C-b"         . ibuffer)
            ("<C-tab>"         . next-buffer)
            ("<C-iso-lefttab>" . previous-buffer))
+    :hook ((ibuffer      . ibuffer-auto-mode)
+           (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
 
     :init
     (add-hook 'ibuffer-auto-mode-hook
@@ -1213,6 +1212,12 @@ readable sizes, and define a ton of filter groups.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package ivy-rich
+    :commands (ivy-rich-mode)
+    :hook (ivy-mode . (lambda() (ivy-rich-mode 1))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flyspell-correct-ivy
     :bind ("C-\\" . flyspell-correct-wrapper)
     :config (setq flyspell-correct-interface #'flyspell-correct-ivy))
@@ -1222,7 +1227,6 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package magit
-    :demand t
     :bind ("C-c C-c" . with-editor-finish))
 #+END_SRC
 
@@ -1235,26 +1239,10 @@ This package provides a major mode for reading EPUB documents.
     :mode ("\\.epub\\'" . nov-mode))
 #+END_SRC
 
-**** package-utils
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package package-utils
-    :demand t
-    :commands (baemacs-update)
-    :config
-    (defun baemacs-update()
-      "Refresh package contents, then update all packages."
-      (interactive)
-      (unless package-archive-contents
-        (package-refresh-contents))
-      (package-utils-upgrade-all)))
-#+END_SRC
-
 **** rainbow-delimiters
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rainbow-delimiters
-    :demand t
     :hook ((conf-mode prog-mode text-mode) . rainbow-delimiters-mode))
 #+END_SRC
 
@@ -1298,6 +1286,7 @@ appreciate the additional functions.
     :after (package-utils)
     :commands (package-utils-upgrade-all server-start)
     :bind ("C-x C-c" . baemacs-server-stop)
+
     :init
     (unless (and (fboundp 'server-running-p)
                  (server-running-p))
@@ -1321,7 +1310,6 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
-    :demand t
     :hook ((eshell-mode org-mode prog-mode text-mode) . smartparens-mode)
     :config
     (setq sp-highlight-pair-overlay     nil
@@ -1329,11 +1317,17 @@ appreciate the additional functions.
           sp-highlight-wrap-tag-overlay nil))
 #+END_SRC
 
+**** swiper
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package swiper
+    :after (counsel ivy))
+#+END_SRC
+
 **** undo-tree
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package undo-tree
-    :demand t
     :commands (global-undo-tree-mode)
     :init (global-undo-tree-mode))
 #+END_SRC
@@ -1350,27 +1344,18 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package yasnippet
+    :after (eglot)
     :commands (yas-minor-mode)
     :hook (prog-mode . yas-minor-mode))
 #+END_SRC
 
 *** Languages
 
-**** Ansible
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package ansible-vault)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-ansible
-    :after (company))
-#+END_SRC
-
 **** Apache
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package apache-mode)
+  (use-package apache-mode
+    :disabled)
 #+END_SRC
 
 **** C
@@ -1391,34 +1376,33 @@ appreciate the additional functions.
   (add-hook 'c++-mode-hook
             (lambda()
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+              (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode))
               (defvar c-basic-offset)
               (setq-local c-basic-offset   4)
               (setq-local indent-tabs-mode t)
               (setq-local tab-width        4)))
 #+END_SRC
 
-**** Caddy
+**** Caddy (Disabled)
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package caddyfile-mode)
+  (use-package caddyfile-mode
+    :disabled)
 #+END_SRC
 
 **** CMake
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package cmake-mode)
-#+END_SRC
-
-**** D
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package d-mode)
+  (use-package cmake-mode
+    :defer t)
 #+END_SRC
 
 **** Docker
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package docker-compose-mode)
+  (use-package docker-compose-mode
+    :mode (("\\docker-compose.yml\\'" . dockerfile-mode)
+           ("\\podman-compose.yml\\'" . dockerfile-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1430,7 +1414,8 @@ appreciate the additional functions.
 **** DotEnv
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dotenv-mode)
+  (use-package dotenv-mode
+    :defer t)
 #+END_SRC
 
 **** GDScript (Disabled)
@@ -1444,15 +1429,18 @@ appreciate the additional functions.
 These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package gitattributes-mode)
+  (use-package gitattributes-mode
+    :defer t)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package gitconfig-mode)
+  (use-package gitconfig-mode
+    :defer t)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package gitignore-mode)
+  (use-package gitignore-mode
+    :defer t)
 #+END_SRC
 
 **** Go
@@ -1461,6 +1449,7 @@ These packages provide modes that make git-related files more readable.
   (use-package go-mode
     :commands (gofmt)
     :mode ("\\.go\\'" . go-mode)
+
     :config
     (setq indent-tabs-mode 't
           tab-width        4))
@@ -1485,9 +1474,7 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-julia
     :after (flycheck julia-mode)
-    :config
-    (add-to-list 'flycheck-global-modes 'julia-mode)
-    (add-to-list 'flycheck-global-modes 'ess-julia-mode))
+    :hook (julia-mode . (lambda() (flycheck-julia-setup))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1506,12 +1493,6 @@ These packages provide modes that make git-related files more readable.
               (setq-local tab-width        2)))
 #+END_SRC
 
-**** Lua
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package lua-mode)
-#+END_SRC
-
 **** Markdown
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1522,30 +1503,28 @@ These packages provide modes that make git-related files more readable.
 **** Meson
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package meson-mode)
+  (use-package meson-mode
+    :mode ("\\meson.build\\'" . markdown-mode))
 #+END_SRC
 
 **** NGINX
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package nginx-mode)
+  (use-package nginx-mode
+    :defer t)
 #+END_SRC
 
 **** Ninja
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package ninja-mode)
+  (use-package ninja-mode
+    :defer t)
 #+END_SRC
 
 **** Org
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org
-    :hook ((org-metadown  . windmove-down)
-           (org-metaleft  . windmove-left)
-           (org-metaright . windmove-right)
-           (org-metaup    . windmove-up)
-           (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
     :bind (:map org-mode-map
                 ([remap backward-paragraph] . nil)
                 ([remap forward-paragraph]  . nil)
@@ -1553,6 +1532,11 @@ These packages provide modes that make git-related files more readable.
                 ("C-S-<up>"   . nil)
                 ("S-<left>"   . nil)
                 ("S-<right>"  . nil))
+    :hook ((org-metadown  . windmove-down)
+           (org-metaleft  . windmove-left)
+           (org-metaright . windmove-right)
+           (org-metaup    . windmove-up)
+           (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
 
     :config
     (setq org-src-fontify-natively  t
@@ -1570,12 +1554,12 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-drill
-    :demand t)
+    :after (org))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package toc-org
-    :after org
+    :after (org)
     :commands (toc-org-enable)
     :hook (org-mode . toc-org-enable))
 #+END_SRC
@@ -1588,19 +1572,22 @@ These packages provide modes that make git-related files more readable.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package php-mode)
+  (use-package php-mode
+    :mode ("\\.php\\'" . php-mode))
 #+END_SRC
 
 **** Protobuf
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package protobuf-mode)
+  (use-package protobuf-mode
+    :defer t)
 #+END_SRC
 
 **** Python
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package python-mode)
+  (use-package python-mode
+    :mode ("\\.py\\'" . python-mode))
 #+END_SRC
 
 **** Rust
@@ -1630,8 +1617,8 @@ These packages provide modes that make git-related files more readable.
             (lambda()
               (setq-local indent-tabs-mode nil)
               (add-hook 'before-save-hook
-                        (lambda()
-                          (untabify (point-min) (point-max))) nil 'local)))
+                        (lambda() (untabify (point-min) (point-max)))
+                        nil 'local)))
 #+END_SRC
 
 **** Sed
@@ -1669,4 +1656,9 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package zig-mode
     :mode ("\\.zig\\'" . zig-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (provide 'config)
+  ;;; config.el ends here
 #+END_SRC
