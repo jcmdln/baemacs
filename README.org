@@ -127,10 +127,12 @@ don't want to turn Emacs into some other editor.
       - [[#yasnippet][yasnippet]]
     - [[#languages][Languages]]
       - [[#apache][Apache]]
+      - [[#bpftrace][bpftrace]]
       - [[#c][C]]
       - [[#c-1][C++]]
       - [[#caddy-disabled][Caddy (Disabled)]]
       - [[#cmake][CMake]]
+      - [[#csv][CSV]]
       - [[#docker][Docker]]
       - [[#dotenv][DotEnv]]
       - [[#gdscript-disabled][GDScript (Disabled)]]
@@ -258,7 +260,7 @@ collections.  On 32-bit systems this threshold is 400,000 objects, while on
 Modifying this value is generally not recommended and considered an act of
 performance voodoo, though the idea is that by specifying a larger threshold,
 garbage collection will occur less often, meaning fewer GC pauses.  We'll set
-this value to 4,000,000 globally, which ideally will reduce the total number of
+this value to 10,000,000 globally, which ideally will reduce the total number of
 GC pauses we experience without garbage collection taking too long when it does
 occur.
 
@@ -269,7 +271,7 @@ The default value is also stored so you may evaluate this change as shown below:
   (defvar gc-cons-threshold-tuned)
 
   (setq gc-cons-threshold-default gc-cons-threshold
-        gc-cons-threshold-tuned   (* 1000 1000 4)
+        gc-cons-threshold-tuned   (* 1000 1000 10)
         gc-cons-threshold         gc-cons-threshold-tuned)
 #+END_SRC
 
@@ -385,9 +387,8 @@ is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package no-littering
-    :demand t
     :commands (no-littering-expand-var-file-name)
-    :config
+    :init
     (setq auto-save-file-name-transforms
           `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 #+END_SRC
@@ -396,9 +397,8 @@ is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package package-utils
-    :demand t
     :commands (baemacs-update)
-    :config
+    :init
     (defun baemacs-update()
       "Refresh package contents, then update all packages."
       (interactive)
@@ -731,7 +731,8 @@ for `async-start' and `async-start-process' for more information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package async
-    :config (async-bytecomp-package-mode '(all)))
+    :config
+    (async-bytecomp-package-mode '(all)))
 #+END_SRC
 
 **** auto-compile
@@ -751,8 +752,9 @@ irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
+    :defer t
     :commands (enable-lui-logging-globally lui-set-prompt)
-    :init
+    :config
     (add-hook 'circe-server-mode-hook (lambda() (require 'circe-chanop)))
     (add-hook 'circe-chat-mode-hook
               (lambda()
@@ -769,7 +771,6 @@ irssi, weechat, or other clients I've used in the past.
                       word-wrap               t
                       wrap-prefix             "")))
 
-    :config
     (defvar lui-flyspell-p)
 
     (setq circe-default-part-message ""
@@ -838,8 +839,8 @@ irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package diff-hl
     :commands (diff-hl-mode diff-hl-margin-mode)
-    :hook ((conf-mode org-mode prog-mode text-mode) . diff-hl-mode)
-    :init
+    :hook ((conf-mode prog-mode text-mode) . diff-hl-mode)
+    :config
     (when (eq window-system nil)
       (add-hook 'after-init-hook
                 (lambda()
@@ -875,9 +876,8 @@ use many buffers.
               (lambda()
                 (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))
 
-    (setq
-     eglot-auto-display-help-buffer  nil
-     eglot-put-doc-in-help-buffer    nil))
+    (setq eglot-auto-display-help-buffer  nil
+          eglot-put-doc-in-help-buffer    nil))
 #+END_SRC
 
 **** eldoc
@@ -885,7 +885,6 @@ use many buffers.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eldoc
     :commands (global-eldoc-mode)
-    :init (global-eldoc-mode -1)
     :config
     (setq eldoc-echo-area-use-multiline-p nil))
 #+END_SRC
@@ -919,7 +918,20 @@ typical unix shells, so maybe try it for yourself.
   (use-package eshell
     :commands (eshell eshell/basename eshell/clear eshell/pwd
                       baemacs/eshell-prompt-function)
+    :init
+    (defun eshell-new()
+      "Open a new instance of eshell."
+      (interactive)
+      (eshell 'N))
+
     :config
+    (add-hook 'eshell-mode-hook
+              (lambda ()
+                (defun eshell/clear()
+                  "Hide previous scrollback to provide a clear view."
+                  (interactive)
+                  (recenter 0))))
+
     (defvar eshell-banner-message)
     (defvar eshell-cmpl-cycle-completions)
     (defvar eshell-error-if-no-glob)
@@ -942,6 +954,7 @@ typical unix shells, so maybe try it for yourself.
                     "~" (eshell/basename (eshell/pwd))) "]"
                 (if (= (user-uid) 0) "# " "$ "))))
 
+
     (setq eshell-banner-message             ""
           eshell-cmpl-cycle-completions     nil
           eshell-error-if-no-glob           t
@@ -957,19 +970,7 @@ typical unix shells, so maybe try it for yourself.
 
           eshell-visual-commands
           '("alsamixer" "atop" "htop" "less" "mosh" "nano" "ssh" "tail"
-            "top" "vi" "vim" "watch"))
-
-    (add-hook 'eshell-mode-hook
-              (lambda ()
-                (defun eshell/clear()
-                  "Hide previous scrollback to provide a clear view."
-                  (interactive)
-                  (recenter 0))))
-
-    (defun eshell-new()
-      "Open a new instance of eshell."
-      (interactive)
-      (eshell 'N)))
+            "top" "vi" "vim" "watch")))
 #+END_SRC
 
 **** eww
@@ -983,7 +984,17 @@ specific buffer, you may now do so.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eww
     :commands (eww eww-mode eww-reload eww-toggle-images eww-new)
-    :init (setq browse-url-browser-function 'eww-browse-url)
+    :init
+    (defun eww-new()
+      "Open a new instance of eww."
+      (interactive)
+      (let ((url (read-from-minibuffer "Enter URL or keywords: ")))
+        (switch-to-buffer (generate-new-buffer "*eww*"))
+        (eww-mode)
+        (eww url)))
+
+    (setq browse-url-browser-function 'eww-browse-url)
+
     :config
     (when window-system
       (setq shr-blocked-images "")
@@ -994,20 +1005,11 @@ specific buffer, you may now do so.
         (if (bound-and-true-p shr-blocked-images)
             (setq-local shr-blocked-images nil)
           (setq-local shr-blocked-images ""))
-        (eww-reload)))
-
-    (defun eww-new()
-      "Open a new instance of eww."
-      (interactive)
-      (let ((url (read-from-minibuffer "Enter URL or keywords: ")))
-        (switch-to-buffer (generate-new-buffer "*eww*"))
-        (eww-mode)
-        (eww url))))
+        (eww-reload))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eww-lnum
-    :after eww
     :commands (eww-lnum-follow eww-lnum-universal)
     :bind (:map eww-mode-map
                 ("f" . eww-lnum-follow)
@@ -1116,12 +1118,11 @@ readable sizes, and define a ton of filter groups.
     :hook ((ibuffer      . ibuffer-auto-mode)
            (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
 
-    :init
+    :config
     (add-hook 'ibuffer-auto-mode-hook
               (lambda()
                 (ibuffer-switch-to-saved-filter-groups "default")))
 
-    :config
     (define-ibuffer-column size-h
       (:name "Size" :inline t)
       (cond
@@ -1221,6 +1222,7 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flyspell-correct-ivy
+    :after (flyspell ivy)
     :bind ("C-\\" . flyspell-correct-wrapper)
     :config (setq flyspell-correct-interface #'flyspell-correct-ivy))
 #+END_SRC
@@ -1285,16 +1287,11 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package server
-    :after (package-utils)
+    :demand t
     :commands (package-utils-upgrade-all server-start)
     :bind ("C-x C-c" . baemacs-server-stop)
 
     :init
-    (unless (and (fboundp 'server-running-p)
-                 (server-running-p))
-      (server-start))
-
-    :config
     (defun baemacs-server-kill()
       "Delete current Emacs server, then kill Emacs"
       (interactive)
@@ -1305,14 +1302,20 @@ appreciate the additional functions.
       "Prompt to save buffers, then kill Emacs."
       (interactive)
       (if (y-or-n-p "Quit Emacs? ")
-          (save-buffers-kill-emacs))))
+          (save-buffers-kill-emacs)))
+
+    :config
+    (unless (and (fboundp 'server-running-p)
+                 (server-running-p))
+      (server-start)))
 #+END_SRC
 
 **** smartparens
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
-    :hook ((eshell-mode org-mode prog-mode text-mode) . smartparens-mode)
+    :hook ((eshell-mode org-mode prog-mode text-mode)
+           . turn-on-smartparens-mode)
     :config
     (setq sp-highlight-pair-overlay     nil
           sp-highlight-wrap-overlay     nil
@@ -1339,7 +1342,11 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package xclip
     :commands (xclip-mode)
-    :init (xclip-mode 1))
+    :init
+    (if (or (executable-find "xclip")
+            (executable-find "xclipboard"))
+        (xclip-mode 1)
+      nil))
 #+END_SRC
 
 **** yasnippet
@@ -1358,6 +1365,13 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package apache-mode
     :disabled)
+#+END_SRC
+
+**** bpftrace
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package bpftrace-mode
+    :mode ("\\.bt\\'" . bpftrace-mode))
 #+END_SRC
 
 **** C
@@ -1399,12 +1413,19 @@ appreciate the additional functions.
     :defer t)
 #+END_SRC
 
+**** CSV
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package csv-mode
+    :mode ("\\.csv\\'" . csv-mode))
+#+END_SRC
+
 **** Docker
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package docker-compose-mode
-    :mode (("\\docker-compose.yml\\'" . dockerfile-mode)
-           ("\\podman-compose.yml\\'" . dockerfile-mode)))
+    :mode (("\\docker-compose.yml\\'" . docker-compose-mode)
+           ("\\podman-compose.yml\\'" . docker-compose-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1432,29 +1453,29 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitattributes-mode
-    :defer t)
+    :mode ("\\.gitattributes\\'" . gitattributes-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitconfig-mode
-    :defer t)
+    :mode (("\\.gitconfig\\'"  . gitconfig-mode)
+           ("\\.gitmodules\\'" . gitignore-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitignore-mode
-    :defer t)
+    :mode (("\\.gitignore\\'"    . gitignore-mode)
+           ("\\.dockerignore\\'" . gitignore-mode)))
 #+END_SRC
 
 **** Go
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package go-mode
-    :commands (gofmt)
     :mode ("\\.go\\'" . go-mode)
-
     :config
-    (setq indent-tabs-mode 't
-          tab-width        4))
+    (setq-local indent-tabs-mode 't
+                tab-width        4))
 #+END_SRC
 
 **** Jinja2
@@ -1537,15 +1558,18 @@ These packages provide modes that make git-related files more readable.
     :hook ((org-metadown  . windmove-down)
            (org-metaleft  . windmove-left)
            (org-metaright . windmove-right)
-           (org-metaup    . windmove-up)
-           (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
+           (org-metaup    . windmove-up))
+    :mode ("\\.org\\'" . org-mode)
 
     :config
-    (setq org-src-fontify-natively  t
-          org-src-tab-acts-natively t
-          org-support-shift-select  'always)
-
-    (set-face-attribute 'org-block nil :background "#111111" :extend t))
+    (add-hook 'org-mode-hook
+              (lambda()
+                (setq-local indent-tabs-mode          nil
+                            org-src-fontify-natively  t
+                            org-src-tab-acts-natively t
+                            org-support-shift-select  'always)
+                (set-face-attribute 'org-block nil
+                                    :background "#111111" :extend t))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1556,7 +1580,8 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-drill
-    :after (org))
+    :defer t
+    :commands (org-drill))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1582,7 +1607,7 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package protobuf-mode
-    :defer t)
+    :mode ("\\.proto\\'" . protobuf-mode))
 #+END_SRC
 
 **** Python
@@ -1602,6 +1627,7 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-rust
+    :after (flycheck-mode rust-mode)
     :commands (flycheck-rust-setup)
     :hook (flycheck-mode . flycheck-rust-setup))
 #+END_SRC
@@ -1643,14 +1669,7 @@ These packages provide modes that make git-related files more readable.
   (use-package yaml-mode
     :mode (("\\.yaml\\'" . yaml-mode)
            ("\\.yml\\'"  . yaml-mode))
-
-    :config
-    (setq-local indent-tabs-mode nil)
-    (add-hook 'sh-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda()
-                            (untabify (point-min) (point-max))) nil 'local))))
+    :config (setq-local indent-tabs-mode nil))
 #+END_SRC
 
 **** Zig
