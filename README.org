@@ -4,23 +4,39 @@
 #+LANGUAGE: en
 
 Baemacs is yet another take on a literate GNU/Emacs configuration that intends
-to remain close to the default behavior and appearance.
+to remain close to the default behavior and appearance.  Baemacs is built with
+use-package and org which is all contained within this singular file, which also
+includes documentation and other such context.
+
+Because this file is checked on init for changes, this single file becomes your
+management tool for maintaining your Emacs config.  Whenever this file is newer
+than a configuration file, your entire configuration will be tangled, compiled,
+and loaded automatically.
 
 #+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
-To understand what Baemacs is attempting to do differently, let's cover some of
-the important goals and intentions of this configuration.
+The goals of Baemacs are fairly simplistic, mostly because I like Emacs and I
+don't want to turn Emacs into some other editor.
 
 1. Preserve (most) core GNU/Emacs functionality
 
-  Unlike other configurations, there is no evil-mode support and we don't remap
-  any (useful) default keybinds.  If you are comfortable with plain GNU/Emacs,
-  you should feel empowered by Baemacs.
+   Unlike other configurations, there is no evil-mode support and we don't remap
+   any (useful) default keybinds.  If you are comfortable with plain GNU/Emacs,
+   you should feel empowered by Baemacs.  Vi/Vim and evil-mode users should most
+   likely look at one of the many alternatives that provides or defaults to
+   evil-mode.
 
-  Vi/Vim and evil-mode users should most likely look at one of the many
-  alternatives that provides or defaults to evil-mode.
+2. Leverage use-package for predictability
 
-2. Fully document changes with context and reasoning (eventually)
+   While a well-performing configuration doesn't have to rely on use-package, I
+   find it far more obvious to manage and configure package rules and
+   relationships using it.
+
+   Though not specifically related to use-package, this configuration uses
+   stable packages whenever possible so that there are no unexpected behaviors
+   with a preference of elpa, then stable melpa, then melpa.
+
+3. Fully document changes with context and reasoning (eventually)
 
    Having documentation, context of why something was added, and reasoning of
    whether it is a good/bad/subjective addition allows you as the user to better
@@ -28,35 +44,20 @@ the important goals and intentions of this configuration.
 
    Even better, you don't need to hunt any of this down, it's all in this file!
 
-3. Leverage use-package for predictability
-
-   Creating logic of when packages should conditionally be loaded is a bit
-   easier with use-package.  Also it reads a little better than huge blocks of
-   elisp.
-
 4. Performance is a concern, though avoid voodoo
 
-   There are two config changes that (hopefully) will have a positive effect on
-   overall performance:
+   Emacs can initialize and run quickly without tricks, voodoo, or lies.  Most
+   of the speed comes from properly configuring use-package to generate
+   autoloads, and we don't do any background loading of packages.  Just about
+   everything is loaded upfront on init, and it still takes about 0.5s to 1.0s
+   depending on the performance of your device.  Anything that isn't loaded on
+   init will be loaded on specific hooks or package relationships.
 
-   - Tweaking the garbage collector
+   There are two additional configuration changes that (hopefully) will have a
+   positive effect on overall performance:
 
-     This is primarily to decrease garbage collection pauses, but the changes
-     made will at minimum halve the number of pauses we experience. See
-     [[#garbage-collection][Garbage Collection]] for clarification.
-
-   - Compiling configuration files
-
-     This is primarily to decrease initialization time.  When using a non-Org
-     config might ordinarily change an '.el' file, expecting that change to be
-     reflected on startup.  In reality if you didn't byte-compile your config
-     after making changes, you would inherit the value from '.elc', which is no
-     longer the expected behavior.  There may be some other implications though
-     this is the main argument I've heard against byte-compiling config files.
-
-     In our case since everything should be in 'README.org', which acts as our
-     staging ground for changes, we may tangle and byte-compile config files
-     with less apprehension.
+   - Tweaking [[#garbage-collection][Garbage Collection]]
+   - Automatically [[#Bootstrap][Byte-compiling]] configuration files and packages
 
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
