@@ -384,6 +384,7 @@ is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package no-littering
+    :demand t
     :commands (no-littering-expand-var-file-name)
     :config
     (setq auto-save-file-name-transforms
