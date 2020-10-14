@@ -650,7 +650,7 @@ support:
   (setq mouse-wheel-follow-mouse      't
         mouse-wheel-progressive-speed nil
         mouse-wheel-scroll-amount     '(1 ((shift) . 1))
-        mouse-yank-at-point           t)
+        mouse-yank-at-point           't)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -776,12 +776,12 @@ irssi, weechat, or other clients I've used in the past.
     (setq circe-default-part-message ""
           circe-default-quit-message ""
           circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
-          circe-reduce-lurker-spam   'true
-          circe-use-cycle-completion 'true
+          circe-reduce-lurker-spam   't
+          circe-use-cycle-completion 't
 
           lui-fill-type              nil
           lui-flyspell-alist         '((".*" "american"))
-          lui-flyspell-p             'true
+          lui-flyspell-p             't
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
 
@@ -872,12 +872,13 @@ use many buffers.
     :config
     (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
     (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
+
     (add-hook 'eglot-managed-mode-hook
               (lambda()
                 (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))
 
-    (setq eglot-auto-display-help-buffer  nil
-          eglot-put-doc-in-help-buffer    nil))
+    (setq eglot-auto-display-help-buffer nil
+          eglot-put-doc-in-help-buffer   nil))
 #+END_SRC
 
 **** eldoc
@@ -1381,9 +1382,11 @@ appreciate the additional functions.
             (lambda()
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
               (defvar c-basic-offset)
-              (setq-local c-basic-offset   8)
-              (setq-local indent-tabs-mode t)
-              (setq-local tab-width        8)))
+              (setq-local c-basic-offset   8
+                          c-default-style  "bsd"
+                          indent-tabs-mode t
+                          tab-width        8))
+            nil 'local)
 #+END_SRC
 
 **** C++
@@ -1394,9 +1397,11 @@ appreciate the additional functions.
               (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
               (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode))
               (defvar c-basic-offset)
-              (setq-local c-basic-offset   4)
-              (setq-local indent-tabs-mode t)
-              (setq-local tab-width        4)))
+              (setq-local c-basic-offset   4
+                          c-default-style  "ellemtel"
+                          indent-tabs-mode 't
+                          tab-width        4))
+            nil 'local)
 #+END_SRC
 
 **** Caddy (Disabled)
@@ -1474,7 +1479,8 @@ These packages provide modes that make git-related files more readable.
   (use-package go-mode
     :mode ("\\.go\\'" . go-mode)
     :config
-    (setq-local indent-tabs-mode 't
+    (setq-local c-basic-offset   4
+                indent-tabs-mode 't
                 tab-width        4))
 #+END_SRC
 
@@ -1489,7 +1495,8 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package json-mode
-    :mode ("\\.json\\'" . json-mode))
+    :mode ("\\.json\\'" . json-mode)
+    :config (setq json-mode-indent-level 4))
 #+END_SRC
 
 **** Julia
@@ -1511,9 +1518,9 @@ These packages provide modes that make git-related files more readable.
   (add-hook 'lisp-mode-hook
             (lambda()
               (defvar c-basic-offset)
-              (setq-local c-basic-offset   2)
-              (setq-local indent-tabs-mode nil)
-              (setq-local tab-width        2)))
+              (setq-local c-basic-offset   8
+                          indent-tabs-mode nil
+                          tab-width        8)))
 #+END_SRC
 
 **** Markdown
@@ -1527,7 +1534,7 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package meson-mode
-    :mode ("\\meson.build\\'" . markdown-mode))
+    :mode ("\\meson.build\\'" . meson-mode))
 #+END_SRC
 
 **** NGINX
@@ -1560,7 +1567,6 @@ These packages provide modes that make git-related files more readable.
            (org-metaright . windmove-right)
            (org-metaup    . windmove-up))
     :mode ("\\.org\\'" . org-mode)
-
     :config
     (add-hook 'org-mode-hook
               (lambda()
@@ -1643,10 +1649,10 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (add-hook 'sh-mode-hook
             (lambda()
-              (setq-local indent-tabs-mode nil)
               (add-hook 'before-save-hook
                         (lambda() (untabify (point-min) (point-max)))
-                        nil 'local)))
+                        nil 'local))
+            (setq-local indent-tabs-mode nil))
 #+END_SRC
 
 **** Sed
