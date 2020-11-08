@@ -138,6 +138,7 @@ don't want to turn Emacs into some other editor.
       - [[#gdscript-disabled][GDScript (Disabled)]]
       - [[#git][Git]]
       - [[#go][Go]]
+      - [[#hcl][HCL]]
       - [[#jinja2][Jinja2]]
       - [[#json][JSON]]
       - [[#julia][Julia]]
@@ -343,7 +344,9 @@ exists on multiple sources.
         '(("elpa"         . 3)
           ("melpa-stable" . 2)
           ("melpa"        . 1))
-        package-pinned-packages '((use-package . "melpa")))
+        package-pinned-packages
+        '((use-package . "melpa")
+          (hcl-mode    . "melpa")))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
@@ -1478,6 +1481,19 @@ These packages provide modes that make git-related files more readable.
   (use-package go-mode
     :mode ("\\.go\\'" . go-mode)
     :config
+    (setq-local c-basic-offset   4
+                indent-tabs-mode 't
+                tab-width        4))
+#+END_SRC
+
+**** HCL
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package hcl-mode
+    :mode ("\\.hcl\\'" . hcl-mode)
+    :config
+    (setq hcl-indent-level 4)
+
     (setq-local c-basic-offset   4
                 indent-tabs-mode 't
                 tab-width        4))
