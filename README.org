@@ -336,14 +336,17 @@ exists on multiple sources.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq package-user-dir (concat user-emacs-directory "pkg/")
+
         package-archives
         '(("elpa"         . "https://elpa.gnu.org/packages/")
           ("melpa-stable" . "https://stable.melpa.org/packages/")
           ("melpa"        . "https://melpa.org/packages/"))
+
         package-archive-priorities
         '(("elpa"         . 3)
           ("melpa-stable" . 2)
           ("melpa"        . 1))
+
         package-pinned-packages
         '((use-package . "melpa")
           (hcl-mode    . "melpa")))
@@ -486,7 +489,7 @@ we won't look for every possible edge condition to normalize this behavior.
 
   (setq pop-up-frames     nil
         pop-up-windows    nil
-        reusable-frames   't
+        reusable-frames   t
         Man-notify-method 'pushy)
 #+END_SRC
 
@@ -650,10 +653,10 @@ support:
   (defvar mouse-wheel-progressive-speed)
   (defvar mouse-wheel-scroll-amount)
 
-  (setq mouse-wheel-follow-mouse      't
+  (setq mouse-wheel-follow-mouse      t
         mouse-wheel-progressive-speed nil
         mouse-wheel-scroll-amount     '(1 ((shift) . 1))
-        mouse-yank-at-point           't)
+        mouse-yank-at-point           t)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -779,12 +782,12 @@ irssi, weechat, or other clients I've used in the past.
     (setq circe-default-part-message ""
           circe-default-quit-message ""
           circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
-          circe-reduce-lurker-spam   't
-          circe-use-cycle-completion 't
+          circe-reduce-lurker-spam   t
+          circe-use-cycle-completion t
 
           lui-fill-type              nil
           lui-flyspell-alist         '((".*" "american"))
-          lui-flyspell-p             't
+          lui-flyspell-p             t
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
 
@@ -841,6 +844,7 @@ irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package diff-hl
+    :demand t
     :commands (diff-hl-mode diff-hl-margin-mode)
     :hook ((conf-mode prog-mode text-mode) . diff-hl-mode)
     :config
@@ -878,7 +882,7 @@ use many buffers.
 
     (add-hook 'eglot-managed-mode-hook
               (lambda()
-                (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))
+                (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
 
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil))
@@ -1234,6 +1238,7 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package magit
+    :demand t
     :bind ("C-c C-c" . with-editor-finish))
 #+END_SRC
 
@@ -1401,7 +1406,7 @@ appreciate the additional functions.
               (defvar c-basic-offset)
               (setq-local c-basic-offset   4
                           c-default-style  "ellemtel"
-                          indent-tabs-mode 't
+                          indent-tabs-mode t
                           tab-width        4))
             nil 'local)
 #+END_SRC
@@ -1482,7 +1487,7 @@ These packages provide modes that make git-related files more readable.
     :mode ("\\.go\\'" . go-mode)
     :config
     (setq-local c-basic-offset   4
-                indent-tabs-mode 't
+                indent-tabs-mode t
                 tab-width        4))
 #+END_SRC
 
@@ -1490,12 +1495,17 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package hcl-mode
-    :mode ("\\.hcl\\'" . hcl-mode)
+    :mode (("\\.hcl\\'" . hcl-mode))
     :config
-    (setq hcl-indent-level 4)
+    (add-hook 'hcl-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil t)))
 
+    (setq hcl-indent-level 4)
     (setq-local c-basic-offset   4
-                indent-tabs-mode 't
+                indent-tabs-mode nil
                 tab-width        4))
 #+END_SRC
 
@@ -1511,7 +1521,11 @@ These packages provide modes that make git-related files more readable.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package json-mode
     :mode ("\\.json\\'" . json-mode)
-    :config (setq json-mode-indent-level 4))
+    :config
+    (setq json-mode-indent-level 4)
+    (setq-local c-basic-offset   4
+                indent-tabs-mode nil
+                tab-width        4))
 #+END_SRC
 
 **** Julia
@@ -1583,14 +1597,12 @@ These packages provide modes that make git-related files more readable.
            (org-metaup    . windmove-up))
     :mode ("\\.org\\'" . org-mode)
     :config
-    (add-hook 'org-mode-hook
-              (lambda()
-                (setq-local indent-tabs-mode          nil
-                            org-src-fontify-natively  t
-                            org-src-tab-acts-natively t
-                            org-support-shift-select  'always)
-                (set-face-attribute 'org-block nil
-                                    :background "#111111" :extend t))))
+    (setq org-src-fontify-natively  t
+          org-src-tab-acts-natively t
+          org-support-shift-select  'always)
+    (setq-local indent-tabs-mode nil)
+    (set-face-attribute 'org-block nil
+                        :background "#111111" :extend t))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1666,7 +1678,7 @@ These packages provide modes that make git-related files more readable.
             (lambda()
               (add-hook 'before-save-hook
                         (lambda() (untabify (point-min) (point-max)))
-                        nil 'local))
+                        nil t))
             (setq-local indent-tabs-mode nil))
 #+END_SRC
 
