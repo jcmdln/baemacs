@@ -924,8 +924,14 @@ typical unix shells, so maybe try it for yourself.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
-    :commands (eshell eshell/basename eshell/clear eshell/pwd
-                      baemacs/eshell-prompt-function)
+    :commands (baemacs/eshell/clear
+               baemacs/eshell/prompt-function
+               eshell
+               eshell-new
+               eshell/basename
+               eshell/pwd)
+    :hook (eshell-mode . (lambda()
+                           (defalias 'eshell/clear 'baemacs/eshell/clear)))
     :init
     (defun eshell-new()
       "Open a new instance of eshell."
@@ -933,13 +939,6 @@ typical unix shells, so maybe try it for yourself.
       (eshell 'N))
 
     :config
-    (add-hook 'eshell-mode-hook
-              (lambda ()
-                (defun eshell/clear()
-                  "Hide previous scrollback to provide a clear view."
-                  (interactive)
-                  (recenter 0))))
-
     (defvar eshell-banner-message)
     (defvar eshell-cmpl-cycle-completions)
     (defvar eshell-error-if-no-glob)
@@ -953,7 +952,13 @@ typical unix shells, so maybe try it for yourself.
     (defvar eshell-scroll-to-bottom-on-output)
     (defvar eshell-visual-commands)
 
-    (defun baemacs/eshell-prompt-function()
+    (defun baemacs/eshell/clear()
+      "Clear the current eshell buffer by truncating the contents."
+      (interactive)
+      (setq-local eshell-buffer-maximum-lines 0)
+      (eshell-truncate-buffer))
+
+    (defun baemacs/eshell/prompt-function()
       (interactive)
       (lambda ()
         (concat "[" (user-login-name) "@"
@@ -968,16 +973,22 @@ typical unix shells, so maybe try it for yourself.
           eshell-hist-ignoredups            t
           eshell-history-size               4096
           eshell-prefer-lisp-functions      t
-          eshell-prompt-function            (baemacs/eshell-prompt-function)
+          eshell-prompt-function            (baemacs/eshell/prompt-function)
           eshell-prompt-regexp              "^[^#$\n]*[#$] "
           eshell-save-history-on-exit       t
           eshell-scroll-to-bottom-on-input  nil
           eshell-scroll-to-bottom-on-output nil
           eshell-scroll-show-maximum-output nil
-
-          eshell-visual-commands
-          '("alsamixer" "atop" "htop" "less" "mosh" "nano" "ssh" "tail"
-            "top" "vi" "vim" "watch")))
+          eshell-visual-commands            '("alsamixer"
+                                              "atop"
+                                              "htop"
+                                              "mosh"
+                                              "ssh"
+                                              "tail"
+                                              "top"
+                                              "vi"
+                                              "vim"
+                                              "watch")))
 #+END_SRC
 
 **** eww
@@ -1589,6 +1600,8 @@ These packages provide modes that make git-related files more readable.
                 ([remap forward-paragraph]  . nil)
                 ("C-S-<down>" . nil)
                 ("C-S-<up>"   . nil)
+	        ("M-<down>"   . nil)
+	        ("M-<up>"     . nil)
                 ("S-<left>"   . nil)
                 ("S-<right>"  . nil))
     :hook ((org-metadown  . windmove-down)
