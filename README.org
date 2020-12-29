@@ -1692,9 +1692,10 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-rust
-    :after (flycheck-mode rust-mode)
     :commands (flycheck-rust-setup)
-    :hook (flycheck-mode . flycheck-rust-setup))
+    :config
+    (with-eval-after-load 'rust-mode
+      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
