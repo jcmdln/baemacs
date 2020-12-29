@@ -1693,7 +1693,7 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-rust
     :commands (flycheck-rust-setup)
-    :config
+    :init
     (with-eval-after-load 'rust-mode
       (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
 #+END_SRC
@@ -1701,6 +1701,10 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rust-mode
     :commands (rust-format-buffer rust-mode)
+    :hook (rust-mode . (lambda()
+                         (setq-local c-basic-offset   4
+                                     indent-tabs-mode 't
+                                     tab-width        4)))
     :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
