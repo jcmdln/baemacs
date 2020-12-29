@@ -177,8 +177,8 @@ or may not have been given a higher priority in recent releases.
 
 Paste this rather unsightly block into your terminal to use Emacs from the
 command line to tangle this file into the various configuration files, then
-byte-compile the managed files, finally loading the ~init.el~.  This will result
-in Emacs being fully setup and configured, and will never have to be run
+byte-compile the managed files, finally loading the ~init.el~.  This will
+result in Emacs being fully setup and configured, and will never have to be run
 manually again.
 
 #+BEGIN_SRC shell :eval no :tangle no
@@ -223,57 +223,59 @@ in this section.
 
 **** gc-cons-percentage
 
-For the purposes of initialization, we'll increase `gc-cons-percentage` to
+For the purposes of initialization, we'll increase ~gc-cons-percentage~ to
 decrease garbage collection pauses.  The settings below mean that garbage
 collection is deferred until reaching 80% of the total heap size.  After
 initialization completes we lower this value to 20% of the total heap size to
-prevent garbage collection passes from becoming too large to be handled quickly.
+prevent garbage collection passes from becoming too large to be handled
+quickly.
 
 At the time of writing, the default is 10% so we are effectively attempting to
-halve the amount of garbage collection pauses we would experience as a result of
-reaching the defined threshold of the total heap size.
+halve the amount of garbage collection pauses we would experience as a result
+of reaching the defined threshold of the total heap size.
 
 Should you want to compare these changes against the default values, they are
 preserved as shown below:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (defvar gc-cons-percentage-default)
-  (defvar gc-cons-percentage-init)
-  (defvar gc-cons-percentage-tuned)
+  (defvar baemacs/gc-cons-percentage-default gc-cons-percentage
+    "Default value of gc-cons-percentage.")
+  (defvar baemacs/gc-cons-percentage-init 0.8
+    "Init value of gc-cons-percentage.")
+  (defvar baemacs/gc-cons-percentage-tuned 0.2
+    "Tuned value of gc-cons-percentage.")
 
-  (setq gc-cons-percentage-default gc-cons-percentage
-        gc-cons-percentage-init    0.8
-        gc-cons-percentage-tuned   0.2
-        gc-cons-percentage         gc-cons-percentage-init)
+  (setq gc-cons-percentage baemacs/gc-cons-percentage-init)
 
   (add-hook 'after-init-hook
             (lambda()
-              (setq gc-cons-percentage gc-cons-percentage-tuned)))
+              (setq gc-cons-percentage baemacs/gc-cons-percentage-tuned)))
 #+END_SRC
 
 **** gc-cons-threshold
 
-Now we will increase the `gc-cons-threshold`, which refers to the total bytes of
-storage for lisp objects that must be allocated to trigger subsequent garbage
-collections.  On 32-bit systems this threshold is 400,000 objects, while on
-64-bit systems it is 800,000 objects.
+Now we will increase the ~gc-cons-threshold~, which refers to the total bytes
+of storage for lisp objects that must be allocated to trigger subsequent
+garbage collections.  On 32-bit systems this threshold is 400,000 objects,
+while on 64-bit systems it is 800,000 objects.
 
 Modifying this value is generally not recommended and considered an act of
 performance voodoo, though the idea is that by specifying a larger threshold,
 garbage collection will occur less often, meaning fewer GC pauses.  We'll set
-this value to 10,000,000 globally, which ideally will reduce the total number of
-GC pauses we experience without garbage collection taking too long when it does
-occur.
+this value to 10,000,000 globally, which ideally will reduce the total number
+of GC pauses we experience without garbage collection taking too long when it
+does occur.
 
-The default value is also stored so you may evaluate this change as shown below:
+The default value is also stored so you may evaluate this change as shown
+below:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (defvar gc-cons-threshold-default)
-  (defvar gc-cons-threshold-tuned)
+  (defvar baemacs/gc-cons-threshold-default gc-cons-threshold
+    "Default value of gc-cons-threshold")
+  (defvar baemacs/gc-cons-threshold-tuned (* 1000 1000 10)
+    "Tuned value of gc-cons-threshold")
 
-  (setq gc-cons-threshold-default gc-cons-threshold
-        gc-cons-threshold-tuned   (* 1000 1000 10)
-        gc-cons-threshold         gc-cons-threshold-tuned)
+  (setq gc-cons-threshold baemacs/gc-cons-threshold-tuned)
 #+END_SRC
 
 *** Encoding
@@ -298,10 +300,10 @@ UTF-8 encoding.
 Emacs will inherit your system's current environment, though we may adjust some
 key variables for quality of life.
 
-- Set Emacs as our default EDITOR when in Emacs
-- Set PAGER to an Emacs built-in, which doesn't require ansi-term
-- Unset PROMPT_COMMAND, which causes issues with ssh connections
-- Attempt to get/set variables, in case they differ
+- Set Emacs as our default ~EDITOR~ when in Emacs
+- Set ~PAGER~ to an Emacs built-in, which doesn't require ansi-term
+- Unset ~PROMPT_COMMAND~, which causes issues with ssh connections
+- Attempt to get/set certain variables, in case they differ
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setenv "EDITOR"         "emacsclient")
@@ -317,7 +319,7 @@ key variables for quality of life.
 *** Custom
 
 Rather than Emacs customization being appended to the end of the configuration
-file, in our case 'init.el', we may specify the location of `custom-file` early
+file, in our case ~init.el~, we may specify the location of ~custom-file~ early
 on to keep our configuration directory relatively clean.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -381,8 +383,8 @@ and check that use-package is installed and active before attempting to
 initialize:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (setq use-package-always-ensure     t
-        use-package-check-before-init t)
+  (setq use-package-always-ensure     't
+        use-package-check-before-init 't)
 #+END_SRC
 
 **** no-littering
@@ -396,7 +398,7 @@ is a nice change.
     :commands (no-littering-expand-var-file-name)
     :init
     (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't))))
 #+END_SRC
 
 **** package-utils
@@ -436,8 +438,8 @@ helpful for long-time Emacs users.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq initial-scratch-message     ""
-        inhibit-splash-screen       t
-        inhibit-startup-buffer-menu t)
+        inhibit-splash-screen       't
+        inhibit-startup-buffer-menu 't)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -470,7 +472,7 @@ instead to make slight modifications.
 
 One big annoyance is Emacs arbitrary splitting my window to show a newly
 created buffer.  This is especially annoying when I run a command myself such
-as 'M-x man' which causes arbitrary splits.
+as ~M-x man~ which causes arbitrary splits.
 
 Here we will enforce always re-using the currently selected frame when a new
 buffer is opened or focused.  This works in most cases, though as shown below
@@ -484,19 +486,21 @@ we won't look for every possible edge condition to normalize this behavior.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar pop-up-frames)
+  (defvar pop-up-windows)
   (defvar reusable-frames)
   (defvar Man-notify-method)
 
   (setq pop-up-frames     nil
         pop-up-windows    nil
-        reusable-frames   t
+        reusable-frames   't
         Man-notify-method 'pushy)
 #+END_SRC
 
 **** Font
 
-This probably isn't needed, but we'll set the default font to the
-system-defined Monospace font.
+This probably isn't needed, but we'll set the default font to the monospace
+font defined on the system.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (set-face-attribute :family "Monospace")
@@ -507,22 +511,22 @@ system-defined Monospace font.
 Rather than include yet another theme, we’ll use the tango-dark theme.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (load-theme 'tango-dark t)
+  (load-theme 'tango-dark 't)
 #+END_SRC
 
 *** Editing
 
 There are some general-purpose changes to make for editing files, which ideally
-if I ever get around to incorporating site-start.el will allow loading a slim,
+if I ever get around to incorporating ~site-start.el~ will allow loading a slim,
 nimble instance of Emacs when needed.  For now I'll leave these changes here.
 
 **** Clipboard
 
 This part is a bit unorganized though reduces clutter by inhibiting buffers and
-adjusting how Emacs' clipboard works.
+adjusting how the clipboard works in Emacs.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (setq save-interprogram-paste-before-kill t
+  (setq save-interprogram-paste-before-kill 't
         select-enable-primary               nil)
 #+END_SRC
 
@@ -558,15 +562,15 @@ Display line numbers in most types of modes where it makes sense.
 **** Modeline
 
 - Show column numbers
-- Ensure '\n' always precedes EOF
-- When show-paren-mode is enabled, delay showing match for 330ms
-- Disable the visual-bell
+- Ensure ~\n~ always precedes EOF
+- When ~show-paren-mode~ is enabled, delay showing match for 330ms
+- Disable the ~visual-bell~
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defvar show-paren-delay)
 
-  (setq column-number-mode    t
-        require-final-newline t
+  (setq column-number-mode    't
+        require-final-newline 't
         show-paren-delay      0.33
         visible-bell          nil)
 #+END_SRC
@@ -576,9 +580,7 @@ Display line numbers in most types of modes where it makes sense.
 Highlight matching parenthesis, always.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'after-init-hook
-            (lambda()
-              (show-paren-mode t)))
+  (add-hook 'after-init-hook (lambda() (show-paren-mode 't)))
 #+END_SRC
 
 **** Whitespace
@@ -596,9 +598,7 @@ simple editing commands are redefined to act on visual lines, not logical
 lines.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'after-init-hook
-            (lambda()
-              (global-visual-line-mode t)))
+  (add-hook 'after-init-hook (lambda() (global-visual-line-mode 't)))
 #+END_SRC
 
 *** Input
@@ -653,10 +653,10 @@ support:
   (defvar mouse-wheel-progressive-speed)
   (defvar mouse-wheel-scroll-amount)
 
-  (setq mouse-wheel-follow-mouse      t
+  (setq mouse-wheel-follow-mouse      't
         mouse-wheel-progressive-speed nil
         mouse-wheel-scroll-amount     '(1 ((shift) . 1))
-        mouse-yank-at-point           t)
+        mouse-yank-at-point           't)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -683,8 +683,8 @@ create.  If performed conditionally, we only have to pay the cost of
 byte-compiling when we make a change to this configuration file for the entire
 configuration to be rebuilt.
 
-At the end of initialization, ensure that 'README.org' is not newer than
-'config.el', otherwise rebuild our configuration files and byte-compile them.
+At the end of initialization, ensure that ~README.org~ is not newer than
+~config.el~, otherwise rebuild our configuration files and byte-compile them.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (defun baemacs-reconfig()
@@ -715,10 +715,9 @@ At the end of initialization, ensure that 'README.org' is not newer than
 
 ** config.el
 
-This is a non-standard file that is referenced at the end of 'init.el' which
-contains our extra package and language definitions.
-
-Before we add anything to this file, first we'll add the file header:
+This is a non-standard file that is referenced at the end of ~init.el~ which
+contains our extra package and language definitions. Before we add anything to
+this file, first we'll add the file header:
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   ;;; config.el ---- Baemacs configuration file
@@ -733,7 +732,7 @@ Before we add anything to this file, first we'll add the file header:
 **** async
 
 Simplify calling asynchronous functions and processes.  See the documentation
-for `async-start' and `async-start-process' for more information.
+for ~async-start~ and ~async-start-process~ for more information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package async
@@ -758,9 +757,32 @@ irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
-    :defer t
+    :defer 't
     :commands (enable-lui-logging-globally lui-set-prompt)
     :config
+    (defvar circe-default-part-message)
+    (defvar circe-default-quit-message)
+    (defvar circe-format-server-topic)
+    (defvar circe-reduce-lurker-spam)
+    (defvar circe-use-cycle-completion)
+    (defvar lui-fill-type)
+    (defvar lui-flyspell-alist)
+    (defvar lui-flyspell-p)
+    (defvar lui-time-stamp-format)
+    (defvar lui-time-stamp-position)
+
+    (setq circe-default-part-message ""
+          circe-default-quit-message ""
+          circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
+          circe-reduce-lurker-spam   't
+          circe-use-cycle-completion 't
+
+          lui-fill-type              nil
+          lui-flyspell-alist         '((".*" "american"))
+          lui-flyspell-p             't
+          lui-time-stamp-format      "%H:%M:%S"
+          lui-time-stamp-position    'left-margin)
+
     (add-hook 'circe-server-mode-hook (lambda() (require 'circe-chanop)))
     (add-hook 'circe-chat-mode-hook
               (lambda()
@@ -772,24 +794,10 @@ irssi, weechat, or other clients I've used in the past.
 
     (add-hook 'lui-mode-hook
               (lambda()
-                (setq fringes-outside-margins t
+                (setq fringes-outside-margins 't
                       left-margin-width       9
-                      word-wrap               t
+                      word-wrap               't
                       wrap-prefix             "")))
-
-    (defvar lui-flyspell-p)
-
-    (setq circe-default-part-message ""
-          circe-default-quit-message ""
-          circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
-          circe-reduce-lurker-spam   t
-          circe-use-cycle-completion t
-
-          lui-fill-type              nil
-          lui-flyspell-alist         '((".*" "american"))
-          lui-flyspell-p             t
-          lui-time-stamp-format      "%H:%M:%S"
-          lui-time-stamp-position    'left-margin)
 
     (enable-circe-color-nicks)
 
@@ -801,12 +809,18 @@ irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company
-    :hook ((lisp-mode prog-mode text-mode) . company-mode)
     :config
-    (setq company-tooltip-limit  20
+    (defvar company-begin-commands)
+    (defvar company-echo-delay)
+    (defvar company-idle-delay)
+    (defvar company-tooltip-limit)
+
+    (setq company-begin-commands '(self-insert-command)
           company-idle-delay     0.3
           company-echo-delay     0
-          company-begin-commands '(self-insert-command)))
+          company-tooltip-limit  20)
+
+    :hook ((lisp-mode prog-mode text-mode) . company-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -844,7 +858,7 @@ irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package diff-hl
-    :demand t
+    :demand 't
     :commands (diff-hl-mode diff-hl-margin-mode)
     :hook ((conf-mode prog-mode text-mode) . diff-hl-mode)
     :config
@@ -875,17 +889,21 @@ use many buffers.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eglot
     :commands (eglot-ensure)
-    :hook ((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
     :config
+    (defvar eglot-auto-display-help-buffer)
+    (defvar eglot-put-doc-in-help-buffer)
+
+    (setq eglot-auto-display-help-buffer nil
+          eglot-put-doc-in-help-buffer   nil)
+
     (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
     (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
 
-    (add-hook 'eglot-managed-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
-
-    (setq eglot-auto-display-help-buffer nil
-          eglot-put-doc-in-help-buffer   nil))
+    :hook (((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
+           (eglot-managed-mode . (lambda()
+                                   (add-hook 'before-save-hook
+                                             'eglot-format-buffer
+                                             nil 'local)))))
 #+END_SRC
 
 **** eldoc
@@ -893,8 +911,7 @@ use many buffers.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eldoc
     :commands (global-eldoc-mode)
-    :config
-    (setq eldoc-echo-area-use-multiline-p nil))
+    :config (setq eldoc-echo-area-use-multiline-p nil))
 #+END_SRC
 
 **** elfeed
@@ -917,10 +934,10 @@ Atom.
 
 **** eshell
 
-The default configuration of eshell is, well, bad. The ordinary user who opens
-it once and considers it to be a bad tool is missing out of the full potential
-eshell provides. I've spent a _lot_ of time making eshell behave and look like
-typical unix shells, so maybe try it for yourself.
+The default configuration of eshell is... well, bad. The ordinary user who
+opens it once and considers it to be a bad tool is missing out of the full
+potential eshell provides. I've spent a _lot_ of time making eshell behave and
+look like typical unix shells, so maybe try it for yourself.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
@@ -928,18 +945,29 @@ typical unix shells, so maybe try it for yourself.
                baemacs/eshell/prompt-function
                eshell
                eshell-new
+               eshell-truncate-buffer
                eshell/basename
                eshell/pwd)
-    :hook (eshell-mode . (lambda()
-                           (defalias 'eshell/clear 'baemacs/eshell/clear)))
-    :init
-    (defun eshell-new()
-      "Open a new instance of eshell."
-      (interactive)
-      (eshell 'N))
 
     :config
+    (defun baemacs/eshell/clear()
+      "Clear the current eshell buffer by truncating the contents."
+      (interactive)
+      (setq-local eshell-buffer-maximum-lines 0)
+      (eshell-truncate-buffer))
+
+    (defun baemacs/eshell/prompt-function()
+      "Custom eshell prompt."
+      (interactive)
+      (lambda ()
+        (concat "[" (user-login-name) "@"
+                (car (split-string (system-name) "\\.")) " "
+                (if (string= (eshell/pwd) (getenv "HOME"))
+                    "~" (eshell/basename (eshell/pwd))) "]"
+                (if (= (user-uid) 0) "# " "$ "))))
+
     (defvar eshell-banner-message)
+    (defvar eshell-buffer-maximum-lines)
     (defvar eshell-cmpl-cycle-completions)
     (defvar eshell-error-if-no-glob)
     (defvar eshell-hist-ignoredups)
@@ -952,43 +980,27 @@ typical unix shells, so maybe try it for yourself.
     (defvar eshell-scroll-to-bottom-on-output)
     (defvar eshell-visual-commands)
 
-    (defun baemacs/eshell/clear()
-      "Clear the current eshell buffer by truncating the contents."
-      (interactive)
-      (setq-local eshell-buffer-maximum-lines 0)
-      (eshell-truncate-buffer))
-
-    (defun baemacs/eshell/prompt-function()
-      (interactive)
-      (lambda ()
-        (concat "[" (user-login-name) "@"
-                (car (split-string (system-name) "\\.")) " "
-                (if (string= (eshell/pwd) (getenv "HOME"))
-                    "~" (eshell/basename (eshell/pwd))) "]"
-                (if (= (user-uid) 0) "# " "$ "))))
-
     (setq eshell-banner-message             ""
           eshell-cmpl-cycle-completions     nil
-          eshell-error-if-no-glob           t
-          eshell-hist-ignoredups            t
+          eshell-error-if-no-glob           't
+          eshell-hist-ignoredups            't
           eshell-history-size               4096
-          eshell-prefer-lisp-functions      t
+          eshell-prefer-lisp-functions      't
           eshell-prompt-function            (baemacs/eshell/prompt-function)
           eshell-prompt-regexp              "^[^#$\n]*[#$] "
-          eshell-save-history-on-exit       t
+          eshell-save-history-on-exit       't
           eshell-scroll-to-bottom-on-input  nil
           eshell-scroll-to-bottom-on-output nil
-          eshell-scroll-show-maximum-output nil
-          eshell-visual-commands            '("alsamixer"
-                                              "atop"
-                                              "htop"
-                                              "mosh"
-                                              "ssh"
-                                              "tail"
-                                              "top"
-                                              "vi"
-                                              "vim"
-                                              "watch")))
+          eshell-scroll-show-maximum-output nil)
+
+    :hook (eshell-mode . (lambda()
+                           (defalias 'eshell/clear 'baemacs/eshell/clear)))
+
+    :init
+    (defun eshell-new()
+      "Open a new instance of eshell."
+      (interactive)
+      (eshell 'N)))
 #+END_SRC
 
 **** eww
@@ -1002,16 +1014,6 @@ specific buffer, you may now do so.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eww
     :commands (eww eww-mode eww-reload eww-toggle-images eww-new)
-    :init
-    (defun eww-new()
-      "Open a new instance of eww."
-      (interactive)
-      (let ((url (read-from-minibuffer "Enter URL or keywords: ")))
-        (switch-to-buffer (generate-new-buffer "*eww*"))
-        (eww-mode)
-        (eww url)))
-
-    (setq browse-url-browser-function 'eww-browse-url)
 
     :config
     (when window-system
@@ -1023,15 +1025,26 @@ specific buffer, you may now do so.
         (if (bound-and-true-p shr-blocked-images)
             (setq-local shr-blocked-images nil)
           (setq-local shr-blocked-images ""))
-        (eww-reload))))
+        (eww-reload)))
+
+    :init
+    (setq browse-url-browser-function 'eww-browse-url)
+
+    (defun eww-new()
+      "Open a new instance of eww."
+      (interactive)
+      (let ((url (read-from-minibuffer "Enter URL or keywords: ")))
+        (switch-to-buffer (generate-new-buffer "*eww*"))
+        (eww-mode)
+        (eww url))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eww-lnum
-    :commands (eww-lnum-follow eww-lnum-universal)
     :bind (:map eww-mode-map
                 ("f" . eww-lnum-follow)
-                ("F" . eww-lnum-universal)))
+                ("F" . eww-lnum-universal))
+    :commands (eww-lnum-follow eww-lnum-universal))
 #+END_SRC
 
 **** flycheck
@@ -1051,12 +1064,12 @@ specific buffer, you may now do so.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flyspell
-    :hook (((conf-mode markdown-mode text-mode) . flyspell-mode)
-           (prog-mode . flyspell-prog-mode))
-
     :config
     (setq ispell-program-name (executable-find "hunspell")
-          ispell-dictionary   "en_US"))
+          ispell-dictionary   "en_US")
+
+    :hook (((conf-mode markdown-mode text-mode) . flyspell-mode)
+           (prog-mode . flyspell-prog-mode)))
 #+END_SRC
 
 **** gnus
@@ -1068,8 +1081,6 @@ though here we will attempt to make gnus behave like other clients.
   (use-package gnus
     :bind (("<M-down>" . windmove-down)
            ("<M-up>"   . windmove-up))
-    :hook ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
-           (gnus-group-mode       . gnus-group-sort-groups-by-alphabet))
 
     :config
     (defvar gnus-show-threads)
@@ -1083,7 +1094,7 @@ though here we will attempt to make gnus behave like other clients.
     (defvar gnus-thread-hide-subtree)
     (defvar gnus-thread-sort-functions)
 
-    (setq gnus-show-threads                      t
+    (setq gnus-show-threads                      't
           gnus-sum-thread-tree-false-root        ""
           gnus-sum-thread-tree-indent            "  "
           gnus-sum-thread-tree-leaf-with-other   "├─> "
@@ -1092,11 +1103,14 @@ though here we will attempt to make gnus behave like other clients.
           gnus-sum-thread-tree-vertical          "│ "
           gnus-summary-line-format               "%U%R:%-15,15o  %-20,20A  %B%s\n"
           gnus-summary-thread-gathering-function 'gnus-gather-threads-by-subject
-          gnus-thread-hide-subtree               t
+          gnus-thread-hide-subtree               't
           gnus-thread-sort-functions             '(gnus-thread-sort-by-date))
 
     (if (file-exists-p (concat user-emacs-directory "usr/gnus.el"))
-        (load-file     (concat user-emacs-directory "usr/gnus.el"))))
+        (load-file     (concat user-emacs-directory "usr/gnus.el")))
+
+    :hook ((gnus-summary-prepared . gnus-summary-sort-by-most-recent-date)
+           (gnus-group-mode       . gnus-group-sort-groups-by-alphabet)))
 #+END_SRC
 
 **** helpful
@@ -1117,8 +1131,8 @@ much more contextual information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package highlight-indent-guides
-    :hook (prog-mode . highlight-indent-guides-mode)
-    :config (setq highlight-indent-guides-method 'character))
+    :config (setq highlight-indent-guides-method 'character)
+    :hook (prog-mode . highlight-indent-guides-mode))
 #+END_SRC
 
 **** ibuffer
@@ -1129,12 +1143,11 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ibuffer
-    :commands (ibuffer-switch-to-saved-filter-groups)
     :bind (("C-x C-b"         . ibuffer)
            ("<C-tab>"         . next-buffer)
            ("<C-iso-lefttab>" . previous-buffer))
-    :hook ((ibuffer      . ibuffer-auto-mode)
-           (ibuffer-mode . ibuffer-do-sort-by-alphabetic))
+
+    :commands (ibuffer-switch-to-saved-filter-groups)
 
     :config
     (add-hook 'ibuffer-auto-mode-hook
@@ -1142,13 +1155,14 @@ readable sizes, and define a ton of filter groups.
                 (ibuffer-switch-to-saved-filter-groups "default")))
 
     (define-ibuffer-column size-h
-      (:name "Size" :inline t)
-      (cond
-       ((> (buffer-size) 1000000)
-        (format "%7.1fM" (/ (buffer-size) 1000000.0)))
-       ((> (buffer-size) 1000)
-        (format "%7.1fk" (/ (buffer-size) 1000.0)))
-       (t (format "%8d" (buffer-size)))))
+      (:name "Size" :inline 't)
+      (cond ((> (buffer-size) (* 1000 1000 1000))
+             (format "%7.1fG" (/ (buffer-size) 1000000000.0)))
+            ((> (buffer-size) (* 1000 1000))
+             (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+            ((> (buffer-size) 1000)
+             (format "%7.1fK" (/ (buffer-size) 1000.0)))
+            ('t (format "%8d" (buffer-size)))))
 
     (defvar ibuffer-show-empty-filter-groups)
     (defvar ibuffer-saved-filter-groups)
@@ -1215,7 +1229,10 @@ readable sizes, and define a ton of filter groups.
                              (name 35 35 :left :nil) " "
                              (size-h 9 -1 :right) " "
                              (mode 16 16 :left :elide) " "
-                             filename-and-process))))
+                             filename-and-process)))
+
+    :hook ((ibuffer      . ibuffer-auto-mode)
+           (ibuffer-mode . ibuffer-do-sort-by-alphabetic)))
 #+END_SRC
 
 **** ivy
@@ -1228,8 +1245,8 @@ readable sizes, and define a ton of filter groups.
            ("<f6>"    . ivy-resume))
 
     :config
-    (setq ivy-use-virtual-buffers      t
-          enable-recursive-minibuffers t))
+    (setq ivy-use-virtual-buffers      't
+          enable-recursive-minibuffers 't))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1249,8 +1266,8 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package magit
-    :demand t
-    :bind ("C-c C-c" . with-editor-finish))
+    :bind ("C-c C-c" . with-editor-finish)
+    :demand 't)
 #+END_SRC
 
 **** nov
@@ -1278,7 +1295,7 @@ users may want to disable this.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ranger
     :commands (ranger-override-dired-mode)
-    :init (ranger-override-dired-mode t))
+    :init (ranger-override-dired-mode 't))
 #+END_SRC
 
 **** scratch
@@ -1306,10 +1323,11 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package server
-    :demand t
-    :commands (package-utils-upgrade-all server-start)
     :bind ("C-x C-c" . baemacs-server-stop)
-
+    :commands (package-utils-upgrade-all server-start)
+    :config
+    (unless (and (fboundp 'server-running-p) (server-running-p)) (server-start))
+    :demand 't
     :init
     (defun baemacs-server-kill()
       "Delete current Emacs server, then kill Emacs"
@@ -1321,24 +1339,20 @@ appreciate the additional functions.
       "Prompt to save buffers, then kill Emacs."
       (interactive)
       (if (y-or-n-p "Quit Emacs? ")
-          (save-buffers-kill-emacs)))
-
-    :config
-    (unless (and (fboundp 'server-running-p)
-                 (server-running-p))
-      (server-start)))
+          (save-buffers-kill-emacs))))
 #+END_SRC
 
 **** smartparens
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
-    :hook ((eshell-mode org-mode prog-mode text-mode)
-           . turn-on-smartparens-mode)
     :config
     (setq sp-highlight-pair-overlay     nil
           sp-highlight-wrap-overlay     nil
-          sp-highlight-wrap-tag-overlay nil))
+          sp-highlight-wrap-tag-overlay nil)
+
+    :hook ((eshell-mode org-mode prog-mode text-mode)
+           . turn-on-smartparens-mode))
 #+END_SRC
 
 **** swiper
@@ -1398,12 +1412,12 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (add-hook 'c-mode-hook
             (lambda()
-              (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
               (defvar c-basic-offset)
               (setq-local c-basic-offset   8
                           c-default-style  "bsd"
-                          indent-tabs-mode t
-                          tab-width        8))
+                          indent-tabs-mode 't
+                          tab-width        8)
+              (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode)))
             nil 'local)
 #+END_SRC
 
@@ -1412,13 +1426,13 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (add-hook 'c++-mode-hook
             (lambda()
-              (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-              (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode))
               (defvar c-basic-offset)
               (setq-local c-basic-offset   4
                           c-default-style  "ellemtel"
-                          indent-tabs-mode t
-                          tab-width        4))
+                          indent-tabs-mode 't
+                          tab-width        4)
+              (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+              (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode)))
             nil 'local)
 #+END_SRC
 
@@ -1433,7 +1447,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package cmake-mode
-    :defer t)
+    :defer 't)
 #+END_SRC
 
 **** CSV
@@ -1461,7 +1475,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dotenv-mode
-    :defer t)
+    :defer 't)
 #+END_SRC
 
 **** GDScript (Disabled)
@@ -1472,7 +1486,6 @@ appreciate the additional functions.
 #+END_SRC
 
 **** Git
-These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitattributes-mode
@@ -1495,29 +1508,30 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package go-mode
-    :mode ("\\.go\\'" . go-mode)
     :config
     (setq-local c-basic-offset   4
-                indent-tabs-mode t
-                tab-width        4))
+                indent-tabs-mode 't
+                tab-width        4)
+
+    :mode ("\\.go\\'" . go-mode))
 #+END_SRC
 
 **** HCL
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package hcl-mode
-    :mode (("\\.hcl\\'" . hcl-mode))
     :config
-    (add-hook 'hcl-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil t)))
-
     (setq hcl-indent-level 4)
     (setq-local c-basic-offset   4
                 indent-tabs-mode nil
-                tab-width        4))
+                tab-width        4)
+
+    :hook (hcl-mode . (lambda()
+                        (add-hook 'before-save-hook
+                                  (lambda() (untabify (point-min) (point-max)))
+                                  nil 'local)))
+
+    :mode (("\\.hcl\\'" . hcl-mode)))
 #+END_SRC
 
 **** Jinja2
@@ -1531,12 +1545,12 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package json-mode
-    :mode ("\\.json\\'" . json-mode)
     :config
     (setq json-mode-indent-level 4)
     (setq-local c-basic-offset   4
                 indent-tabs-mode nil
-                tab-width        4))
+                tab-width        4)
+    :mode ("\\.json\\'" . json-mode))
 #+END_SRC
 
 **** Julia
@@ -1581,14 +1595,14 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nginx-mode
-    :defer t)
+    :defer 't)
 #+END_SRC
 
 **** Ninja
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ninja-mode
-    :defer t)
+    :defer 't)
 #+END_SRC
 
 **** Org
@@ -1600,22 +1614,27 @@ These packages provide modes that make git-related files more readable.
                 ([remap forward-paragraph]  . nil)
                 ("C-S-<down>" . nil)
                 ("C-S-<up>"   . nil)
-	        ("M-<down>"   . nil)
-	        ("M-<up>"     . nil)
+                ("M-<down>"   . nil)
+                ("M-<up>"     . nil)
                 ("S-<left>"   . nil)
                 ("S-<right>"  . nil))
+
+    :config
+    (setq org-src-fontify-natively  't
+          org-src-tab-acts-natively 't
+          org-support-shift-select  'always)
+
+    (setq-local indent-tabs-mode nil)
+
+    (set-face-attribute 'org-block nil
+                        :background "#111111" :extend 't)
+
     :hook ((org-metadown  . windmove-down)
            (org-metaleft  . windmove-left)
            (org-metaright . windmove-right)
            (org-metaup    . windmove-up))
-    :mode ("\\.org\\'" . org-mode)
-    :config
-    (setq org-src-fontify-natively  t
-          org-src-tab-acts-natively t
-          org-support-shift-select  'always)
-    (setq-local indent-tabs-mode nil)
-    (set-face-attribute 'org-block nil
-                        :background "#111111" :extend t))
+
+    :mode ("\\.org\\'" . org-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1626,8 +1645,8 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-drill
-    :defer t
-    :commands (org-drill))
+    :commands (org-drill)
+    :defer 't)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1691,7 +1710,7 @@ These packages provide modes that make git-related files more readable.
             (lambda()
               (add-hook 'before-save-hook
                         (lambda() (untabify (point-min) (point-max)))
-                        nil t))
+                        nil 'local))
             (setq-local indent-tabs-mode nil))
 #+END_SRC
 
@@ -1713,9 +1732,9 @@ These packages provide modes that make git-related files more readable.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package yaml-mode
+    :config (setq-local indent-tabs-mode nil)
     :mode (("\\.yaml\\'" . yaml-mode)
-           ("\\.yml\\'"  . yaml-mode))
-    :config (setq-local indent-tabs-mode nil))
+           ("\\.yml\\'"  . yaml-mode)))
 #+END_SRC
 
 **** Zig
