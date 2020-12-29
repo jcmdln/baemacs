@@ -953,6 +953,7 @@ look like typical unix shells, so maybe try it for yourself.
     (defun baemacs/eshell/clear()
       "Clear the current eshell buffer by truncating the contents."
       (interactive)
+      (defvar eshell-buffer-maximum-lines)
       (setq-local eshell-buffer-maximum-lines 0)
       (eshell-truncate-buffer))
 
@@ -967,7 +968,6 @@ look like typical unix shells, so maybe try it for yourself.
                 (if (= (user-uid) 0) "# " "$ "))))
 
     (defvar eshell-banner-message)
-    (defvar eshell-buffer-maximum-lines)
     (defvar eshell-cmpl-cycle-completions)
     (defvar eshell-error-if-no-glob)
     (defvar eshell-hist-ignoredups)
