@@ -552,11 +552,11 @@ adjusting how the clipboard works in Emacs.
 Display line numbers in most types of modes where it makes sense.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'conf-mode-hook 'display-line-numbers-mode)
-  (add-hook 'lisp-mode-hook 'display-line-numbers-mode)
-  (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (add-hook 'org-mode-hook  'display-line-numbers-mode)
-  (add-hook 'text-mode-hook 'display-line-numbers-mode)
+  (add-hook 'after-init-hook
+            (lambda()
+              (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+              (add-hook 'org-mode-hook  'display-line-numbers-mode)
+              (add-hook 'text-mode-hook 'display-line-numbers-mode)))
 #+END_SRC
 
 **** Modeline
@@ -820,7 +820,8 @@ irssi, weechat, or other clients I've used in the past.
           company-echo-delay     0
           company-tooltip-limit  20)
 
-    :hook ((lisp-mode prog-mode text-mode) . company-mode))
+    :hook ((prog-mode . company-mode)
+           (text-mode . company-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1410,30 +1411,37 @@ appreciate the additional functions.
 **** C
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (add-hook 'c-mode-hook
-            (lambda()
-              (defvar c-basic-offset)
-              (setq-local c-basic-offset   8
-                          c-default-style  "bsd"
-                          indent-tabs-mode 't
-                          tab-width        8)
-              (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode)))
-            nil 'local)
+  (use-package cc-mode
+    :init
+    (add-hook 'c-mode-hook
+              (lambda()
+                (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
+
+                (setq-local c-basic-offset   8
+                            c-default-style  "linux"
+                            indent-tabs-mode 't
+                            tab-width        8)))
+
+    :mode ("\\.c\\'" . c-mode))
 #+END_SRC
 
 **** C++
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (add-hook 'c++-mode-hook
-            (lambda()
-              (defvar c-basic-offset)
-              (setq-local c-basic-offset   4
-                          c-default-style  "ellemtel"
-                          indent-tabs-mode 't
-                          tab-width        4)
-              (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-              (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode)))
-            nil 'local)
+  (use-package cc-mode
+    :init
+    (add-hook 'c++-mode-hook
+              (lambda()
+                (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+                (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode))
+
+                (setq-local c-basic-offset   4
+                            c-default-style  "ellemtel"
+                            indent-tabs-mode 't'
+                            tab-width        4)))
+
+    :mode (("\\.cpp\\'" . c++-mode)
+           ("\\.cxx\\'" . c++-mode)))
 #+END_SRC
 
 **** Caddy (Disabled)
@@ -1508,10 +1516,12 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package go-mode
-    :config
-    (setq-local c-basic-offset   4
-                indent-tabs-mode 't
-                tab-width        4)
+    :init
+    (add-hook 'go-mode-hook
+              (lambda()
+                (setq-local c-basic-offset   4
+                            indent-tabs-mode nil
+                            tab-width        4)))
 
     :mode ("\\.go\\'" . go-mode))
 #+END_SRC
@@ -1520,16 +1530,17 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package hcl-mode
-    :config
-    (setq hcl-indent-level 4)
-    (setq-local c-basic-offset   4
-                indent-tabs-mode nil
-                tab-width        4)
+    :init
+    (add-hook 'hcl-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
 
-    :hook (hcl-mode . (lambda()
-                        (add-hook 'before-save-hook
-                                  (lambda() (untabify (point-min) (point-max)))
-                                  nil 'local)))
+                (setq-local c-basic-offset   4
+                            hcl-indent-level 4
+                            indent-tabs-mode nil
+                            tab-width        4)))
 
     :mode (("\\.hcl\\'" . hcl-mode)))
 #+END_SRC
@@ -1545,11 +1556,18 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package json-mode
-    :config
-    (setq json-mode-indent-level 4)
-    (setq-local c-basic-offset   4
-                indent-tabs-mode nil
-                tab-width        4)
+    :init
+    (add-hook 'json-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+
+                (setq-local c-basic-offset         2
+                            indent-tabs-mode       nil
+                            json-mode-indent-level 2
+                            tab-width              2)))
+
     :mode ("\\.json\\'" . json-mode))
 #+END_SRC
 
@@ -1571,16 +1589,30 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (add-hook 'lisp-mode-hook
             (lambda()
-              (defvar c-basic-offset)
-              (setq-local c-basic-offset   8
-                          indent-tabs-mode nil
-                          tab-width        8)))
+              (add-hook 'before-save-hook
+                        (lambda() (untabify (point-min) (point-max)))
+                        nil 'local)
+
+              (setq-local c-basic-offset         8
+                          indent-tabs-mode       nil
+                          tab-width              8)))
 #+END_SRC
 
 **** Markdown
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package markdown-mode
+    :init
+    (add-hook 'markdown-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+
+                (setq-local c-basic-offset         4
+                            indent-tabs-mode       nil
+                            tab-width              4)))
+
     :mode ("\\.md\\'" . markdown-mode))
 #+END_SRC
 
@@ -1624,15 +1656,14 @@ appreciate the additional functions.
           org-src-tab-acts-natively 't
           org-support-shift-select  'always)
 
-    (setq-local indent-tabs-mode nil)
-
     (set-face-attribute 'org-block nil
                         :background "#111111" :extend 't)
 
     :hook ((org-metadown  . windmove-down)
            (org-metaleft  . windmove-left)
            (org-metaright . windmove-right)
-           (org-metaup    . windmove-up))
+           (org-metaup    . windmove-up)
+           (org-mode . (lambda() (setq-local indent-tabs-mode nil))))
 
     :mode ("\\.org\\'" . org-mode))
 #+END_SRC
@@ -1701,10 +1732,17 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rust-mode
     :commands (rust-format-buffer rust-mode)
-    :hook (rust-mode . (lambda()
-                         (setq-local c-basic-offset   4
-                                     indent-tabs-mode 't
-                                     tab-width        4)))
+    :init
+    (add-hook 'rust-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+
+                (setq-local c-basic-offset         4
+                            indent-tabs-mode       nil
+                            tab-width              4)))
+
     :mode ("\\.rs\\'" . rust-mode))
 #+END_SRC
 
@@ -1715,8 +1753,8 @@ appreciate the additional functions.
             (lambda()
               (add-hook 'before-save-hook
                         (lambda() (untabify (point-min) (point-max)))
-                        nil 'local))
-            (setq-local indent-tabs-mode nil))
+                        nil 'local)
+              (setq-local indent-tabs-mode nil)))
 #+END_SRC
 
 **** Sed
@@ -1737,8 +1775,19 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package yaml-mode
-    :config (setq-local indent-tabs-mode nil)
-    :mode (("\\.yaml\\'" . yaml-mode)
+    :init
+    (add-hook 'yaml-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+
+                (setq-local c-basic-offset         4
+                            indent-tabs-mode       nil
+                            tab-width              4)))
+
+    :mode (("\\.clang-format\\'" . yaml-mode)
+           ("\\.yaml\\'" . yaml-mode)
            ("\\.yml\\'"  . yaml-mode)))
 #+END_SRC
 
