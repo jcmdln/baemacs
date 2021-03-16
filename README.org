@@ -554,6 +554,7 @@ Display line numbers in most types of modes where it makes sense.
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (add-hook 'after-init-hook
             (lambda()
+              (add-hook 'conf-mode-hook 'display-line-numbers-mode)
               (add-hook 'prog-mode-hook 'display-line-numbers-mode)
               (add-hook 'org-mode-hook  'display-line-numbers-mode)
               (add-hook 'text-mode-hook 'display-line-numbers-mode)))
