@@ -1101,7 +1101,8 @@ though here we will attempt to make gnus behave like other clients.
     (defvar gnus-thread-hide-subtree)
     (defvar gnus-thread-sort-functions)
 
-    (setq gnus-show-threads                      't
+    (setq gnus-permanently-visible-groups        ".*"
+          gnus-show-threads                      't
           gnus-sum-thread-tree-false-root        ""
           gnus-sum-thread-tree-indent            "  "
           gnus-sum-thread-tree-leaf-with-other   "├─> "
