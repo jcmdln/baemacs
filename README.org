@@ -1,7 +1,7 @@
 # -*- mode : org -*-
-#+TITLE: Baemacs - A Literate GNU/Emacs Configuration
-#+STARTUP: indent
 #+LANGUAGE: en
+#+STARTUP: indent
+#+TITLE: Baemacs - A Literate GNU/Emacs Configuration
 
 Baemacs is yet another take on a literate GNU/Emacs configuration that intends
 to remain close to the default behavior and appearance.  Baemacs is built with
@@ -350,8 +350,9 @@ exists on multiple sources.
           ("melpa"        . 1))
 
         package-pinned-packages
-        '((use-package . "melpa")
-          (hcl-mode    . "melpa")))
+        '((hcl-mode    . "melpa")
+          (ivy-rich    . "melpa")
+          (use-package . "melpa")))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
@@ -898,14 +899,18 @@ use many buffers.
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
 
-    (add-to-list 'eglot-server-programs '(c-mode . ("clangd")))
+    (add-to-list 'eglot-server-programs '(c-mode   . ("clangd")))
     (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
 
-    :hook (((c-mode c++-mode go-mode python-mode rust-mode) . 'eglot-ensure)
-           (eglot-managed-mode . (lambda()
-                                   (add-hook 'before-save-hook
-                                             'eglot-format-buffer
-                                             nil 'local)))))
+    :hook (((c-mode
+             c++-mode
+             go-mode
+             python-mode
+             rust-mode
+             zig-mode) . 'eglot-ensure)
+           (eglot-managed-mode
+            . (lambda()
+                (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))))
 #+END_SRC
 
 **** eldoc
@@ -1103,7 +1108,7 @@ though here we will attempt to make gnus behave like other clients.
           gnus-sum-thread-tree-root              ""
           gnus-sum-thread-tree-single-leaf       "╰─> "
           gnus-sum-thread-tree-vertical          "│ "
-          gnus-summary-line-format               "%U%R:%-15,15o  %-20,20A  %B%s\n"
+          gnus-summary-line-format               "%U%R:%-15,15o  %-20,20A  %-3,3t  %B%s\n"
           gnus-summary-thread-gathering-function 'gnus-gather-threads-by-subject
           gnus-thread-hide-subtree               't
           gnus-thread-sort-functions             '(gnus-thread-sort-by-date))
@@ -1438,7 +1443,7 @@ appreciate the additional functions.
 
                 (setq-local c-basic-offset   4
                             c-default-style  "ellemtel"
-                            indent-tabs-mode 't'
+                            indent-tabs-mode 't
                             tab-width        4)))
 
     :mode (("\\.cpp\\'" . c++-mode)
