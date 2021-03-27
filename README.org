@@ -135,6 +135,7 @@ don't want to turn Emacs into some other editor.
       - [[#csv][CSV]]
       - [[#docker][Docker]]
       - [[#dotenv][DotEnv]]
+      - [[#emacs-lisp][Emacs Lisp]]
       - [[#gdscript-disabled][GDScript (Disabled)]]
       - [[#git][Git]]
       - [[#go][Go]]
@@ -142,7 +143,6 @@ don't want to turn Emacs into some other editor.
       - [[#jinja2][Jinja2]]
       - [[#json][JSON]]
       - [[#julia][Julia]]
-      - [[#lisp][Lisp]]
       - [[#markdown][Markdown]]
       - [[#meson][Meson]]
       - [[#nginx][NGINX]]
@@ -1498,6 +1498,25 @@ appreciate the additional functions.
     :defer 't)
 #+END_SRC
 
+**** Emacs Lisp
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package elisp-mode
+    :commands (emacs-lisp-mode)
+    :ensure nil
+    :init
+    (add-hook 'emacs-lisp-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+
+                (setq-local indent-tabs-mode nil)))
+
+    :mode (("\\.el\\" . emacs-lisp-mode)
+           ("\\.elc\\" . emacs-lisp-mode)))
+#+END_SRC
+
 **** GDScript (Disabled)
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1593,21 +1612,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package julia-mode
-    :mode ("\\.jl\\'" . julia-mode))
-#+END_SRC
-
-**** Lisp
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (add-hook 'lisp-mode-hook
-            (lambda()
-              (add-hook 'before-save-hook
-                        (lambda() (untabify (point-min) (point-max)))
-                        nil 'local)
-
-              (setq-local c-basic-offset         8
-                          indent-tabs-mode       nil
-                          tab-width              8)))
+    :mode "\\.jl\\'")
 #+END_SRC
 
 **** Markdown
