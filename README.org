@@ -1004,10 +1004,11 @@ look like typical unix shells, so maybe try it for yourself.
           eshell-scroll-to-bottom-on-output nil
           eshell-scroll-show-maximum-output nil)
 
-    :hook (eshell-mode . (lambda()
-                           (defalias 'eshell/clear 'baemacs/eshell/clear)))
-
     :init
+    (add-hook 'eshell-mode-hook
+              (lambda()
+                (defalias 'eshell/clear 'baemacs/eshell/clear)))
+
     (defun eshell-new()
       "Open a new instance of eshell."
       (interactive)
