@@ -396,10 +396,14 @@ is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package no-littering
-    :commands (no-littering-expand-var-file-name)
+    :commands (dired-create-directory no-littering-expand-var-file-name)
     :init
     (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't))))
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't)))
+
+    (if (file-directory-p (concat user-emacs-directory "var/auto-save"))
+        nil
+      (dired-create-directory (concat user-emacs-directory "var/auto-save"))))
 #+END_SRC
 
 **** package-utils
