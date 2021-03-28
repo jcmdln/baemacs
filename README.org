@@ -1289,7 +1289,7 @@ This package provides a major mode for reading EPUB documents.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package nov
-    :mode ("\\.epub\\'" . nov-mode))
+    :mode ("\\.epub$" . nov-mode))
 #+END_SRC
 
 **** rainbow-delimiters
@@ -1417,7 +1417,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package bpftrace-mode
-    :mode "\\.bt\\'")
+    :mode "\\.bt$")
 #+END_SRC
 
 **** C
@@ -1434,7 +1434,7 @@ appreciate the additional functions.
                             indent-tabs-mode 't
                             tab-width        8)))
 
-    :mode ("\\.c\\'" . c-mode))
+    :mode ("\\.c$" . c-mode))
 #+END_SRC
 
 **** C++
@@ -1452,8 +1452,8 @@ appreciate the additional functions.
                             indent-tabs-mode 't
                             tab-width        4)))
 
-    :mode (("\\.cpp\\'" . c++-mode)
-           ("\\.cxx\\'" . c++-mode)))
+    :mode (("\\.cpp$" . c++-mode)
+           ("\\.cxx$" . c++-mode)))
 #+END_SRC
 
 **** Caddy (Disabled)
@@ -1474,21 +1474,21 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package csv-mode
-    :mode "\\.csv\\'")
+    :mode "\\.csv$")
 #+END_SRC
 
 **** Docker
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package docker-compose-mode
-    :mode ("\\docker-compose.yml\\'"
-           "\\podman-compose.yml\\'"))
+    :mode ("^docker-compose.yml$"
+           "^podman-compose.yml$"))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dockerfile-mode
-    :mode ("\\Containerfile\\'"
-           "\\Dockerfile\\'"))
+[  (use-package dockerfile-mode
+    :mode ("^Containerfile$"
+           "^Dockerfile$"))]
 #+END_SRC
 
 **** DotEnv
@@ -1513,8 +1513,7 @@ appreciate the additional functions.
 
                 (setq-local indent-tabs-mode nil)))
 
-    :mode (("\\.el\\" . emacs-lisp-mode)
-           ("\\.elc\\" . emacs-lisp-mode)))
+    :mode ("\\.el\\'"  . emacs-lisp-mode))
 #+END_SRC
 
 **** GDScript (Disabled)
@@ -1528,19 +1527,19 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitattributes-mode
-    :mode "\\.gitattributes\\'")
+    :mode "\\.gitattributes$")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitconfig-mode
-    :mode ("\\.gitconfig\\'"
-           "\\.gitmodules\\'"))
+    :mode ("\\.gitconfig$"
+           "\\.gitmodules$"))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package gitignore-mode
-    :mode ("\\.gitignore\\'"
-           "\\.dockerignore\\'"))
+    :mode ("\\.gitignore$"
+           "\\.dockerignore$"))
 #+END_SRC
 
 **** Go
@@ -1554,7 +1553,7 @@ appreciate the additional functions.
                             indent-tabs-mode nil
                             tab-width        4)))
 
-    :mode "\\.go\\'")
+    :mode "\\.go$")
 #+END_SRC
 
 **** HCL
@@ -1573,14 +1572,14 @@ appreciate the additional functions.
                             indent-tabs-mode nil
                             tab-width        4)))
 
-    :mode "\\.hcl\\'")
+    :mode "\\.hcl$")
 #+END_SRC
 
 **** Jinja2
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package jinja2-mode
-    :mode "\\.j2\\'")
+    :mode "\\.j2$")
 #+END_SRC
 
 **** JSON
@@ -1599,7 +1598,7 @@ appreciate the additional functions.
                             json-mode-indent-level 2
                             tab-width              2)))
 
-    :mode "\\.json\\'")
+    :mode "\\.json$")
 #+END_SRC
 
 **** Julia
@@ -1612,7 +1611,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package julia-mode
-    :mode "\\.jl\\'")
+    :mode "\\.jl$")
 #+END_SRC
 
 **** Markdown
@@ -1630,14 +1629,14 @@ appreciate the additional functions.
                             indent-tabs-mode       nil
                             tab-width              4)))
 
-    :mode "\\.md\\'")
+    :mode "\\.md$")
 #+END_SRC
 
 **** Meson
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package meson-mode
-    :mode "\\meson.build\\'")
+    :mode "meson.build$")
 #+END_SRC
 
 **** NGINX
@@ -1682,7 +1681,7 @@ appreciate the additional functions.
            (org-metaup    . windmove-up)
            (org-mode . (lambda() (setq-local indent-tabs-mode nil))))
 
-    :mode "\\.org\\'")
+    :mode "\\.org$")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1720,7 +1719,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package protobuf-mode
-    :mode "\\.proto\\'")
+    :mode "\\.proto$")
 #+END_SRC
 
 **** Python
@@ -1760,7 +1759,7 @@ appreciate the additional functions.
                             indent-tabs-mode       nil
                             tab-width              4)))
 
-    :mode "\\.rs\\'")
+    :mode "\\.rs$")
 #+END_SRC
 
 **** Shell
