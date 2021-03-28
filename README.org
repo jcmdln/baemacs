@@ -154,6 +154,7 @@ don't want to turn Emacs into some other editor.
       - [[#rust][Rust]]
       - [[#shell][Shell]]
       - [[#sed][Sed]]
+      - [[#toml][Toml]]
       - [[#verilog][Verilog]]
       - [[#yaml][YAML]]
       - [[#zig][Zig]]
@@ -1774,21 +1775,36 @@ appreciate the additional functions.
                           nil 'local)
                 (setq-local indent-tabs-mode nil)))
 
-    :mode ("\\.sh\\'" . sh-mode))
+    :mode ("\\.sh$" . sh-mode))
 #+END_SRC
 
 **** Sed
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package sed-mode
-    :mode "\\.sed\\'")
+    :mode "\\.sed$")
+#+END_SRC
+
+**** Toml
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package conf-mode
+    :init
+    (add-hook 'conf-toml-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+                (setq-local indent-tabs-mode nil)))
+
+    :mode (("\\.toml$" . conf-toml-mode)))
 #+END_SRC
 
 **** Verilog
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package verilog-mode
-    :mode "\\.v\\'")
+    :mode "\\.v$")
 #+END_SRC
 
 **** YAML
@@ -1806,16 +1822,16 @@ appreciate the additional functions.
                             indent-tabs-mode       nil
                             tab-width              4)))
 
-    :mode ("\\.clang-format\\'"
-           "\\.yaml\\'"
-           "\\.yml\\'"))
+    :mode ("\\.clang-format$"
+           "\\.yaml$"
+           "\\.yml$"))
 #+END_SRC
 
 **** Zig
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package zig-mode
-    :mode "\\.zig\\'")
+    :mode "\\.zig$")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
