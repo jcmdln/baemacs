@@ -1532,7 +1532,8 @@ appreciate the additional functions.
 
                 (setq-local indent-tabs-mode nil)))
 
-    :mode ("\\.el\\'"  . emacs-lisp-mode))
+    :mode (("\\.el"  . emacs-lisp-mode)
+           ("\\.elc" . emacs-lisp-mode)))
 #+END_SRC
 
 **** GDScript (Disabled)
