@@ -131,6 +131,7 @@ don't want to turn Emacs into some other editor.
       - [[#c][C]]
       - [[#c-1][C++]]
       - [[#caddy-disabled][Caddy (Disabled)]]
+      - [[#cfg--ini][Cfg / Ini]]
       - [[#cmake][CMake]]
       - [[#csv][CSV]]
       - [[#docker][Docker]]
@@ -1462,6 +1463,23 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package caddyfile-mode
     :disabled)
+#+END_SRC
+
+
+**** Cfg / Ini
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package conf-mode
+    :init
+    (add-hook 'conf-toml-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda() (untabify (point-min) (point-max)))
+                          nil 'local)
+                (setq-local indent-tabs-mode nil)))
+
+    :mode ("\\.cfg"
+           "\\.ini"))
 #+END_SRC
 
 **** CMake
