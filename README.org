@@ -204,7 +204,7 @@ platform.
     --with-toolkit-scroll-bars \
     --with-xml2 \
     --with-zlib
-  $ make -j$(grep -c ^processor /proc/cpuinfo)
+  $ make NATIVE_FULL_AOT=1 -j$(grep -c ^processor /proc/cpuinfo)
   $ sudo make install
 #+END_SRC
 
