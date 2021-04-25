@@ -186,7 +186,7 @@ platform.
   $ ./autogen.sh
   $ ./configure \
     CC="gcc" \
-    CFLAGS="-O3 -g3 -march=native -pipe" \
+    CFLAGS="-O2 -g3 -march=native -pipe" \
     --without-all \
     --without-x \
     --with-dbus \
