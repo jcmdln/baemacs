@@ -61,6 +61,7 @@ don't want to turn Emacs into some other editor.
 
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
+  - [[#building-emacs-with-native-compilation][Building Emacs with native-compilation]]
   - [[#install][Install]]
 - [[#configuration-files][Configuration Files]]
   - [[#early-initel][early-init.el]]
@@ -166,6 +167,46 @@ This singular file is all that is needed to fully replicate this config.  While
 you may simply download a copy of this file and use it, the steps below will
 reference using git to retrieve and manage your copy of the config, which will
 hopefully simplify incorporating your own changes.
+
+** Building Emacs with native-compilation
+
+When native compilation lands in upstream Emacs, this section will be removed.
+
+This is optional but highly recommended for those seeking improved
+performance. The following example shows how I compile my own equivalent of
+~emacs-nox~ for Fedora though it should be trivial to adapt it to your target
+platform.
+
+#+BEGIN_SRC shell :eval no :tangle no
+  $ sudo dnf install -y automake gnutls-devel gpm-devel jansson-devel \
+    libgccjit-devel ncurses-devel systemd-devel
+  $ git clone --branch feature/native-comp --depth 1 \
+    https://github.com/emacs-mirror/emacs
+  $ cd emacs
+  $ ./autogen.sh
+  $ ./configure \
+    CC="gcc" \
+    CFLAGS="-O3 -g3 -march=native -pipe" \
+    --without-all \
+    --without-x \
+    --with-dbus \
+    --with-file-notification \
+    --with-gpm \
+    --with-gnutls \
+    --with-json \
+    --with-libgmp \
+    --with-libsystemd \
+    --with-mailutils \
+    --with-modules \
+    --with-native-compilation \
+    --with-selinux \
+    --with-threads \
+    --with-toolkit-scroll-bars \
+    --with-xml2 \
+    --with-zlib
+  $ make -j$(grep -c ^processor /proc/cpuinfo)
+  $ sudo make install
+#+END_SRC
 
 ** Install
 
