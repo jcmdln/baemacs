@@ -180,8 +180,7 @@ platform.
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install -y automake gnutls-devel gpm-devel jansson-devel \
     libgccjit-devel ncurses-devel systemd-devel
-  $ git clone --branch feature/native-comp --depth 1 \
-    https://github.com/emacs-mirror/emacs
+  $ git clone --branch master --depth 1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
   $ ./configure \
