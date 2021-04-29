@@ -4,12 +4,12 @@
 #+TITLE: Baemacs - A Literate GNU/Emacs Configuration
 
 Baemacs is yet another take on a literate GNU/Emacs configuration that intends
-to remain close to the default behavior and appearance.  Baemacs is built with
-use-package and org which is all contained within this singular file, which also
-includes documentation and other such context.
+to remain close to the default behavior and appearance. Baemacs is built with
+use-package and org which is all contained within this singular file, which
+also includes documentation and other such context.
 
 Because this file is checked on init for changes, this single file becomes your
-management tool for maintaining your Emacs config.  Whenever this file is newer
+management tool for maintaining your Emacs config. Whenever this file is newer
 than a configuration file, your entire configuration will be tangled, compiled,
 and loaded automatically.
 
@@ -20,11 +20,11 @@ don't want to turn Emacs into some other editor.
 
 1. Preserve (most) core GNU/Emacs functionality
 
-   Unlike other configurations, there is no evil-mode support and we don't remap
-   any (useful) default keybinds.  If you are comfortable with plain GNU/Emacs,
-   you should feel empowered by Baemacs.  Vi/Vim and evil-mode users should most
-   likely look at one of the many alternatives that provides or defaults to
-   evil-mode.
+   Unlike other configurations, there is no evil-mode support and we don't
+   remap any (useful) default keybinds. If you are comfortable with plain
+   GNU/Emacs, you should feel empowered by Baemacs.  Vi/Vim and evil-mode users
+   should most likely look at one of the many alternatives that provides or
+   defaults to evil-mode.
 
 2. Leverage use-package for predictability
 
@@ -39,18 +39,18 @@ don't want to turn Emacs into some other editor.
 3. Fully document changes with context and reasoning (eventually)
 
    Having documentation, context of why something was added, and reasoning of
-   whether it is a good/bad/subjective addition allows you as the user to better
-   understand how each component ties together.
+   whether it is a good/bad/subjective addition allows you as the user to
+   better understand how each component ties together.
 
    Even better, you don't need to hunt any of this down, it's all in this file!
 
 4. Performance is a concern, though avoid voodoo
 
-   Emacs can initialize and run quickly without tricks, voodoo, or lies.  Most
+   Emacs can initialize and run quickly without tricks, voodoo, or lies. Most
    of the speed comes from properly configuring use-package to generate
-   autoloads, and we don't do any background loading of packages.  Just about
+   autoloads, and we don't do any background loading of packages. Just about
    everything is loaded upfront on init, and it still takes about 0.5s to 1.0s
-   depending on the performance of your device.  Anything that isn't loaded on
+   depending on the performance of your device. Anything that isn't loaded on
    init will be loaded on specific hooks or package relationships.
 
    There are two additional configuration changes that (hopefully) will have a
@@ -163,19 +163,19 @@ don't want to turn Emacs into some other editor.
 
 * Usage
 
-This singular file is all that is needed to fully replicate this config.  While
+This singular file is all that is needed to fully replicate this config. While
 you may simply download a copy of this file and use it, the steps below will
 reference using git to retrieve and manage your copy of the config, which will
 hopefully simplify incorporating your own changes.
 
 ** Building Emacs with native-compilation
 
-When native compilation lands in upstream Emacs, this section will be removed.
+When native compilation is enabled in Emacs by default, this section will be
+removed.
 
-This is optional but highly recommended for those seeking improved
-performance. The following example shows how I compile my own equivalent of
-~emacs-nox~ for Fedora though it should be trivial to adapt it to your target
-platform.
+This is optional but recommended for those seeking improved performance. The
+following example shows how I compile my own equivalent of ~emacs-nox~ for
+Fedora though it should be trivial to adapt it to your target platform.
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install -y automake gnutls-devel gpm-devel jansson-devel \
@@ -210,7 +210,7 @@ platform.
 ** Install
 
 By default, this configuration uses the XDG config path ~$HOME/.config~ which
-will be ignored if any other configuration location is present.  This path may
+will be ignored if any other configuration location is present. This path may
 or may not have been given a higher priority in recent releases.
 
 #+BEGIN_SRC shell :eval no :tangle no
@@ -219,8 +219,8 @@ or may not have been given a higher priority in recent releases.
 
 Paste this rather unsightly block into your terminal to use Emacs from the
 command line to tangle this file into the various configuration files, then
-byte-compile the managed files, finally loading the ~init.el~.  This will
-result in Emacs being fully setup and configured, and will never have to be run
+byte-compile the managed files, finally loading the ~init.el~. This will result
+in Emacs being fully setup and configured, and will never have to be run
 manually again.
 
 #+BEGIN_SRC shell :eval no :tangle no
@@ -237,9 +237,9 @@ manually again.
 
 To make the most effective use of the various startup files that Emacs will
 check for, each file listed in this section will detail the changes they
-contain.  The intention is to ensure that we don't force Emacs to load
-everything during initialization, instead loading the following config file at
-the end of initialization.
+contain. The intention is to ensure we don't force Emacs to load everything
+during initialization, instead loading the following config file at the end of
+initialization.
 
 ** early-init.el
 
@@ -254,20 +254,20 @@ the end of initialization.
 *** Garbage Collection
 
 Emacs makes some considerations for older and more memory restricted systems in
-terms of how the garbage collector is configured.  On modern 64-bit systems
+terms of how the garbage collector is configured. On modern 64-bit systems
 these considerations may be far too conservative for users who run many elisp
 programs such as gnus, elfeed, circe, etc.
 
 As Emacs develops its concurrency, parallelism, and events primitives these
-adjustments will need to be revisited.  Note that for memory constrained
+adjustments will need to be revisited. Note that for memory constrained
 environments you may want to disable the changes to the garbage collector made
 in this section.
 
 **** gc-cons-percentage
 
 For the purposes of initialization, we'll increase ~gc-cons-percentage~ to
-decrease garbage collection pauses.  The settings below mean that garbage
-collection is deferred until reaching 80% of the total heap size.  After
+decrease garbage collection pauses. The settings below mean that garbage
+collection is deferred until reaching 80% of the total heap size. After
 initialization completes we lower this value to 20% of the total heap size to
 prevent garbage collection passes from becoming too large to be handled
 quickly.
@@ -298,12 +298,12 @@ preserved as shown below:
 
 Now we will increase the ~gc-cons-threshold~, which refers to the total bytes
 of storage for lisp objects that must be allocated to trigger subsequent
-garbage collections.  On 32-bit systems this threshold is 400,000 objects,
-while on 64-bit systems it is 800,000 objects.
+garbage collections. On 32-bit systems this threshold is 400,000 objects, while
+on 64-bit systems it is 800,000 objects.
 
 Modifying this value is generally not recommended and considered an act of
 performance voodoo, though the idea is that by specifying a larger threshold,
-garbage collection will occur less often, meaning fewer GC pauses.  We'll set
+garbage collection will occur less often, meaning fewer GC pauses. We'll set
 this value to 10,000,000 globally, which ideally will reduce the total number
 of GC pauses we experience without garbage collection taking too long when it
 does occur.
@@ -406,7 +406,7 @@ With the above changes made, we may now initialize the package module:
 **** use-package
 
 The first package we'll ensure exists is use-package, which the rest of this
-file relies on for handling per-package configuration.  In newer versions of
+file relies on for handling per-package configuration. In newer versions of
 Emacs use-package is now a built-in, but we should check to be nice to older
 versions:
 
@@ -433,7 +433,7 @@ initialize:
 **** no-littering
 
 The second package will keep our Emacs configuration directory nice and tidy by
-adjusting the locations of configuration files.  It uses a unixy format, which
+adjusting the locations of configuration files. It uses a unixy format, which
 is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -465,7 +465,7 @@ is a nice change.
 *** Disable toolbars
 
 I don't find the toolbars to be useful comparatively to the amount of visual
-space they consume.  The following will disable the various toolbars when their
+space they consume. The following will disable the various toolbars when their
 functions are bound, which prevents them from ever being initialized:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -496,7 +496,7 @@ helpful for long-time Emacs users.
 
 ** init.el
 
-Emacs will look for this specific file once it reaches the init phase.  Here we
+Emacs will look for this specific file once it reaches the init phase. Here we
 will make modifications to things that ship with Emacs and should be changed as
 early as possible.
 
@@ -512,19 +512,19 @@ early as possible.
 *** Appearance
 
 In terms of appearance, I prefer to have as little wasted space and visual
-clutter as possible.  I make no attempt to completely restyle Emacs, preferring
+clutter as possible. I make no attempt to completely restyle Emacs, preferring
 instead to make slight modifications.
 
 **** Re-use Frames and Windows
 
 One big annoyance is Emacs arbitrary splitting my window to show a newly
-created buffer.  This is especially annoying when I run a command myself such
-as ~M-x man~ which causes arbitrary splits.
+created buffer. This is especially annoying when I run a command myself such as
+~M-x man~ which causes arbitrary splits.
 
 Here we will enforce always re-using the currently selected frame when a new
-buffer is opened or focused.  This works in most cases, though as shown below
+buffer is opened or focused. This works in most cases, though as shown below
 certain things like 'man' will not respect our choices and require specific
-adjustment.  Some things like 'gnus' should still make splits as they want, so
+adjustment. Some things like 'gnus' should still make splits as they want, so
 we won't look for every possible edge condition to normalize this behavior.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -564,8 +564,9 @@ Rather than include yet another theme, we’ll use the tango-dark theme.
 *** Editing
 
 There are some general-purpose changes to make for editing files, which ideally
-if I ever get around to incorporating ~site-start.el~ will allow loading a slim,
-nimble instance of Emacs when needed.  For now I'll leave these changes here.
+if I ever get around to incorporating ~site-start.el~ will allow loading a
+slim, nimble instance of Emacs when needed. For now I'll leave these changes
+here.
 
 **** Clipboard
 
@@ -727,9 +728,9 @@ support:
 
 Something we can do to slightly improve the total duration needed for Emacs to
 complete its initialization phase is byte-compile the configuration files we
-create.  If performed conditionally, we only have to pay the cost of
-byte-compiling when we make a change to this configuration file for the entire
-configuration to be rebuilt.
+create. If performed conditionally, we only pay the cost of byte-compiling when
+we make a change to this configuration file for the entire configuration to be
+rebuilt.
 
 At the end of initialization, ensure that ~README.org~ is not newer than
 ~config.el~, otherwise rebuild our configuration files and byte-compile them.
@@ -779,7 +780,7 @@ this file, first we'll add the file header:
 
 **** async
 
-Simplify calling asynchronous functions and processes.  See the documentation
+Simplify calling asynchronous functions and processes. See the documentation
 for ~async-start~ and ~async-start-process~ for more information.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1343,7 +1344,7 @@ This package provides a major mode for reading EPUB documents.
 **** ranger
 
 This package adds a minor mode that runs within ~dired~ that emulates much of
-the features provided by the ~ranger~ terminal file browser.  Hardcore ~dired~
+the features provided by the ~ranger~ terminal file browser. Hardcore ~dired~
 users may want to disable this.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
