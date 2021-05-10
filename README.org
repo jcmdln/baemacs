@@ -326,11 +326,6 @@ Another thing we want to handle very early is attempting to enforce the use of
 UTF-8 encoding.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (defvar prefer-coding-system)
-  (defvar set-default-coding-systems)
-  (defvar set-language-environment)
-  (defvar set-locale-environment)
-
   (setq prefer-coding-system       'utf-8
         set-default-coding-systems 'utf-8
         set-language-environment   "UTF-8"
@@ -533,11 +528,6 @@ we won't look for every possible edge condition to normalize this behavior.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (defvar pop-up-frames)
-  (defvar pop-up-windows)
-  (defvar reusable-frames)
-  (defvar Man-notify-method)
-
   (setq pop-up-frames     nil
         pop-up-windows    nil
         reusable-frames   't
@@ -698,10 +688,6 @@ In terms of the mouse, I really only adjust scrolling behavior and add xterm
 support:
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (defvar mouse-wheel-follow-mouse)
-  (defvar mouse-wheel-progressive-speed)
-  (defvar mouse-wheel-scroll-amount)
-
   (setq mouse-wheel-follow-mouse      't
         mouse-wheel-progressive-speed nil
         mouse-wheel-scroll-amount     '(1 ((shift) . 1))
@@ -809,17 +795,6 @@ irssi, weechat, or other clients I've used in the past.
     :defer 't
     :commands (enable-lui-logging-globally lui-set-prompt)
     :config
-    (defvar circe-default-part-message)
-    (defvar circe-default-quit-message)
-    (defvar circe-format-server-topic)
-    (defvar circe-reduce-lurker-spam)
-    (defvar circe-use-cycle-completion)
-    (defvar lui-fill-type)
-    (defvar lui-flyspell-alist)
-    (defvar lui-flyspell-p)
-    (defvar lui-time-stamp-format)
-    (defvar lui-time-stamp-position)
-
     (setq circe-default-part-message ""
           circe-default-quit-message ""
           circe-format-server-topic  "*** Topic: {userhost}: {topic-diff}"
@@ -859,11 +834,6 @@ irssi, weechat, or other clients I've used in the past.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company
     :config
-    (defvar company-begin-commands)
-    (defvar company-echo-delay)
-    (defvar company-idle-delay)
-    (defvar company-tooltip-limit)
-
     (setq company-begin-commands '(self-insert-command)
           company-idle-delay     0.3
           company-echo-delay     0
@@ -940,14 +910,11 @@ use many buffers.
   (use-package eglot
     :commands (eglot-ensure)
     :config
-    (defvar eglot-auto-display-help-buffer)
-    (defvar eglot-put-doc-in-help-buffer)
+    (add-to-list 'eglot-server-programs '(c-mode   . ("clangd")))
+    (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
 
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
-
-    (add-to-list 'eglot-server-programs '(c-mode   . ("clangd")))
-    (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
 
     :hook (((c-mode
              c++-mode
@@ -1020,19 +987,6 @@ look like typical unix shells, so maybe try it for yourself.
                     "~" (eshell/basename (eshell/pwd))) "]"
                 (if (= (user-uid) 0) "# " "$ "))))
 
-    (defvar eshell-banner-message)
-    (defvar eshell-cmpl-cycle-completions)
-    (defvar eshell-error-if-no-glob)
-    (defvar eshell-hist-ignoredups)
-    (defvar eshell-history-size)
-    (defvar eshell-prompt-function)
-    (defvar eshell-prompt-regexp)
-    (defvar eshell-save-history-on-exit)
-    (defvar eshell-scroll-show-maximum-output)
-    (defvar eshell-scroll-to-bottom-on-input)
-    (defvar eshell-scroll-to-bottom-on-output)
-    (defvar eshell-visual-commands)
-
     (setq eshell-banner-message             ""
           eshell-cmpl-cycle-completions     nil
           eshell-error-if-no-glob           't
@@ -1071,26 +1025,26 @@ specific buffer, you may now do so.
 
     :config
     (when window-system
-      (setq shr-blocked-images "")
-
       (defun eww-toggle-images()
         "Toggle blocking images in eww."
         (interactive)
         (if (bound-and-true-p shr-blocked-images)
             (setq-local shr-blocked-images nil)
           (setq-local shr-blocked-images ""))
-        (eww-reload)))
+        (eww-reload))
+
+      (setq shr-blocked-images ""))
 
     :init
-    (setq browse-url-browser-function 'eww-browse-url)
-
     (defun eww-new()
       "Open a new instance of eww."
       (interactive)
       (let ((url (read-from-minibuffer "Enter URL or keywords: ")))
         (switch-to-buffer (generate-new-buffer "*eww*"))
         (eww-mode)
-        (eww url))))
+        (eww url)))
+
+    (setq browse-url-browser-function 'eww-browse-url))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1137,16 +1091,8 @@ though here we will attempt to make gnus behave like other clients.
            ("<M-up>"   . windmove-up))
 
     :config
-    (defvar gnus-show-threads)
-    (defvar gnus-sum-thread-tree-false-root)
-    (defvar gnus-sum-thread-tree-indent)
-    (defvar gnus-sum-thread-tree-leaf-with-other)
-    (defvar gnus-sum-thread-tree-root)
-    (defvar gnus-sum-thread-tree-single-leaf)
-    (defvar gnus-sum-thread-tree-vertical)
-    (defvar gnus-summary-thread-gathering-function)
-    (defvar gnus-thread-hide-subtree)
-    (defvar gnus-thread-sort-functions)
+    (add-to-list 'mm-discouraged-alternatives "text/html")
+    (add-to-list 'mm-discouraged-alternatives "text/richtext")
 
     (setq gnus-permanently-visible-groups        ".*"
           gnus-show-threads                      't
@@ -1218,9 +1164,6 @@ readable sizes, and define a ton of filter groups.
             ((> (buffer-size) 1000)
              (format "%7.1fK" (/ (buffer-size) 1000.0)))
             ('t (format "%8d" (buffer-size)))))
-
-    (defvar ibuffer-show-empty-filter-groups)
-    (defvar ibuffer-saved-filter-groups)
 
     (setq ibuffer-show-empty-filter-groups nil
           ibuffer-saved-filter-groups
