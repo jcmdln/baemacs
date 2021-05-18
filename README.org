@@ -1828,7 +1828,7 @@ appreciate the additional functions.
                             tab-width              4)))
 
     :mode ("\\.clang-format$"
-           "\\.y.ml$"))
+           "\\.y.ml"))
 #+END_SRC
 
 **** Zig
