@@ -733,12 +733,17 @@ At the end of initialization, ensure that ~README.org~ is not newer than
     (byte-compile-file (concat user-emacs-directory "config.el"))
 
     (load (concat user-emacs-directory "early-init.el"))
-    (load (concat user-emacs-directory "init.el")))
+    (load (concat user-emacs-directory "init.el"))
+    (load (concat user-emacs-directory "config.el")))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (if (file-newer-than-file-p (concat user-emacs-directory "README.org")
-                              (concat user-emacs-directory "config.el"))
+  (if (or (file-newer-than-file-p (concat user-emacs-directory "README.org")
+                                  (concat user-emacs-directory "config.el"))
+          (file-newer-than-file-p (concat user-emacs-directory "README.org")
+                                  (concat user-emacs-directory "early-init.el"))
+          (file-newer-than-file-p (concat user-emacs-directory "README.org")
+                                  (concat user-emacs-directory "init.el")))
       (baemacs-reconfig)
     (load (concat user-emacs-directory "config.el")))
 #+END_SRC
