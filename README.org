@@ -722,10 +722,10 @@ At the end of initialization, ensure that ~README.org~ is not newer than
 ~config.el~, otherwise rebuild our configuration files and byte-compile them.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (require 'org)
   (defun baemacs-reconfig()
     "Tangle, build, and load configuration."
     (interactive)
-    (require 'org)
     (org-babel-tangle-file (concat user-emacs-directory "README.org"))
 
     (byte-compile-file (concat user-emacs-directory "early-init.el"))
