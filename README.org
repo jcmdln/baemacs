@@ -224,13 +224,29 @@ in Emacs being fully setup and configured, and will never have to be run
 manually again.
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ emacs --batch --eval="(progn (require 'org)
+  $ emacs --batch --eval="
+  (progn
+    (require 'org)
+    (setq package-native-compile t)
+
+    (native-compile-async
+     (dolist (item load-path result)
+       (if (string-match-p \"/lisp$\" item)
+           (setq-local result item)))
+     'recursively)
+
+    (while (or comp-files-queue
+               (> (comp-async-runnings) 0))
+      (sleep-for 1))
+
     (org-babel-tangle-file \"~/.config/emacs/README.org\")
-    (byte-compile-file \"~/.config/emacs/early-init.el\")
-    (byte-compile-file \"~/.config/emacs/init.el\")
-    (byte-compile-file \"~/.config/emacs/config.el\")
     (load-file \"~/.config/emacs/early-init.el\")
-    (load-file \"~/.config/emacs/init.el\"))"
+    (native-compile \"~/.config/emacs/early-init.el\")
+    (native-compile \"~/.config/emacs/init.el\")
+    (native-compile \"~/.config/emacs/config.el\")
+
+    (kill-emacs))
+  "
 #+END_SRC
 
 * Configuration Files
@@ -374,6 +390,9 @@ and the priority we should retrieve packages if a package with the same name
 exists on multiple sources.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (if (fboundp 'native-compile)
+      (setq package-native-compile t))
+
   (setq package-user-dir (concat user-emacs-directory "pkg/")
 
         package-archives
@@ -528,10 +547,11 @@ we won't look for every possible edge condition to normalize this behavior.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
+  (defvar reusable-frames 't)
+  (defvar Man-notify-method 'pushy)
+
   (setq pop-up-frames     nil
-        pop-up-windows    nil
-        reusable-frames   't
-        Man-notify-method 'pushy)
+        pop-up-windows    nil)
 #+END_SRC
 
 **** Font
@@ -728,9 +748,9 @@ At the end of initialization, ensure that ~README.org~ is not newer than
     (interactive)
     (org-babel-tangle-file (concat user-emacs-directory "README.org"))
 
-    (byte-compile-file (concat user-emacs-directory "early-init.el"))
-    (byte-compile-file (concat user-emacs-directory "init.el"))
-    (byte-compile-file (concat user-emacs-directory "config.el"))
+    (native-compile (concat user-emacs-directory "early-init.el"))
+    (native-compile (concat user-emacs-directory "init.el"))
+    (native-compile (concat user-emacs-directory "config.el"))
 
     (load (concat user-emacs-directory "early-init.el"))
     (load (concat user-emacs-directory "init.el"))
@@ -777,7 +797,8 @@ for ~async-start~ and ~async-start-process~ for more information.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package async
     :config
-    (async-bytecomp-package-mode '(all)))
+    (if (not (fboundp 'native-compile))
+             (async-bytecomp-package-mode '(all))))
 #+END_SRC
 
 **** auto-compile
@@ -1681,6 +1702,17 @@ appreciate the additional functions.
           org-src-tab-acts-natively 't
           org-support-shift-select  'always)
 
+    (setq org-babel-load-languages '((C . t)
+                                     (awk . t)
+                                     (emacs-lisp . t)
+                                     (lisp . t)
+                                     (makefile . t)
+                                     (scheme . t)
+                                     (shell . t)
+                                     (sql . t)
+                                     (sqlite . t)))
+
+
     (set-face-attribute 'org-block nil
                         :background "#111111" :extend 't)
 
@@ -1694,13 +1726,26 @@ appreciate the additional functions.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package company-org-block
+    :after (company org)
+    :config (setq company-org-block-edit-style 'auto)
+    :init
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (add-to-list (make-local-variable 'company-backends)
+                             'company-org-block))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-bullets
+    :after (org)
     :commands (org-bullets-mode)
     :hook (org-mode . (lambda() (org-bullets-mode 1))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-drill
+    :after (org)
     :commands (org-drill)
     :defer 't)
 #+END_SRC
