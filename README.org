@@ -241,7 +241,7 @@ manually again.
 
     (org-babel-tangle-file \"~/.config/emacs/README.org\")
     (load-file \"~/.config/emacs/early-init.el\")
-  
+
     (kill-emacs))
   "
 #+END_SRC
@@ -403,9 +403,12 @@ exists on multiple sources.
           ("melpa"        . 1))
 
         package-pinned-packages
-        '((hcl-mode    . "melpa")
-          (ivy-rich    . "melpa")
-          (use-package . "melpa")))
+        '((cargo          . "melpa")
+          (hcl-mode       . "melpa")
+          (flycheck-rust  . "melpa")
+          (ivy-rich       . "melpa")
+          (rust-mode      . "melpa")
+          (use-package    . "melpa")))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
@@ -930,16 +933,14 @@ use many buffers.
     :config
     (add-to-list 'eglot-server-programs '(c-mode   . ("clangd")))
     (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
+    (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
+    (add-to-list 'eglot-server-programs '(rust-mode . ("rls")))
 
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
 
-    :hook (((c-mode
-             c++-mode
-             go-mode
-             python-mode
-             rust-mode
-             zig-mode) . 'eglot-ensure)
+    :hook (((c-mode c++-mode go-mode python-mode rust-mode zig-mode)
+            . 'eglot-ensure)
            (eglot-managed-mode
             . (lambda()
                 (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))))
@@ -1779,21 +1780,17 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package cargo
-    :commands (cargo-minor-mode)
+    :commands (cargo cargo-minor-mode)
     :hook (rust-mode . cargo-minor-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package flycheck-rust
+    :after (rust-mode)
     :commands (flycheck-rust-setup)
-    :init
-    (with-eval-after-load 'rust-mode
-      (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)))
-#+END_SRC
+    :hook (flycheck-mode . (lambda() (flycheck-rust-setup))))
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rust-mode
-    :commands (rust-format-buffer rust-mode)
     :init
     (add-hook 'rust-mode-hook
               (lambda()
@@ -1805,7 +1802,22 @@ appreciate the additional functions.
                             indent-tabs-mode       nil
                             tab-width              4)))
 
-    :mode "\\.rs$")
+    :mode (("^Cargo.toml$" . 'rust-mode)
+           ("\\.rs$"       . 'rust-mode)))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+;;  (use-package rustic
+;;    :hook (eglot-managed-mode-hook . (lambda() (flymake-mode -1)))
+;;    :init
+;;    (setq rustic-format-trigger nil
+;;          rustic-format-on-save nil
+;;          rustic-lsp-client     'eglot
+;;          rustic-lsp-format     't
+;;          rustic-lsp-server     'rls)
+;;
+;;    :mode (("^Cargo.toml$" . 'rustic-mode)
+;;           ("\\.rs$"       . 'rustic-mode)))
 #+END_SRC
 
 **** Shell
@@ -1818,9 +1830,10 @@ appreciate the additional functions.
                 (add-hook 'before-save-hook
                           (lambda() (untabify (point-min) (point-max)))
                           nil 'local)
+
                 (setq-local indent-tabs-mode nil)))
 
-    :mode ("\\.sh$" . sh-mode))
+    :mode ("\\.sh$" . 'sh-mode))
 #+END_SRC
 
 **** Sed
@@ -1840,11 +1853,12 @@ appreciate the additional functions.
                 (add-hook 'before-save-hook
                           (lambda() (untabify (point-min) (point-max)))
                           nil 'local)
+
                 (setq-local indent-tabs-mode nil)))
 
-    :mode (("\\.toml$"       . conf-toml-mode)
-           ("Cargo\\.lock$"  . conf-toml-mode)
-           ("poetry\\.lock$" . conf-toml-mode)))
+    :mode (("\\.toml$"       . 'conf-toml-mode)
+           ("Cargo\\.lock$"  . 'conf-toml-mode)
+           ("poetry\\.lock$" . 'conf-toml-mode)))
 #+END_SRC
 
 **** Verilog
