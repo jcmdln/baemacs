@@ -214,7 +214,7 @@ will be ignored if any other configuration location is present. This path may
 or may not have been given a higher priority in recent releases.
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ git clone --depth 1 https://gitlab.com/jcmdln/baemacs.git ~/.config/emacs
+  $ git clone --depth 1 https://github.com/jcmdln/baemacs.git ~/.config/emacs
 #+END_SRC
 
 Paste this rather unsightly block into your terminal to use Emacs from the
