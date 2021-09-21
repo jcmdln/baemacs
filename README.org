@@ -241,10 +241,7 @@ manually again.
 
     (org-babel-tangle-file \"~/.config/emacs/README.org\")
     (load-file \"~/.config/emacs/early-init.el\")
-    (native-compile \"~/.config/emacs/early-init.el\")
-    (native-compile \"~/.config/emacs/init.el\")
-    (native-compile \"~/.config/emacs/config.el\")
-
+  
     (kill-emacs))
   "
 #+END_SRC
@@ -747,11 +744,6 @@ At the end of initialization, ensure that ~README.org~ is not newer than
     "Tangle, build, and load configuration."
     (interactive)
     (org-babel-tangle-file (concat user-emacs-directory "README.org"))
-
-    (native-compile (concat user-emacs-directory "early-init.el"))
-    (native-compile (concat user-emacs-directory "init.el"))
-    (native-compile (concat user-emacs-directory "config.el"))
-
     (load (concat user-emacs-directory "early-init.el"))
     (load (concat user-emacs-directory "init.el"))
     (load (concat user-emacs-directory "config.el")))
