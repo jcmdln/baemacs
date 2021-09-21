@@ -178,14 +178,13 @@ following example shows how I compile my own equivalent of ~emacs-nox~ for
 Fedora though it should be trivial to adapt it to your target platform.
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ sudo dnf install -y automake gnutls-devel gpm-devel jansson-devel \
-    libgccjit-devel ncurses-devel systemd-devel
+  $ sudo dnf install -y autoconf automake dbus-devel gcc-devel gnutls-devel \
+    gpm-devel jansson-devel libgccjit-devel libselinux-devel ncurses-devel \
+    systemd-devel
   $ git clone --branch master --depth 1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
-  $ ./configure \
-    CC="gcc" \
-    CFLAGS="-O2 -g3 -march=native -pipe" \
+  $ ./configure CC="gcc" CFLAGS="-O2 -g3 -march=native -pipe" \
     --without-all \
     --without-x \
     --with-dbus \
