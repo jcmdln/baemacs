@@ -137,6 +137,7 @@ don't want to turn Emacs into some other editor.
       - [[#csv][CSV]]
       - [[#docker][Docker]]
       - [[#dotenv][DotEnv]]
+      - [[#editorconfig][EditorConfig]]
       - [[#emacs-lisp][Emacs Lisp]]
       - [[#gdscript-disabled][GDScript (Disabled)]]
       - [[#git][Git]]
@@ -792,7 +793,7 @@ for ~async-start~ and ~async-start-process~ for more information.
   (use-package async
     :config
     (if (not (fboundp 'native-compile))
-             (async-bytecomp-package-mode '(all))))
+        (async-bytecomp-package-mode '(all))))
 #+END_SRC
 
 **** auto-compile
@@ -1431,11 +1432,10 @@ appreciate the additional functions.
     (add-hook 'c-mode-hook
               (lambda()
                 (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-
-                (setq-local c-basic-offset   8
-                            c-default-style  "linux"
-                            indent-tabs-mode 't
-                            tab-width        8)))
+                (setq-local c-basic-offset    8
+                            c-default-style   "linux"
+                            indent-tabs-mode  't
+                            tab-width         8)))
 
     :mode ("\\.c$" . c-mode))
 #+END_SRC
@@ -1447,13 +1447,12 @@ appreciate the additional functions.
     :init
     (add-hook 'c++-mode-hook
               (lambda()
-                (add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-                (add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode))
-
-                (setq-local c-basic-offset   4
-                            c-default-style  "ellemtel"
-                            indent-tabs-mode 't
-                            tab-width        4)))
+                (add-to-list 'auto-mode-alist  '("\\.h\\'" . c++-mode))
+                (add-to-list 'auto-mode-alist  '("\\.hpp\\'" . c++-mode))
+                (setq-local c-basic-offset    4
+                            c-default-style   "ellemtel"
+                            indent-tabs-mode  't
+                            tab-width         4)))
 
     :mode (("\\.cpp$" . c++-mode)
            ("\\.cxx$" . c++-mode)))
@@ -1516,6 +1515,21 @@ appreciate the additional functions.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package dotenv-mode
     :defer 't)
+#+END_SRC
+
+**** EditorConfig
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package editorconfig
+    :init
+    (editorconfig-mode 1)
+    (add-hook 'prog-mode-hook
+              (lambda()
+                (add-hook 'before-save-hook
+                          (lambda()
+                            (editorconfig-apply)
+                            (editorconfig-format-buffer))
+                          nil 'local))))
 #+END_SRC
 
 **** Emacs Lisp
@@ -1806,17 +1820,17 @@ appreciate the additional functions.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-;;  (use-package rustic
-;;    :hook (eglot-managed-mode-hook . (lambda() (flymake-mode -1)))
-;;    :init
-;;    (setq rustic-format-trigger nil
-;;          rustic-format-on-save nil
-;;          rustic-lsp-client     'eglot
-;;          rustic-lsp-format     't
-;;          rustic-lsp-server     'rls)
-;;
-;;    :mode (("^Cargo.toml$" . 'rustic-mode)
-;;           ("\\.rs$"       . 'rustic-mode)))
+  ;;  (use-package rustic
+  ;;    :hook (eglot-managed-mode-hook . (lambda() (flymake-mode -1)))
+  ;;    :init
+  ;;    (setq rustic-format-trigger nil
+  ;;          rustic-format-on-save nil
+  ;;          rustic-lsp-client     'eglot
+  ;;          rustic-lsp-format     't
+  ;;          rustic-lsp-server     'rls)
+  ;;
+  ;;    :mode (("^Cargo.toml$" . 'rustic-mode)
+  ;;           ("\\.rs$"       . 'rustic-mode)))
 #+END_SRC
 
 **** Shell
