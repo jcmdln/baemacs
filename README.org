@@ -10,13 +10,13 @@ also includes documentation and other such context.
 
 Because this file is checked on init for changes, this single file becomes your
 management tool for maintaining your Emacs config. Whenever this file is newer
-than a configuration file, your entire configuration will be tangled, compiled,
-and loaded automatically.
+than a configuration file we've written out, your entire configuration will be
+tangled, compiled, and loaded automatically.
 
 #+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
 The goals of Baemacs are fairly simplistic, mostly because I like Emacs and I
-don't want to turn Emacs into some other editor.
+don't want to turn it into some other editor.
 
 1. Preserve (most) core GNU/Emacs functionality
 
