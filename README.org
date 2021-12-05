@@ -4,64 +4,39 @@
 #+TITLE: Baemacs - A Literate GNU/Emacs Configuration
 
 Baemacs is yet another take on a literate GNU/Emacs configuration that intends
-to remain close to the default behavior and appearance. Baemacs is built with
-use-package and org which is all contained within this singular file, which
-also includes documentation and other such context.
+to remain close to the default behavior and appearance. It is comprised of some
+minor housekeeping tweaks and use-package definitions in the file you're
+reading that get parsed and compiled with Org.
 
-Because this file is checked on init for changes, this single file becomes your
-management tool for maintaining your Emacs config. Whenever this file is newer
-than a configuration file we've written out, your entire configuration will be
-tangled, compiled, and loaded automatically.
+This file is checked on init for changes and becomes your management tool for
+maintaining your config. Whenever this file is newer than a config file we've
+written out, your entire config will be tangled, compiled, and loaded.
 
 #+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
-The goals of Baemacs are fairly simplistic, mostly because I like Emacs and I
-don't want to turn it into some other editor.
+The goals of Baemacs are purposefully mundane.
 
-1. Preserve (most) core GNU/Emacs functionality
+1. If you like plain GNU/Emacs, you should feel empowered by Baemacs
 
-   Unlike other configurations, there is no evil-mode support and we don't
-   remap any (useful) default keybinds. If you are comfortable with plain
-   GNU/Emacs, you should feel empowered by Baemacs.  Vi/Vim and evil-mode users
-   should most likely look at one of the many alternatives that provides or
-   defaults to evil-mode.
+   To illustrate this, consider trying some of the [[#eshell][eshell]] config options which
+   make it behave more like other shells. You should expect for most cli tools
+   to simply work with few(er) artifacts, one example being progress bars.
 
-2. Leverage use-package for predictability
+2. Package rules and relationships made predictable with use-package
 
-   While a well-performing configuration doesn't have to rely on use-package, I
-   find it far more obvious to manage and configure package rules and
-   relationships using it.
+   Tangentially related to use-package, this configuration uses stable packages
+   whenever possible so that there are no unexpected behaviors with a
+   preference of elpa, then stable melpa, then melpa.
 
-   Though not specifically related to use-package, this configuration uses
-   stable packages whenever possible so that there are no unexpected behaviors
-   with a preference of elpa, then stable melpa, then melpa.
+3. Have great documentation
 
-3. Fully document changes with context and reasoning (eventually)
-
-   Having documentation, context of why something was added, and reasoning of
-   whether it is a good/bad/subjective addition allows you as the user to
-   better understand how each component ties together.
-
-   Even better, you don't need to hunt any of this down, it's all in this file!
-
-4. Performance is a concern, though avoid voodoo
-
-   Emacs can initialize and run quickly without tricks, voodoo, or lies. Most
-   of the speed comes from properly configuring use-package to generate
-   autoloads, and we don't do any background loading of packages. Just about
-   everything is loaded upfront on init, and it still takes about 0.5s to 1.0s
-   depending on the performance of your device. Anything that isn't loaded on
-   init will be loaded on specific hooks or package relationships.
-
-   There are two additional configuration changes that (hopefully) will have a
-   positive effect on overall performance:
-
-   - Tweaking [[#garbage-collection][Garbage Collection]]
-   - Automatically [[#Bootstrap][Byte-compiling]] configuration files and packages
+   The more powerful benefit of Org is the intermingling of documentation and
+   source code. Applying this to our configuration allows for explaining finer
+   details when relevant, and (hopefully) keeping things logically organized.
 
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
-  - [[#building-emacs-with-native-compilation][Building Emacs with native-compilation]]
+  - [[#optional-building-emacs-with-native-compilation][(Optional) Building Emacs with native-compilation]]
   - [[#install][Install]]
 - [[#configuration-files][Configuration Files]]
   - [[#early-initel][early-init.el]]
@@ -165,44 +140,42 @@ don't want to turn it into some other editor.
 * Usage
 
 This singular file is all that is needed to fully replicate this config. While
-you may simply download a copy of this file and use it, the steps below will
+you may simply download a copy of this file and use it, the following sections
 reference using git to retrieve and manage your copy of the config, which will
 hopefully simplify incorporating your own changes.
 
-** Building Emacs with native-compilation
+** (Optional) Building Emacs with native-compilation
 
-When native compilation is enabled in Emacs by default, this section will be
-removed.
-
-This is optional but recommended for those seeking improved performance. The
-following example shows how I compile my own equivalent of ~emacs-nox~ for
-Fedora though it should be trivial to adapt it to your target platform.
+In Emacs 28 or later, you can native-compile elisp via libgccjit for a serious
+performance improvement. The following example shows how I compile my own
+equivalent of ~emacs-nox~ for Fedora 34+ though it should be trivial to adapt
+it to your target platform.
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install -y autoconf automake dbus-devel gnutls-devel gpm-devel \
-    jansson-devel libgccjit-devel libselinux-devel libxml2-devel \
-    ncurses-devel openssl-devel systemd-devel texinfo zlib-devel
+        jansson-devel libgccjit-devel libselinux-devel libxml2-devel \
+        ncurses-devel openssl-devel systemd-devel texinfo zlib-devel
   $ git clone --branch emacs-28 --depth 1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
   $ ./configure CC="gcc" CFLAGS="-O2 -g3 -march=native -pipe" \
-    --without-all \
-    --without-x \
-    --with-dbus \
-    --with-file-notification \
-    --with-gpm \
-    --with-gnutls \
-    --with-json \
-    --with-libgmp \
-    --with-libsystemd \
-    --with-mailutils \
-    --with-modules \
-    --with-native-compilation \
-    --with-selinux \
-    --with-threads \
-    --with-toolkit-scroll-bars \
-    --with-xml2 \
-    --with-zlib
+        --without-all \
+        --without-x \
+        --with-dbus \
+        --with-file-notification \
+        --with-gpm \
+        --with-gnutls \
+        --with-json \
+        --with-libgmp \
+        --with-libsystemd \
+        --with-mailutils \
+        --with-modules \
+        --with-native-compilation \
+        --with-selinux \
+        --with-threads \
+        --with-toolkit-scroll-bars \
+        --with-xml2 \
+        --with-zlib
   $ make NATIVE_FULL_AOT=1 -j$(grep -c ^processor /proc/cpuinfo)
   $ sudo make install
 #+END_SRC
@@ -219,8 +192,8 @@ or may not have been given a higher priority in recent releases.
 
 Paste this rather unsightly block into your terminal to use Emacs from the
 command line to tangle this file into the various configuration files, then
-byte-compile the managed files, finally loading the ~init.el~. This will result
-in Emacs being fully setup and configured, and will never have to be run
+byte-compile the managed files, finally loading the ~early-init.el~. This will
+result in Emacs being fully setup and configured, and will never have to be run
 manually again.
 
 #+BEGIN_SRC shell :eval no :tangle no
@@ -228,20 +201,8 @@ manually again.
   (progn
     (require 'org)
     (setq package-native-compile t)
-
-    (native-compile-async
-     (dolist (item load-path result)
-       (if (string-match-p \"/lisp$\" item)
-           (setq-local result item)))
-     'recursively)
-
-    (while (or comp-files-queue
-               (> (comp-async-runnings) 0))
-      (sleep-for 1))
-
     (org-babel-tangle-file \"~/.config/emacs/README.org\")
     (load-file \"~/.config/emacs/early-init.el\")
-
     (kill-emacs))
   "
 #+END_SRC
@@ -249,10 +210,7 @@ manually again.
 * Configuration Files
 
 To make the most effective use of the various startup files that Emacs will
-check for, each file listed in this section will detail the changes they
-contain. The intention is to ensure we don't force Emacs to load everything
-during initialization, instead loading the following config file at the end of
-initialization.
+check for, each file listed in this section will detail their contents.
 
 ** early-init.el
 
@@ -269,35 +227,21 @@ initialization.
 Emacs makes some considerations for older and more memory restricted systems in
 terms of how the garbage collector is configured. On modern 64-bit systems
 these considerations may be far too conservative for users who run many elisp
-programs such as gnus, elfeed, circe, etc.
-
-As Emacs develops its concurrency, parallelism, and events primitives these
-adjustments will need to be revisited. Note that for memory constrained
+programs such as gnus, elfeed, circe, etc. Note that for memory constrained
 environments you may want to disable the changes to the garbage collector made
 in this section.
 
 **** gc-cons-percentage
 
-For the purposes of initialization, we'll increase ~gc-cons-percentage~ to
-decrease garbage collection pauses. The settings below mean that garbage
-collection is deferred until reaching 80% of the total heap size. After
-initialization completes we lower this value to 20% of the total heap size to
-prevent garbage collection passes from becoming too large to be handled
-quickly.
-
-At the time of writing, the default is 10% so we are effectively attempting to
-halve the amount of garbage collection pauses we would experience as a result
-of reaching the defined threshold of the total heap size.
-
-Should you want to compare these changes against the default values, they are
-preserved as shown below:
+~gc-cons-percentage~ refers to the threshold of total heap size to reach to
+trigger garbage collection. By default this threshold is 10%.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defvar baemacs/gc-cons-percentage-default gc-cons-percentage
     "Default value of gc-cons-percentage.")
   (defvar baemacs/gc-cons-percentage-init 0.8
     "Init value of gc-cons-percentage.")
-  (defvar baemacs/gc-cons-percentage-tuned 0.2
+  (defvar baemacs/gc-cons-percentage-tuned 0.33
     "Tuned value of gc-cons-percentage.")
 
   (setq gc-cons-percentage baemacs/gc-cons-percentage-init)
@@ -309,25 +253,14 @@ preserved as shown below:
 
 **** gc-cons-threshold
 
-Now we will increase the ~gc-cons-threshold~, which refers to the total bytes
-of storage for lisp objects that must be allocated to trigger subsequent
-garbage collections. On 32-bit systems this threshold is 400,000 objects, while
-on 64-bit systems it is 800,000 objects.
-
-Modifying this value is generally not recommended and considered an act of
-performance voodoo, though the idea is that by specifying a larger threshold,
-garbage collection will occur less often, meaning fewer GC pauses. We'll set
-this value to 10,000,000 globally, which ideally will reduce the total number
-of GC pauses we experience without garbage collection taking too long when it
-does occur.
-
-The default value is also stored so you may evaluate this change as shown
-below:
+~gc-cons-threshold~ refers to the total number of lisp objects that must be
+allocated to trigger garbage collection. By default this threshold is 400,000
+objects on 32-bit systems and 800,000 objects on 64-bit systems.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (defvar baemacs/gc-cons-threshold-default gc-cons-threshold
     "Default value of gc-cons-threshold")
-  (defvar baemacs/gc-cons-threshold-tuned (* 1000 1000 10)
+  (defvar baemacs/gc-cons-threshold-tuned (* 1000 1000 2)
     "Tuned value of gc-cons-threshold")
 
   (setq gc-cons-threshold baemacs/gc-cons-threshold-tuned)
@@ -464,7 +397,7 @@ is a nice change.
 
 **** package-utils
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package package-utils
     :commands (baemacs-update)
     :init
@@ -972,11 +905,6 @@ Atom.
 #+END_SRC
 
 **** eshell
-
-The default configuration of eshell is... well, bad. The ordinary user who
-opens it once and considers it to be a bad tool is missing out of the full
-potential eshell provides. I've spent a _lot_ of time making eshell behave and
-look like typical unix shells, so maybe try it for yourself.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
