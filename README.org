@@ -1360,6 +1360,7 @@ appreciate the additional functions.
     (add-hook 'c-mode-hook
               (lambda()
                 (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
+                (fset 'c-indent-region 'clang-format-region)
                 (setq-local c-basic-offset    8
                             c-default-style   "linux"
                             indent-tabs-mode  't
@@ -1377,12 +1378,14 @@ appreciate the additional functions.
               (lambda()
                 (add-to-list 'auto-mode-alist  '("\\.h\\'" . c++-mode))
                 (add-to-list 'auto-mode-alist  '("\\.hpp\\'" . c++-mode))
+                (fset 'c-indent-region 'clang-format-region)
                 (setq-local c-basic-offset    4
                             c-default-style   "ellemtel"
                             indent-tabs-mode  't
                             tab-width         4)))
 
-    :mode (("\\.cpp$" . c++-mode)
+    :mode (("\\.cc$" . c++-mode)
+           ("\\.cpp$" . c++-mode)
            ("\\.cxx$" . c++-mode)))
 #+END_SRC
 
