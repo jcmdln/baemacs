@@ -337,9 +337,7 @@ exists on multiple sources.
         package-pinned-packages
         '((cargo          . "melpa")
           (hcl-mode       . "melpa")
-          (flycheck-rust  . "melpa")
           (ivy-rich       . "melpa")
-          (rust-mode      . "melpa")
           (use-package    . "melpa")))
 #+END_SRC
 
