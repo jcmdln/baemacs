@@ -200,8 +200,34 @@ be performed once as Baemacs will automatically ensure that changes to
   $ emacs --batch --eval="
   (progn
     (require 'org)
+
+    ;; Ensure we native-compile everything
+    (setq package-native-compile t)
+
+    ;; Use org to write out all our config files
     (org-babel-tangle-file \"~/.config/emacs/README.org\")
+
+    ;; Find the /lisp dir from load-path and recursively compile its contents
+    (native-compile-async
+     (dolist (item load-path result)
+       (if (string-match-p \"/lisp$\" item)
+           (setq-local result item)))
+     'recursively)
+
+    ;; Fully load our config so that packages are installed
     (load-file \"~/.config/emacs/early-init.el\")
+    (load-file \"~/.config/emacs/init.el\")
+    (load-file \"~/.config/emacs/config.el\")
+
+    ;; Compile all packages installed by our config
+    (native-compile-async (concat user-emacs-directory \"elpa/\") 'recursively)
+    (native-compile-async (concat user-emacs-directory \"pkg/\") 'recursively)
+
+    ;; Wait for everything to get compiled
+    (while (or comp-files-queue
+               (> (comp-async-runnings) 0))
+      (sleep-for 1))
+
     (kill-emacs))
   "
 #+END_SRC
