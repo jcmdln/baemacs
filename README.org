@@ -478,11 +478,8 @@ we won't look for every possible edge condition to normalize this behavior.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (defvar reusable-frames 't)
-  (defvar Man-notify-method 'pushy)
-
-  (setq pop-up-frames     nil
-        pop-up-windows    nil)
+  (setq pop-up-frames  nil
+        pop-up-windows nil)
 #+END_SRC
 
 **** Font
@@ -557,8 +554,6 @@ Display line numbers in most types of modes where it makes sense.
 - Disable the ~visual-bell~
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (defvar show-paren-delay)
-
   (setq column-number-mode    't
         require-final-newline 't
         show-paren-delay      0.33
@@ -893,8 +888,6 @@ Atom.
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package elfeed
     :config
-    (defvar elfeed-search-filter)
-
     (setq elfeed-search-filter "@1-week-ago +unread "
           url-queue-timeout    10)
 
@@ -906,19 +899,19 @@ Atom.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eshell
-    :commands (baemacs/eshell/clear
-               baemacs/eshell/prompt-function
-               eshell
-               eshell-new
-               eshell-truncate-buffer
-               eshell/basename
-               eshell/pwd)
+    :commands
+    (baemacs/eshell/clear
+     baemacs/eshell/prompt-function
+     eshell
+     eshell-new
+     eshell-truncate-buffer
+     eshell/basename
+     eshell/pwd)
 
     :config
     (defun baemacs/eshell/clear()
       "Clear the current eshell buffer by truncating the contents."
       (interactive)
-      (defvar eshell-buffer-maximum-lines)
       (setq-local eshell-buffer-maximum-lines 0)
       (eshell-truncate-buffer))
 
