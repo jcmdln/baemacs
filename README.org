@@ -398,9 +398,9 @@ is a nice change.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (use-package package-utils
-    :commands (baemacs-update)
+    :commands (baemacs/update)
     :init
-    (defun baemacs-update()
+    (defun baemacs/update()
       "Refresh package contents, then update all packages."
       (interactive)
       (unless package-archive-contents
@@ -670,24 +670,21 @@ At the end of initialization, ensure that ~README.org~ is not newer than
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (require 'org)
-  (defun baemacs-reconfig()
+  (defun baemacs/reconfig()
     "Tangle, build, and load configuration."
     (interactive)
     (org-babel-tangle-file (concat user-emacs-directory "README.org"))
-    (load (concat user-emacs-directory "early-init.el"))
-    (load (concat user-emacs-directory "init.el"))
-    (load (concat user-emacs-directory "config.el")))
+    (load (concat user-emacs-directory "early-init.el")))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (if (or (file-newer-than-file-p (concat user-emacs-directory "README.org")
-                                  (concat user-emacs-directory "config.el"))
-          (file-newer-than-file-p (concat user-emacs-directory "README.org")
-                                  (concat user-emacs-directory "early-init.el"))
-          (file-newer-than-file-p (concat user-emacs-directory "README.org")
-                                  (concat user-emacs-directory "init.el")))
-      (baemacs-reconfig)
-    (load (concat user-emacs-directory "config.el")))
+  (if (file-newer-than-file-p (concat user-emacs-directory "README.org")
+                              (concat user-emacs-directory "early-init.el"))
+      (baemacs/reconfig))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (load (concat user-emacs-directory "config.el"))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
@@ -973,7 +970,7 @@ Atom.
               (lambda()
                 (defalias 'eshell/clear 'baemacs/eshell/clear)))
 
-    (defun eshell-new()
+    (defun baemacs/eshell-new()
       "Open a new instance of eshell."
       (interactive)
       (eshell 'N)))
@@ -993,7 +990,7 @@ specific buffer, you may now do so.
 
     :config
     (when window-system
-      (defun eww-toggle-images()
+      (defun baemacs/eww-toggle-images()
         "Toggle blocking images in eww."
         (interactive)
         (if (bound-and-true-p shr-blocked-images)
@@ -1004,7 +1001,7 @@ specific buffer, you may now do so.
       (setq shr-blocked-images ""))
 
     :init
-    (defun eww-new()
+    (defun baemacs/eww-new()
       "Open a new instance of eww."
       (interactive)
       (let ((url (read-from-minibuffer "Enter URL or keywords: ")))
@@ -1273,7 +1270,7 @@ make a new numbered scratch buffer.
   (use-package scratch
     :commands (scratch-new)
     :init
-    (defun scratch-new()
+    (defun baemacs/scratch-new()
       "Open a new scratch buffer."
       (interactive)
       (switch-to-buffer (generate-new-buffer "*scratch*"))
@@ -1289,36 +1286,40 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package server
-    :bind ("C-x C-c" . baemacs-server-stop)
-    :commands (package-utils-upgrade-all server-start)
-    :config
-    (unless (and (fboundp 'server-running-p) (server-running-p)) (server-start))
     :demand 't
+    :bind ("C-x C-c" . baemacs/server-stop)
+    :commands (package-utils-upgrade-all server-start)
+
     :init
-    (defun baemacs-server-kill()
+    (defun baemacs/server-kill()
       "Delete current Emacs server, then kill Emacs"
       (interactive)
       (if (y-or-n-p "Kill Emacs without saving? ")
           (kill-emacs)))
 
-    (defun baemacs-server-stop()
+    (defun baemacs/server-stop()
       "Prompt to save buffers, then kill Emacs."
       (interactive)
       (if (y-or-n-p "Quit Emacs? ")
-          (save-buffers-kill-emacs))))
+          (save-buffers-kill-emacs)))
+
+    :config
+    (unless (and (fboundp 'server-running-p)
+                 (server-running-p))
+      (server-start)))
 #+END_SRC
 
 **** smartparens
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
+    :hook
+    ((eshell-mode org-mode prog-mode text-mode) . turn-on-smartparens-mode)
+
     :config
     (setq sp-highlight-pair-overlay     nil
           sp-highlight-wrap-overlay     nil
-          sp-highlight-wrap-tag-overlay nil)
-
-    :hook ((eshell-mode org-mode prog-mode text-mode)
-           . turn-on-smartparens-mode))
+          sp-highlight-wrap-tag-overlay nil))
 #+END_SRC
 
 **** swiper
