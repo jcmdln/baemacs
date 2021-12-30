@@ -190,17 +190,15 @@ or may not have been given a higher priority in recent releases.
   $ git clone --depth 1 https://github.com/jcmdln/baemacs.git ~/.config/emacs
 #+END_SRC
 
-Paste this rather unsightly block into your terminal to use Emacs from the
-command line to tangle this file into the various configuration files, then
-byte-compile the managed files, finally loading the ~early-init.el~. This will
-result in Emacs being fully setup and configured, and will never have to be run
-manually again.
+The following command bootstraps Baemacs by using org tangle ~README.org~ into
+the various config files, then loading ~early-init.el~. This step only need to
+be performed once as Baemacs will automatically ensure that changes to
+~README.org~ are reflected on start. See [[Bootstrap]] more information.
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ emacs --batch --eval="
   (progn
     (require 'org)
-    (setq package-native-compile t)
     (org-babel-tangle-file \"~/.config/emacs/README.org\")
     (load-file \"~/.config/emacs/early-init.el\")
     (kill-emacs))
