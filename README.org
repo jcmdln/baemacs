@@ -74,6 +74,7 @@ The goals of Baemacs are purposefully mundane.
       - [[#async][async]]
       - [[#auto-compile][auto-compile]]
       - [[#circe][circe]]
+      - [[#clang-format][clang-format]]
       - [[#company][company]]
       - [[#counsel][counsel]]
       - [[#diff-hl][diff-hl]]
@@ -711,9 +712,11 @@ this file, first we'll add the file header:
 *** Packages
 
 **** async
+Adds the ability to call asynchronous functions and process with ease. See the
+documentation for ~async-start~ and ~async-start-process~.
 
-Simplify calling asynchronous functions and processes. See the documentation
-for ~async-start~ and ~async-start-process~ for more information.
+https://stable.melpa.org/#/async
+https://github.com/jwiegley/emacs-async
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package async
@@ -723,6 +726,13 @@ for ~async-start~ and ~async-start-process~ for more information.
 #+END_SRC
 
 **** auto-compile
+
+This package provides two minor modes which automatically recompile Emacs Lisp
+source files. Together these modes guarantee that Emacs never loads outdated
+byte code files.
+
+https://stable.melpa.org/#/auto-compile
+https://github.com/emacscollective/auto-compile
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package auto-compile
@@ -734,8 +744,10 @@ for ~async-start~ and ~async-start-process~ for more information.
 
 **** circe
 
-This package adds _another_ IRC client, which is my preferred client even over
-irssi, weechat, or other clients I've used in the past.
+Circe is a Client for IRC in Emacs.
+
+https://stable.melpa.org/#/circe
+https://github.com/emacs-circe/circe
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package circe
@@ -748,9 +760,10 @@ irssi, weechat, or other clients I've used in the past.
           circe-reduce-lurker-spam   't
           circe-use-cycle-completion 't
 
-          lui-fill-type              nil
           lui-flyspell-alist         '((".*" "american"))
           lui-flyspell-p             't
+
+          lui-fill-type              nil
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
 
@@ -776,7 +789,19 @@ irssi, weechat, or other clients I've used in the past.
         (load-file     (concat user-emacs-directory "usr/circe.el"))))
 #+END_SRC
 
+**** clang-format
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package clang-format)
+#+END_SRC
+
 **** company
+
+Company is a modular completion framework. Modules for retrieving completion
+candidates are called backends, modules for displaying them are frontends.
+
+https://stable.melpa.org/#/company
+https://github.com/company-mode/company-mode
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company
@@ -786,8 +811,9 @@ irssi, weechat, or other clients I've used in the past.
           company-echo-delay     0
           company-tooltip-limit  20)
 
-    :hook ((prog-mode . company-mode)
-           (text-mode . company-mode)))
+    :hook
+    ((prog-mode . company-mode)
+     (text-mode . company-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -798,8 +824,8 @@ irssi, weechat, or other clients I've used in the past.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package company-emoji
-    :if window-system
-    :after (company))
+    :after (company)
+    :if window-system)
 #+END_SRC
 
 **** counsel
@@ -857,19 +883,23 @@ use many buffers.
   (use-package eglot
     :commands (eglot-ensure)
     :config
+    (setq eglot-auto-display-help-buffer nil
+          eglot-put-doc-in-help-buffer   nil)
+
     (add-to-list 'eglot-server-programs '(c-mode   . ("clangd")))
     (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
     (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
     (add-to-list 'eglot-server-programs '(rust-mode . ("rls")))
 
-    (setq eglot-auto-display-help-buffer nil
-          eglot-put-doc-in-help-buffer   nil)
-
     :hook (((c-mode c++-mode go-mode python-mode rust-mode zig-mode)
             . 'eglot-ensure)
+           ((c-mode c++-mode)
+            . (lambda()
+                (fset 'c-indent-region 'clang-format-region)))
            (eglot-managed-mode
             . (lambda()
-                (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))))
+                (add-hook 'before-save-hook 'eglot-format-buffer
+                          nil 'local)))))
 #+END_SRC
 
 **** eldoc
@@ -1351,7 +1381,6 @@ appreciate the additional functions.
     (add-hook 'c-mode-hook
               (lambda()
                 (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-                (fset 'c-indent-region 'clang-format-region)
                 (setq-local c-basic-offset    8
                             c-default-style   "linux"
                             indent-tabs-mode  't
@@ -1369,7 +1398,6 @@ appreciate the additional functions.
               (lambda()
                 (add-to-list 'auto-mode-alist  '("\\.h\\'" . c++-mode))
                 (add-to-list 'auto-mode-alist  '("\\.hpp\\'" . c++-mode))
-                (fset 'c-indent-region 'clang-format-region)
                 (setq-local c-basic-offset    4
                             c-default-style   "ellemtel"
                             indent-tabs-mode  't
