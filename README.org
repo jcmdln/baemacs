@@ -58,6 +58,7 @@ The goals of Baemacs are purposefully mundane.
       - [[#font][Font]]
       - [[#theme][Theme]]
     - [[#editing][Editing]]
+      - [[#backups][Backups]]
       - [[#clipboard][Clipboard]]
       - [[#scrolling][Scrolling]]
       - [[#line-numbers][Line Numbers]]
@@ -217,7 +218,6 @@ be performed once as Baemacs will automatically ensure that changes to
     ;; Fully load our config so that packages are installed
     (load-file \"~/.config/emacs/early-init.el\")
     (load-file \"~/.config/emacs/init.el\")
-    (load-file \"~/.config/emacs/config.el\")
 
     ;; Compile all packages installed by our config
     (native-compile-async (concat user-emacs-directory \"elpa/\") 'recursively)
@@ -411,11 +411,12 @@ is a nice change.
     :commands (dired-create-directory no-littering-expand-var-file-name)
     :init
     (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't)))
+          `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't))
 
-    (if (file-directory-p (concat user-emacs-directory "var/auto-save"))
-        nil
-      (dired-create-directory (concat user-emacs-directory "var/auto-save"))))
+          baemacs/auto-save-dir (concat user-emacs-directory "var/auto-save"))
+
+    (if (not (file-directory-p baemacs/auto-save-dir))
+        (dired-create-directory baemacs/auto-save-dir)))
 #+END_SRC
 
 **** package-utils
@@ -427,9 +428,14 @@ is a nice change.
     (defun baemacs/update()
       "Refresh package contents, then update all packages."
       (interactive)
-      (unless package-archive-contents
-        (package-refresh-contents))
-      (package-utils-upgrade-all)))
+
+      ;; Refresh package metadata, and upgrade all packages
+      (package-refresh-contents)
+      (package-utils-upgrade-all)
+
+      ;; Native-compile all packages
+      (native-compile-async (concat user-emacs-directory "elpa") 'recursively)
+      (native-compile-async (concat user-emacs-directory "pkg") 'recursively)))
 #+END_SRC
 
 *** Disable toolbars
@@ -530,6 +536,12 @@ There are some general-purpose changes to make for editing files, which ideally
 if I ever get around to incorporating ~site-start.el~ will allow loading a
 slim, nimble instance of Emacs when needed. For now I'll leave these changes
 here.
+
+**** Backups
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (setq backup-by-copying 't)
+#+END_SRC
 
 **** Clipboard
 
@@ -693,12 +705,13 @@ At the end of initialization, ensure that ~README.org~ is not newer than
 ~config.el~, otherwise rebuild our configuration files and byte-compile them.
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (require 'org)
   (defun baemacs/reconfig()
-    "Tangle, build, and load configuration."
+    "Reconfigure Baemacs by writing and loading our config."
+    (require 'org)
     (interactive)
     (org-babel-tangle-file (concat user-emacs-directory "README.org"))
-    (load (concat user-emacs-directory "early-init.el")))
+    (load (concat user-emacs-directory "early-init.el"))
+    (load (concat user-emacs-directory "init.el")))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
