@@ -147,34 +147,33 @@ hopefully simplify incorporating your own changes.
 
 In Emacs 28 or later, you can native-compile elisp via libgccjit for a serious
 performance improvement. The following example shows how I compile my own
-equivalent of ~emacs-nox~ for Fedora 34+ though it should be trivial to adapt
-it to your target platform.
+equivalent of ~emacs-nox~ for Fedora:
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install -y autoconf automake dbus-devel gnutls-devel gpm-devel \
-        jansson-devel libgccjit-devel libselinux-devel libxml2-devel \
-        ncurses-devel openssl-devel systemd-devel texinfo zlib-devel
+      jansson-devel libgccjit-devel libselinux-devel libxml2-devel \
+      ncurses-devel openssl-devel systemd-devel texinfo zlib-devel
   $ git clone --branch emacs-28 --depth 1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
-  $ ./configure CC="gcc" CFLAGS="-O2 -g3 -march=native -pipe" \
-        --without-all \
-        --without-x \
-        --with-dbus \
-        --with-file-notification \
-        --with-gpm \
-        --with-gnutls \
-        --with-json \
-        --with-libgmp \
-        --with-libsystemd \
-        --with-mailutils \
-        --with-modules \
-        --with-native-compilation \
-        --with-selinux \
-        --with-threads \
-        --with-toolkit-scroll-bars \
-        --with-xml2 \
-        --with-zlib
+  $ ./configure \
+      CFLAGS="-O2 -g3 -march=native -pipe" \
+      --without-all \
+      --without-x \
+      --with-dbus \
+      --with-file-notification \
+      --with-gnutls \
+      --with-json \
+      --with-libgmp \
+      --with-libsystemd \
+      --with-mailutils \
+      --with-modules \
+      --with-native-compilation \
+      --with-selinux \
+      --with-threads \
+      --with-toolkit-scroll-bars \
+      --with-xml2 \
+      --with-zlib
   $ make NATIVE_FULL_AOT=1 -j$(grep -c ^processor /proc/cpuinfo)
   $ sudo make install
 #+END_SRC
