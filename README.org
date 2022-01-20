@@ -152,8 +152,8 @@ equivalent of ~emacs-nox~ for Fedora:
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install -y autoconf automake dbus-devel gnutls-devel gpm-devel \
       jansson-devel libgccjit-devel libselinux-devel libxml2-devel \
-      ncurses-devel openssl-devel systemd-devel texinfo zlib-devel
-  $ git clone --branch emacs-28 --depth 1 https://github.com/emacs-mirror/emacs
+      ncurses-devel openssl-devel sqlite-devel systemd-devel texinfo zlib-devel
+  $ git clone --branch master --depth 1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
   $ ./configure \
@@ -170,6 +170,7 @@ equivalent of ~emacs-nox~ for Fedora:
       --with-modules \
       --with-native-compilation \
       --with-selinux \
+      --with-sqlite3 \
       --with-threads \
       --with-toolkit-scroll-bars \
       --with-xml2 \
