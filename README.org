@@ -891,10 +891,10 @@ use many buffers.
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
 
-    (add-to-list 'eglot-server-programs '(c-mode   . ("clangd")))
-    (add-to-list 'eglot-server-programs '(c++-mode . ("clangd")))
+    (add-to-list 'eglot-server-programs '(c-mode      . ("clangd")))
+    (add-to-list 'eglot-server-programs '(c++-mode    . ("clangd")))
     (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
-    (add-to-list 'eglot-server-programs '(rust-mode . ("rls")))
+    (add-to-list 'eglot-server-programs '(rust-mode   . ("rls")))
 
     :hook (((c-mode c++-mode go-mode python-mode rust-mode zig-mode)
             . 'eglot-ensure)
@@ -1666,7 +1666,7 @@ appreciate the additional functions.
            (org-metaleft  . windmove-left)
            (org-metaright . windmove-right)
            (org-metaup    . windmove-up)
-           (org-mode . (lambda() (setq-local indent-tabs-mode nil))))
+           (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
 
     :mode "\\.org$")
 #+END_SRC
@@ -1751,26 +1751,11 @@ appreciate the additional functions.
                           (lambda() (untabify (point-min) (point-max)))
                           nil 'local)
 
-                (setq-local c-basic-offset         4
-                            indent-tabs-mode       nil
-                            tab-width              4)))
+                (setq-local c-basic-offset    4
+                            indent-tabs-mode  nil
+                            tab-width         4)))
 
-    :mode (("^Cargo.toml$" . 'rust-mode)
-           ("\\.rs$"       . 'rust-mode)))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  ;;  (use-package rustic
-  ;;    :hook (eglot-managed-mode-hook . (lambda() (flymake-mode -1)))
-  ;;    :init
-  ;;    (setq rustic-format-trigger nil
-  ;;          rustic-format-on-save nil
-  ;;          rustic-lsp-client     'eglot
-  ;;          rustic-lsp-format     't
-  ;;          rustic-lsp-server     'rls)
-  ;;
-  ;;    :mode (("^Cargo.toml$" . 'rustic-mode)
-  ;;           ("\\.rs$"       . 'rustic-mode)))
+    :mode ("\\.rs$" . 'rust-mode))
 #+END_SRC
 
 *** Shell
