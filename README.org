@@ -1724,9 +1724,9 @@ appreciate the additional functions.
 *** Rust
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package cargo
-    :commands (cargo cargo-minor-mode)
-    :hook (rust-mode . cargo-minor-mode))
+  (use-package cargo-mode
+    :config
+    (add-hook 'rust-mode-hook 'cargo-minor-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1749,7 +1749,8 @@ appreciate the additional functions.
                             indent-tabs-mode  nil
                             tab-width         4)))
 
-    :mode ("\\.rs$" . 'rust-mode))
+    :mode (("\\.rs$" . 'rust-mode)
+           ("^Cargo.toml$" . 'rust-mode)))
 #+END_SRC
 
 *** Shell
