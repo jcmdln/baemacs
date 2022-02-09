@@ -1682,13 +1682,6 @@ appreciate the additional functions.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package org-bullets
-    :after (org)
-    :commands (org-bullets-mode)
-    :hook (org-mode . (lambda() (org-bullets-mode 1))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package org-drill
     :after (org)
     :commands (org-drill)
