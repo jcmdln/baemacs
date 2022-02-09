@@ -1,6 +1,5 @@
 # -*- mode : org -*-
 #+LANGUAGE: en
-#+STARTUP: indent
 #+TITLE: Baemacs - A Literate GNU/Emacs Configuration
 
 Baemacs is yet another take on a literate GNU/Emacs configuration that intends
