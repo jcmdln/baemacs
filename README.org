@@ -156,7 +156,7 @@ performance improvement. The following example shows how I compile on Fedora:
   $ git clone --branch master --depth 1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
-  $ ./configure
+  $ ./configure \
       CFLAGS="-O2 -g3 -march=native -pipe" \
       --without-all \
       --with-cairo \
