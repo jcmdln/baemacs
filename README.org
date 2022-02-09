@@ -1742,7 +1742,9 @@ appreciate the additional functions.
     :after (rust-mode)
     :commands (flycheck-rust-setup)
     :hook (flycheck-mode . (lambda() (flycheck-rust-setup))))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package rust-mode
     :init
     (add-hook 'rust-mode-hook
