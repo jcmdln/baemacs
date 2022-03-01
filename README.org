@@ -58,6 +58,7 @@ The goals of Baemacs are purposefully mundane.
   - [[#editing][Editing]]
     - [[#backups][Backups]]
     - [[#clipboard][Clipboard]]
+    - [[#delete-selection][Delete Selection]]
     - [[#scrolling][Scrolling]]
     - [[#line-numbers][Line Numbers]]
     - [[#modeline][Modeline]]
@@ -550,6 +551,13 @@ adjusting how the clipboard works in Emacs.
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (setq save-interprogram-paste-before-kill 't
         select-enable-primary               nil)
+#+END_SRC
+
+*** Delete Selection
+
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (add-hook 'after-init-hook
+            (lambda() (delete-selection-mode 1)))
 #+END_SRC
 
 *** Scrolling
