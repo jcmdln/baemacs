@@ -361,20 +361,11 @@ exists on multiple sources.
 
         package-archives
         '(("elpa"         . "https://elpa.gnu.org/packages/")
-          ("melpa-stable" . "https://stable.melpa.org/packages/")
           ("melpa"        . "https://melpa.org/packages/"))
 
         package-archive-priorities
         '(("elpa"         . 3)
-          ("melpa-stable" . 2)
-          ("melpa"        . 1))
-
-        package-pinned-packages
-        '((cargo       . "melpa")
-          (dimmer      . "melpa")
-          (hcl-mode    . "melpa")
-          (ivy-rich    . "melpa")
-          (use-package . "melpa")))
+          ("melpa"        . 1)))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
