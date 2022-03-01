@@ -1025,12 +1025,6 @@ specific buffer, you may now do so.
     :hook (prog-mode . flycheck-mode))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package flycheck-inline
-    :commands (turn-on-flycheck-inline)
-    :hook (flycheck-mode . (lambda() (turn-on-flycheck-inline))))
-#+END_SRC
-
 *** flyspell
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
