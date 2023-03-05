@@ -150,49 +150,25 @@ performance improvement. The following example shows how I compile on Fedora:
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install \
-      automake cairo-devel giflib-devel gnutls-devel gpm-devel gtk3-devel \
-      harfbuzz-devel jansson-devel lcms2-devel libXpm-devel libjpeg-devel \
-      libotf-devel librsvg2-devel libtiff-devel libwebp-devel m17n-lib-devel \
-      ncurses-devel systemd-devel webkit2gtk3-devel
-  $ git clone --branch master --depth 1 https://github.com/emacs-mirror/emacs
+    autoconf cairo-devel giflib-devel gmp-devel gnutls-devel gnutls-utils \
+    gpm-devel gtk+-devel gtk3-devel harfbuzz-devel jansson-devel lcms2-devel \
+    libgccjit-devel libjpeg-devel libotf-devel libpng-devel librsvg2-devel \
+    libtiff-devel libtree-sitter-devel libwebp-devel libXpm-devel make \
+    ncurses-devel openssl-devel sqlite-devel systemd-devel texinfo zlib-devel
+  $ git clone --branch=emacs-29 --depth=1 https://github.com/emacs-mirror/emacs
   $ cd emacs
   $ ./autogen.sh
   $ ./configure \
-      CFLAGS="-O2 -g3 -march=native -pipe" \
-      --without-all \
-      --with-cairo \
-      --with-dbus \
-      --with-file-notification \
-      --with-gif \
-      --with-gpm \
-      --with-gnutls \
-      --with-harfbuzz \
-      --with-jpeg \
-      --with-json \
-      --with-lcms2 \
-      --with-libgmp \
-      --with-libotf \
-      --with-libsystemd \
-      --with-m17n-flt \
-      --with-mailutils \
-      --with-modules \
-      --with-pgtk \
-      --with-png \
-      --with-rsvg \
-      --with-native-compilation \
-      --with-selinux \
-      --with-sqlite3 \
-      --with-selinux \
-      --with-sound \
-      --with-threads \
-      --with-tiff \
-      --with-toolkit-scroll-bars \
-      --with-webp \
-      --with-xml2 \
-      --with-xpm \
-      --with-xwidgets \
-      --with-zlib
-  $ make NATIVE_FULL_AOT=1 -j$(grep -c ^processor /proc/cpuinfo)
+    CFLAGS="-O2 -g3 -march=native -pipe" \
+    --with-cairo=yes --with-dbus=yes --with-file-notification=yes \
+    --with-gif=yes --with-gnutls=yes --with-gpm=yes --with-jpeg=yes \
+    --with-json=yes --with-libgmp=yes --with-libsystemd=yes \
+    --with-mailutils=yes --with-modules=yes --with-native-compilation=aot \
+    --with-pgtk=yes --with-png=yes --with-pop=no --with-rsvg=yes \
+    --with-selinux=yes --with-sound=no --with-sqlite3=yes --with-threads=yes \
+    --with-tiff=yes --with-tree-sitter=yes --with-webp=yes --with-x=no \
+    --with-xml2=yes --with-xpm=yes --with-zlib=yes
+  $ make -j$(grep -c ^processor /proc/cpuinfo)
   $ sudo make install
 #+END_SRC
 
