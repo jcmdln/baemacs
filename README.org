@@ -868,7 +868,6 @@ use many buffers.
     (add-to-list 'eglot-server-programs '(c-mode      . ("clangd")))
     (add-to-list 'eglot-server-programs '(c++-mode    . ("clangd")))
     (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
-    (add-to-list 'eglot-server-programs '(rust-mode   . ("rls")))
 
     :hook (((c-mode c++-mode go-mode python-mode rust-mode zig-mode)
             . 'eglot-ensure)
