@@ -188,7 +188,7 @@ be performed once as Baemacs will automatically ensure that changes to
 ~README.org~ are reflected on start. See [[Bootstrap]] more information.
 
 #+BEGIN_SRC shell :eval no :tangle no
-  $ emacs --batch --eval="
+  $ emacs -Q --batch --eval="
   (progn
     (require 'org)
 
