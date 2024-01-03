@@ -38,9 +38,6 @@ The goals of Baemacs are purposefully mundane.
   - [[#optional-building-emacs-with-native-compilation][(Optional) Building Emacs with native-compilation]]
   - [[#install][Install]]
 - [[#early-initel][early-init.el]]
-  - [[#garbage-collection][Garbage Collection]]
-    - [[#gc-cons-percentage][gc-cons-percentage]]
-    - [[#gc-cons-threshold][gc-cons-threshold]]
   - [[#encoding][Encoding]]
   - [[#environment][Environment]]
   - [[#custom][Custom]]
@@ -67,17 +64,15 @@ The goals of Baemacs are purposefully mundane.
     - [[#word-wrap][Word Wrap]]
   - [[#input][Input]]
     - [[#keyboard][Keyboard]]
-      - [[#keybinds][Keybinds]]
     - [[#mouse][Mouse]]
   - [[#bootstrap][Bootstrap]]
 - [[#configel][config.el]]
   - [[#packages][Packages]]
     - [[#circe][circe]]
-    - [[#clang-format][clang-format]]
     - [[#company][company]]
     - [[#counsel][counsel]]
     - [[#diff-hl][diff-hl]]
-    - [[#dimmer][dimmer]]
+    - [[#editorconfig][editorconfig]]
     - [[#eglot][eglot]]
     - [[#eldoc][eldoc]]
     - [[#elfeed][elfeed]]
@@ -91,7 +86,7 @@ The goals of Baemacs are purposefully mundane.
     - [[#ibuffer][ibuffer]]
     - [[#ivy][ivy]]
     - [[#magit][magit]]
-    - [[#nov][nov]]
+    - [[#org][org]]
     - [[#rainbow-delimiters][rainbow-delimiters]]
     - [[#ranger][ranger]]
     - [[#scratch][scratch]]
@@ -99,42 +94,9 @@ The goals of Baemacs are purposefully mundane.
     - [[#smartparens][smartparens]]
     - [[#swiper][swiper]]
     - [[#undo-tree][undo-tree]]
-    - [[#xclip][xclip]]
-    - [[#yasnippet][yasnippet]]
   - [[#languages][Languages]]
-    - [[#apache][Apache]]
-    - [[#bpftrace][bpftrace]]
     - [[#c][C]]
     - [[#c-1][C++]]
-    - [[#caddy-disabled][Caddy (Disabled)]]
-    - [[#cfg--ini][Cfg / Ini]]
-    - [[#cmake][CMake]]
-    - [[#csv][CSV]]
-    - [[#docker][Docker]]
-    - [[#dotenv][DotEnv]]
-    - [[#editorconfig][EditorConfig]]
-    - [[#emacs-lisp][Emacs Lisp]]
-    - [[#gdscript-disabled][GDScript (Disabled)]]
-    - [[#go][Go]]
-    - [[#hcl][HCL]]
-    - [[#jinja2][Jinja2]]
-    - [[#json][JSON]]
-    - [[#julia][Julia]]
-    - [[#markdown][Markdown]]
-    - [[#meson][Meson]]
-    - [[#nginx][NGINX]]
-    - [[#ninja][Ninja]]
-    - [[#org][Org]]
-    - [[#php][PHP]]
-    - [[#protobuf][Protobuf]]
-    - [[#python][Python]]
-    - [[#rust][Rust]]
-    - [[#shell][Shell]]
-    - [[#sed][Sed]]
-    - [[#toml][Toml]]
-    - [[#verilog][Verilog]]
-    - [[#yaml][YAML]]
-    - [[#zig][Zig]]
 
 * Usage
 
@@ -233,54 +195,7 @@ be performed once as Baemacs will automatically ensure that changes to
   ;;; Code:
 #+END_SRC
 
-** Garbage Collection
-
-Emacs makes some considerations for older and more memory restricted systems in
-terms of how the garbage collector is configured. On modern 64-bit systems
-these considerations may be far too conservative for users who run many elisp
-programs such as gnus, elfeed, circe, etc. Note that for memory constrained
-environments you may want to disable the changes to the garbage collector made
-in this section.
-
-*** gc-cons-percentage
-
-~gc-cons-percentage~ refers to the threshold of total heap size to reach to
-trigger garbage collection. By default this threshold is 10%.
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (defvar baemacs/gc-cons-percentage-default gc-cons-percentage
-    "Default value of gc-cons-percentage.")
-  (defvar baemacs/gc-cons-percentage-init 0.8
-    "Init value of gc-cons-percentage.")
-  (defvar baemacs/gc-cons-percentage-tuned 0.33
-    "Tuned value of gc-cons-percentage.")
-
-  (setq gc-cons-percentage baemacs/gc-cons-percentage-init)
-
-  (add-hook 'after-init-hook
-            (lambda()
-              (setq gc-cons-percentage baemacs/gc-cons-percentage-tuned)))
-#+END_SRC
-
-*** gc-cons-threshold
-
-~gc-cons-threshold~ refers to the total number of lisp objects that must be
-allocated to trigger garbage collection. By default this threshold is 400,000
-objects on 32-bit systems and 800,000 objects on 64-bit systems.
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (defvar baemacs/gc-cons-threshold-default gc-cons-threshold
-    "Default value of gc-cons-threshold")
-  (defvar baemacs/gc-cons-threshold-tuned (* 1000 1000 2)
-    "Tuned value of gc-cons-threshold")
-
-  (setq gc-cons-threshold baemacs/gc-cons-threshold-tuned)
-#+END_SRC
-
 ** Encoding
-
-Another thing we want to handle very early is attempting to enforce the use of
-UTF-8 encoding.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setq prefer-coding-system       'utf-8
@@ -324,31 +239,24 @@ on to keep our configuration directory relatively clean.
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (require 'package)
-#+END_SRC
 
-Here we're defining where to put packages, where we should get packages from,
-and the priority we should retrieve packages if a package with the same name
-exists on multiple sources.
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (if (fboundp 'native-compile)
       (setq package-native-compile t))
 
-  (setq package-user-dir (concat user-emacs-directory "pkg/")
-
-        package-archives
-        '(("elpa"         . "https://elpa.gnu.org/packages/")
-          ("melpa"        . "https://melpa.org/packages/"))
-
-        package-archive-priorities
-        '(("elpa"         . 3)
-          ("melpa"        . 1)))
+  (setq package-archives           '(("elpa"         . "https://elpa.gnu.org/packages/")
+                                     ("melpa-stable" . "https://stable.melpa.org/packages/")
+                                     ("melpa"        . "https://melpa.org/packages/"))
+        package-archive-priorities '(("elpa"         . 3)
+                                     ("melpa-stable" . 2)
+                                     ("melpa"        . 1))
+        package-user-dir           (concat user-emacs-directory "pkg/"))
 #+END_SRC
 
 With the above changes made, we may now initialize the package module:
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (package-initialize)
+  (when (< emacs-major-version 27)
+    (package-initialize))
 #+END_SRC
 
 *** use-package
@@ -388,10 +296,8 @@ is a nice change.
   (use-package no-littering
     :commands (dired-create-directory no-littering-expand-var-file-name)
     :init
-    (setq auto-save-file-name-transforms
-          `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't))
-
-          baemacs/auto-save-dir (concat user-emacs-directory "var/auto-save"))
+    (setq auto-save-file-name-transforms  `((".*" ,(no-littering-expand-var-file-name "auto-save/") 't))
+          baemacs/auto-save-dir           (concat user-emacs-directory "var/auto-save"))
 
     (if (not (file-directory-p baemacs/auto-save-dir))
         (dired-create-directory baemacs/auto-save-dir)))
@@ -408,7 +314,6 @@ is a nice change.
       (interactive)
 
       ;; Refresh package metadata, and upgrade all packages
-      (package-refresh-contents)
       (package-utils-upgrade-all)
 
       ;; Native-compile all packages
@@ -455,7 +360,7 @@ certain things like 'man' will not respect our choices and require specific
 adjustment. Some things like 'gnus' should still make splits as they want, so
 we won't look for every possible edge condition to normalize this behavior.
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (add-to-list 'display-buffer-alist '("*Help*" display-buffer-same-window))
   (add-to-list 'display-buffer-alist '("*Man*" display-buffer-same-window))
 
@@ -610,14 +515,9 @@ lines.
 
 *** Keyboard
 
-In terms of keyboard input, I only make slight adjustments though their
-usefulness is highly subjective.
-
-**** Keybinds
-
-From my time of using tmux + vim I had grown to prefer some custom keybinds I
-made for handling splits or navigating through panes. Here I've attempted to
-recreated the subjective ease of navigation I prefer:
+#+BEGIN_SRC emacs-lisp :tangle init.el
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (global-set-key (kbd "M--")
@@ -641,8 +541,6 @@ recreated the subjective ease of navigation I prefer:
   (global-set-key (kbd "<M-left>")  'windmove-left)
   (global-set-key (kbd "<M-right>") 'windmove-right)
   (global-set-key (kbd "<M-up>")    'windmove-up)
-
-  (defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
 
 *** Mouse
@@ -655,28 +553,12 @@ recreated the subjective ease of navigation I prefer:
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
-  (add-hook 'after-init-hook
-            (lambda()
-              (xterm-mouse-mode 1)))
-
-  (global-set-key (kbd "<mouse-4>")
-                  (lambda()
-                    (interactive)
-                    (scroll-down-line 3)))
-
-  (global-set-key (kbd "<mouse-5>")
-                  (lambda()
-                    (interactive)
-                    (scroll-up-line 3)))
+  (add-hook 'after-init-hook (lambda() (xterm-mouse-mode 1)))
+  (global-set-key (kbd "<mouse-4>") (lambda() (interactive) (scroll-down-line 3)))
+  (global-set-key (kbd "<mouse-5>") (lambda() (interactive) (scroll-up-line 3)))
 #+END_SRC
 
 ** Bootstrap
-
-Something we can do to slightly improve the total duration needed for Emacs to
-complete its initialization phase is byte-compile the configuration files we
-create. If performed conditionally, we only pay the cost of byte-compiling when
-we make a change to this configuration file for the entire configuration to be
-rebuilt.
 
 At the end of initialization, ensure that ~README.org~ is not newer than
 ~config.el~, otherwise rebuild our configuration files and byte-compile them.
@@ -686,18 +568,14 @@ At the end of initialization, ensure that ~README.org~ is not newer than
     "Reconfigure Baemacs by writing and loading our config."
     (require 'org)
     (interactive)
-    (org-babel-tangle-file (concat user-emacs-directory "README.org"))
-    (load (concat user-emacs-directory "early-init.el"))
-    (load (concat user-emacs-directory "init.el")))
+    (org-babel-tangle-file (concat user-emacs-directory "README.org")))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle init.el
   (if (file-newer-than-file-p (concat user-emacs-directory "README.org")
                               (concat user-emacs-directory "early-init.el"))
       (baemacs/reconfig))
-#+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle init.el
   (load (concat user-emacs-directory "config.el"))
 #+END_SRC
 
@@ -769,12 +647,6 @@ https://github.com/emacs-circe/circe
         (load-file     (concat user-emacs-directory "usr/circe.el"))))
 #+END_SRC
 
-*** clang-format
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package clang-format)
-#+END_SRC
-
 *** company
 
 Company is a modular completion framework. Modules for retrieving completion
@@ -794,18 +666,6 @@ https://github.com/company-mode/company-mode
     :hook
     ((prog-mode . company-mode)
      (text-mode . company-mode)))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-c-headers
-    :after (company)
-    :config (add-to-list 'company-backends 'company-c-headers))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-emoji
-    :after (company)
-    :if window-system)
 #+END_SRC
 
 *** counsel
@@ -844,16 +704,16 @@ https://github.com/company-mode/company-mode
                   (add-hook 'text-mode-hook 'diff-hl-margin-mode)))))
 #+END_SRC
 
-*** dimmer
-
-This package provides a minor mode which dims inactive buffers, namely the
-buffers the cursor is not currently active in. It can be helpful for those who
-use many buffers.
+*** editorconfig
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dimmer
-    :commands (dimmer-mode)
-    :hook (after-init . (lambda() (dimmer-mode t))))
+  (use-package editorconfig
+    :hook
+    (prog-mode-hook . (lambda()
+                        (add-hook 'before-save-hook
+                                  (lambda() (editorconfig-apply) (editorconfig-format-buffer))
+                                  nil 'local)))
+    :init (editorconfig-mode 1))
 #+END_SRC
 
 *** eglot
@@ -865,19 +725,13 @@ use many buffers.
     (setq eglot-auto-display-help-buffer nil
           eglot-put-doc-in-help-buffer   nil)
 
-    (add-to-list 'eglot-server-programs '(c-mode      . ("clangd")))
-    (add-to-list 'eglot-server-programs '(c++-mode    . ("clangd")))
-    (add-to-list 'eglot-server-programs '(python-mode . ("pylsp")))
+    (add-to-list 'eglot-server-programs '(c-mode    . ("clangd")))
+    (add-to-list 'eglot-server-programs '(c++-mode  . ("clangd")))
+    (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
 
-    :hook (((c-mode c++-mode go-mode python-mode rust-mode zig-mode)
-            . 'eglot-ensure)
-           ((c-mode c++-mode)
-            . (lambda()
-                (fset 'c-indent-region 'clang-format-region)))
-           (eglot-managed-mode
-            . (lambda()
-                (add-hook 'before-save-hook 'eglot-format-buffer
-                          nil 'local)))))
+    :hook (((c-mode c++-mode go-mode python-mode rust-mode zig-mode) . 'eglot-ensure)
+           ((c-mode c++-mode)  . (lambda() (fset 'c-indent-region 'clang-format-region)))
+           (eglot-managed-mode . (lambda() (add-hook 'before-save-hook 'eglot-format-buffer nil 'local)))))
 #+END_SRC
 
 *** eldoc
@@ -927,29 +781,27 @@ Atom.
       "Custom eshell prompt."
       (interactive)
       (lambda ()
-        (concat "[" (user-login-name) "@"
-                (car (split-string (system-name) "\\.")) " "
-                (if (string= (eshell/pwd) (getenv "HOME"))
-                    "~" (eshell/basename (eshell/pwd))) "]"
-                (if (= (user-uid) 0) "# " "$ "))))
+	(concat "[" (user-login-name) "@"
+		(car (split-string (system-name) "\\.")) " "
+		(if (string= (eshell/pwd) (getenv "HOME"))
+		    "~" (eshell/basename (eshell/pwd))) "]"
+		(if (= (user-uid) 0) "# " "$ "))))
 
     (setq eshell-banner-message             ""
-          eshell-cmpl-cycle-completions     nil
-          eshell-error-if-no-glob           't
-          eshell-hist-ignoredups            't
-          eshell-history-size               4096
-          eshell-prefer-lisp-functions      't
-          eshell-prompt-function            (baemacs/eshell/prompt-function)
-          eshell-prompt-regexp              "^[^#$\n]*[#$] "
-          eshell-save-history-on-exit       't
-          eshell-scroll-to-bottom-on-input  nil
-          eshell-scroll-to-bottom-on-output nil
-          eshell-scroll-show-maximum-output nil)
+	  eshell-cmpl-cycle-completions     nil
+	  eshell-error-if-no-glob           't
+	  eshell-hist-ignoredups            't
+	  eshell-history-size               4096
+	  eshell-prefer-lisp-functions      't
+	  eshell-prompt-function            (baemacs/eshell/prompt-function)
+	  eshell-prompt-regexp              "^[^#$\n]*[#$] "
+	  eshell-save-history-on-exit       't
+	  eshell-scroll-to-bottom-on-input  nil
+	  eshell-scroll-to-bottom-on-output nil
+	  eshell-scroll-show-maximum-output nil)
 
     :init
-    (add-hook 'eshell-mode-hook
-              (lambda()
-                (defalias 'eshell/clear 'baemacs/eshell/clear)))
+    (add-hook 'eshell-mode-hook (lambda() (defalias 'eshell/clear 'baemacs/eshell/clear)))
 
     (defun baemacs/eshell-new()
       "Open a new instance of eshell."
@@ -1177,14 +1029,14 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ivy
+    :bind
+    (("C-c C-r" . ivy-resume)
+     ("<f6>"    . ivy-resume))
     :commands (ivy-mode)
-    :hook (after-init . (lambda() (ivy-mode 1)))
-    :bind (("C-c C-r" . ivy-resume)
-           ("<f6>"    . ivy-resume))
-
     :config
     (setq ivy-use-virtual-buffers      't
-          enable-recursive-minibuffers 't))
+	  enable-recursive-minibuffers 't)
+    :hook (after-init . (lambda() (ivy-mode 1))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1208,13 +1060,76 @@ readable sizes, and define a ton of filter groups.
     :demand 't)
 #+END_SRC
 
-*** nov
-
-This package provides a major mode for reading EPUB documents.
+*** org
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package nov
-    :mode ("\\.epub" . nov-mode))
+  (use-package org
+    :bind
+    (:map org-mode-map
+	  ([remap backward-paragraph] . nil)
+	  ([remap forward-paragraph]  . nil)
+	  ("C-S-<down>" . nil)
+	  ("C-S-<up>"   . nil)
+	  ("M-<down>"   . nil)
+	  ("M-<up>"     . nil)
+	  ("S-<left>"   . nil)
+	  ("S-<right>"  . nil))
+
+    :config
+    (setq org-src-fontify-natively  't
+	  org-src-tab-acts-natively 't
+	  org-support-shift-select  'always)
+
+    (setq org-babel-load-languages '((C . t)
+				     (awk . t)
+				     (emacs-lisp . t)
+				     (lisp . t)
+				     (makefile . t)
+				     (scheme . t)
+				     (shell . t)
+				     (sql . t)
+				     (sqlite . t)))
+
+    (set-face-attribute 'org-block nil
+			:background "#111111" :extend 't)
+
+    :hook
+    ((org-metadown  . windmove-down)
+     (org-metaleft  . windmove-left)
+     (org-metaright . windmove-right)
+     (org-metaup    . windmove-up)
+     (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
+    :mode ("\\.org$" . org-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package company-org-block
+    :after (company org)
+    :config (setq company-org-block-edit-style 'auto)
+    :init
+    (add-hook 'org-mode-hook
+              (lambda ()
+                (add-to-list (make-local-variable 'company-backends)
+                             'company-org-block))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package org-drill
+    :after (org)
+    :commands (org-drill)
+    :defer 't)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (use-package toc-org
+    :after (org)
+    :commands (toc-org-enable)
+    :hook (org-mode . toc-org-enable))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :tangle config.el
+  (provide 'config)
+  ;;; config.el ends here
 #+END_SRC
 
 *** rainbow-delimiters
@@ -1226,10 +1141,6 @@ This package provides a major mode for reading EPUB documents.
 
 *** ranger
 
-This package adds a minor mode that runs within ~dired~ that emulates much of
-the features provided by the ~ranger~ terminal file browser. Hardcore ~dired~
-users may want to disable this.
-
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package ranger
     :commands (ranger-override-dired-mode)
@@ -1237,9 +1148,6 @@ users may want to disable this.
 #+END_SRC
 
 *** scratch
-
-I like opening multiple scratch buffers, so I added a function to allow me to
-make a new numbered scratch buffer.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package scratch
@@ -1288,9 +1196,7 @@ appreciate the additional functions.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
-    :hook
-    ((eshell-mode org-mode prog-mode text-mode) . turn-on-smartparens-mode)
-
+    :hook ((eshell-mode org-mode prog-mode text-mode) . turn-on-smartparens-mode)
     :config
     (setq sp-highlight-pair-overlay     nil
           sp-highlight-wrap-overlay     nil
@@ -1312,490 +1218,38 @@ appreciate the additional functions.
     :init (global-undo-tree-mode))
 #+END_SRC
 
-*** xclip
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package xclip
-    :commands (xclip-mode)
-    :init
-    (if (or (executable-find "xclip")
-            (executable-find "xclipboard"))
-        (xclip-mode 1)
-      nil))
-#+END_SRC
-
-*** yasnippet
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package yasnippet
-    :after (eglot)
-    :commands (yas-minor-mode)
-    :hook (prog-mode . yas-minor-mode))
-#+END_SRC
-
 ** Languages
-
-*** Apache
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package apache-mode
-    :disabled)
-#+END_SRC
-
-*** bpftrace
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package bpftrace-mode
-    :mode "\\.bt$")
-#+END_SRC
 
 *** C
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package cc-mode
-    :init
-    (add-hook 'c-mode-hook
-              (lambda()
-                (add-to-list 'auto-mode-alist '("\\.h\\'" . c-mode))
-                (setq-local c-basic-offset    8
-                            c-default-style   "linux"
-                            indent-tabs-mode  't
-                            tab-width         8)))
-
-    :mode ("\\.c$" . c-mode))
+    :config
+    (setq-local c-basic-offset    8
+                c-default-style   "linux"
+                indent-tabs-mode  't
+                tab-width         8)
+    :hook
+    ((c-mode . tree-sitter-mode)
+     (c-mode . tree-sitter-hl-mode))
+    :mode
+    (("\\.c$" . c-mode)
+     ("\\.h$" . c-mode)))
 #+END_SRC
 
 *** C++
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package cc-mode
-    :init
-    (add-hook 'c++-mode-hook
-              (lambda()
-                (add-to-list 'auto-mode-alist  '("\\.h\\'" . c++-mode))
-                (add-to-list 'auto-mode-alist  '("\\.hpp\\'" . c++-mode))
-                (setq-local c-basic-offset    4
-                            c-default-style   "ellemtel"
-                            indent-tabs-mode  't
-                            tab-width         4)))
-
-    :mode (("\\.cc$" . c++-mode)
-           ("\\.cpp$" . c++-mode)
-           ("\\.cxx$" . c++-mode)))
-#+END_SRC
-
-*** Caddy (Disabled)
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package caddyfile-mode
-    :disabled)
-#+END_SRC
-
-
-*** Cfg / Ini
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package conf-mode
-    :init
-    (add-hook 'conf-toml-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-                (setq-local indent-tabs-mode nil)))
-
-    :mode ("\\.cfg$"
-           "\\.conf$"
-           "\\.ini$"))
-#+END_SRC
-
-*** CMake
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package cmake-mode
-    :defer 't)
-#+END_SRC
-
-*** CSV
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package csv-mode
-    :mode "\\.csv$")
-#+END_SRC
-
-*** Docker
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package docker-compose-mode
-    :mode "^.*-compose\\.y.ml$")
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dockerfile-mode
-    :mode ("Containerfile$"
-           "Dockerfile$"))
-#+END_SRC
-
-*** DotEnv
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package dotenv-mode
-    :defer 't)
-#+END_SRC
-
-*** EditorConfig
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package editorconfig
-    :init
-    (editorconfig-mode 1)
-    (add-hook 'prog-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda()
-                            (editorconfig-apply)
-                            (editorconfig-format-buffer))
-                          nil 'local))))
-#+END_SRC
-
-*** Emacs Lisp
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package elisp-mode
-    :commands (emacs-lisp-mode)
-    :ensure nil
-    :init
-    (add-hook 'emacs-lisp-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-
-                (setq-local indent-tabs-mode nil)))
-
-    :mode (("\\.el$"  . emacs-lisp-mode)
-           ("\\.elc$" . emacs-lisp-mode)))
-#+END_SRC
-
-*** GDScript (Disabled)
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package gdscript-mode
-    :disabled)
-#+END_SRC
-
-*** Go
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package go-mode
-    :init
-    (add-hook 'go-mode-hook
-              (lambda()
-                (setq-local c-basic-offset   4
-                            indent-tabs-mode nil
-                            tab-width        4)))
-
-    :mode "\\.go$")
-#+END_SRC
-
-*** HCL
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package hcl-mode
-    :init
-    (add-hook 'hcl-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-
-                (setq-local c-basic-offset   4
-                            hcl-indent-level 4
-                            indent-tabs-mode nil
-                            tab-width        4)))
-
-    :mode "\\.hcl$")
-#+END_SRC
-
-*** Jinja2
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package jinja2-mode
-    :mode "\\.j2$")
-#+END_SRC
-
-*** JSON
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package json-mode
-    :hook
-    (json-mode
-     . (lambda()
-         (add-hook 'before-save-hook
-                   (lambda() (untabify (point-min) (point-max)))
-                   nil 'local)
-
-         (setq-local c-basic-offset         2
-                     indent-tabs-mode       nil
-                     json-mode-indent-level 2
-                     tab-width              2)))
-
-    :mode "\\.json$")
-#+END_SRC
-
-*** Julia
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package flycheck-julia
-    :after (flycheck julia-mode)
-    :hook (julia-mode . (lambda() (flycheck-julia-setup))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package julia-mode
-    :mode "\\.jl$")
-#+END_SRC
-
-*** Markdown
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package markdown-mode
-    :hook
-    (markdown-mode
-     . (lambda()
-         (add-hook 'before-save-hook
-                   (lambda() (untabify (point-min) (point-max)))
-                   nil 'local)
-
-         (setq-local c-basic-offset         4
-                     indent-tabs-mode       nil
-                     tab-width              4)))
-
-    :mode ("\\.markdown$"
-           "\\.md$"))
-#+END_SRC
-
-*** Meson
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package meson-mode
-    :mode "meson\\.build$")
-#+END_SRC
-
-*** NGINX
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package nginx-mode
-    :defer 't)
-#+END_SRC
-
-*** Ninja
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package ninja-mode
-    :defer 't)
-#+END_SRC
-
-*** Org
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package org
-    :bind (:map org-mode-map
-                ([remap backward-paragraph] . nil)
-                ([remap forward-paragraph]  . nil)
-                ("C-S-<down>" . nil)
-                ("C-S-<up>"   . nil)
-                ("M-<down>"   . nil)
-                ("M-<up>"     . nil)
-                ("S-<left>"   . nil)
-                ("S-<right>"  . nil))
-
     :config
-    (setq org-src-fontify-natively  't
-          org-src-tab-acts-natively 't
-          org-support-shift-select  'always)
-
-    (setq org-babel-load-languages '((C . t)
-                                     (awk . t)
-                                     (emacs-lisp . t)
-                                     (lisp . t)
-                                     (makefile . t)
-                                     (scheme . t)
-                                     (shell . t)
-                                     (sql . t)
-                                     (sqlite . t)))
-
-
-    (set-face-attribute 'org-block nil
-                        :background "#111111" :extend 't)
-
-    :hook ((org-metadown  . windmove-down)
-           (org-metaleft  . windmove-left)
-           (org-metaright . windmove-right)
-           (org-metaup    . windmove-up)
-           (org-mode      . (lambda() (setq-local indent-tabs-mode nil))))
-
-    :mode "\\.org$")
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-org-block
-    :after (company org)
-    :config (setq company-org-block-edit-style 'auto)
-    :init
-    (add-hook 'org-mode-hook
-              (lambda ()
-                (add-to-list (make-local-variable 'company-backends)
-                             'company-org-block))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package org-drill
-    :after (org)
-    :commands (org-drill)
-    :defer 't)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package toc-org
-    :after (org)
-    :commands (toc-org-enable)
-    :hook (org-mode . toc-org-enable))
-#+END_SRC
-
-*** PHP
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package company-php
-    :after (company php-mode))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package php-mode
-    :mode "\\.php$")
-#+END_SRC
-
-*** Protobuf
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package protobuf-mode
-    :mode "\\.proto$")
-#+END_SRC
-
-*** Python
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package python-mode
-    :mode "\\.py$")
-#+END_SRC
-
-*** Rust
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package cargo-mode
-    :config
-    (add-hook 'rust-mode-hook 'cargo-minor-mode))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package flycheck-rust
-    :after (rust-mode)
-    :commands (flycheck-rust-setup)
-    :hook (flycheck-mode . (lambda() (flycheck-rust-setup))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package rust-mode
-    :init
-    (add-hook 'rust-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-
-                (setq-local c-basic-offset    4
-                            indent-tabs-mode  nil
-                            tab-width         4)))
-
-    :mode (("\\.rs$" . 'rust-mode)
-           ("^Cargo.toml$" . 'rust-mode)))
-#+END_SRC
-
-*** Shell
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package sh-script
-    :init
-    (add-hook 'sh-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-
-                (setq-local indent-tabs-mode nil)))
-
-    :mode ("\\.sh$" . 'sh-mode))
-#+END_SRC
-
-*** Sed
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package sed-mode
-    :mode "\\.sed$")
-#+END_SRC
-
-*** Toml
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package conf-mode
-    :init
-    (add-hook 'conf-toml-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-
-                (setq-local indent-tabs-mode nil)))
-
-    :mode (("\\.toml$"       . 'conf-toml-mode)
-           ("Cargo\\.lock$"  . 'conf-toml-mode)
-           ("poetry\\.lock$" . 'conf-toml-mode)))
-#+END_SRC
-
-*** Verilog
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package verilog-mode
-    :mode "\\.v$")
-#+END_SRC
-
-*** YAML
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package yaml-mode
-    :init
-    (add-hook 'yaml-mode-hook
-              (lambda()
-                (add-hook 'before-save-hook
-                          (lambda() (untabify (point-min) (point-max)))
-                          nil 'local)
-
-                (setq-local c-basic-offset         4
-                            indent-tabs-mode       nil
-                            tab-width              4)))
-
-    :mode ("\\.clang-format$"
-           "\\.y.ml"))
-#+END_SRC
-
-*** Zig
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package zig-mode
-    :mode "\\.zig$")
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (provide 'config)
-  ;;; config.el ends here
+    (setq-local c-basic-offset    4
+                c-default-style   "ellemtel"
+                indent-tabs-mode  't
+                tab-width         4)
+    :mode
+    (("\\.cc$"  . c++-mode)
+     ("\\.cpp$" . c++-mode)
+     ("\\.cxx$" . c++-mode)
+     ("\\.hh$"  . c++-mode)
+     ("\\.hpp$" . c++-mode)))
 #+END_SRC
