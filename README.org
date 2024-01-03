@@ -2,49 +2,23 @@
 #+LANGUAGE: en
 #+TITLE: Baemacs - A Literate GNU/Emacs Configuration
 
-Baemacs is yet another take on a literate GNU/Emacs configuration that intends
-to remain close to the default behavior and appearance. It is comprised of some
-minor housekeeping tweaks and use-package definitions in the file you're
-reading that get parsed and compiled with Org.
-
-This file is checked on init for changes and becomes your management tool for
-maintaining your config. Whenever this file is newer than a config file we've
-written out, your entire config will be tangled, compiled, and loaded.
+Baemacs is a GNU/Emacs configuration packaged within ~org-mode~. It provides a
+concise abstraction, this file you're reading, to stage and detect changes which
+automatically updates on start of GNU/Emacs.
 
 #+HTML: <p align="center"><img src="img/baemacs.png" /></p>
 
-The goals of Baemacs are purposefully mundane.
-
-1. If you like plain GNU/Emacs, you should feel empowered by Baemacs
-
-   To illustrate this, consider trying some of the [[#eshell][eshell]] config options which
-   make it behave more like other shells. You should expect for most cli tools
-   to simply work with few(er) artifacts, one example being progress bars.
-
-2. Package rules and relationships made predictable with use-package
-
-   Tangentially related to use-package, this configuration uses stable packages
-   whenever possible so that there are no unexpected behaviors with a
-   preference of elpa, then stable melpa, then melpa.
-
-3. Have great documentation
-
-   The more powerful benefit of Org is the intermingling of documentation and
-   source code. Applying this to our configuration allows for explaining finer
-   details when relevant, and (hopefully) keeping things logically organized.
-
 * Table of Contents :TOC_4:noexport:
 - [[#usage][Usage]]
-  - [[#optional-building-emacs-with-native-compilation][(Optional) Building Emacs with native-compilation]]
+  - [[#optional-building-emacs][(Optional) Building Emacs]]
   - [[#install][Install]]
 - [[#early-initel][early-init.el]]
+  - [[#custom][Custom]]
   - [[#encoding][Encoding]]
   - [[#environment][Environment]]
-  - [[#custom][Custom]]
   - [[#package-management][Package Management]]
     - [[#use-package][use-package]]
     - [[#no-littering][no-littering]]
-    - [[#package-utils][package-utils]]
   - [[#disable-toolbars][Disable toolbars]]
   - [[#disable-splash-screen][Disable splash screen]]
   - [[#re-use-frames-and-windows][Re-use Frames and Windows]]
@@ -100,15 +74,16 @@ The goals of Baemacs are purposefully mundane.
 
 * Usage
 
-This singular file is all that is needed to fully replicate this config. While
-you may simply download a copy of this file and use it, the following sections
-reference using git to retrieve and manage your copy of the config, which will
-hopefully simplify incorporating your own changes.
+The file you're reading contains all configuration details. It uses ~org-mode~
+to capture documentation and code blocks which are written to their respective
+target files. When GNU/Emacs is started, if the ~README.org~ file has been
+changed it triggers rewriting the configuration files.
 
-** (Optional) Building Emacs with native-compilation
+** (Optional) Building Emacs
 
-In Emacs 28 or later, you can native-compile elisp via libgccjit for a serious
-performance improvement. The following example shows how I compile on Fedora:
+This section demonstrates how I build GNU/Emacs on Fedora Linux. Doing so is
+entirely optional as many systems provide GNU/Emacs with support for nativecomp,
+tree-sitter and other newer features enabled.
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ sudo dnf install \
@@ -136,54 +111,20 @@ performance improvement. The following example shows how I compile on Fedora:
 
 ** Install
 
-By default, this configuration uses the XDG config path ~$HOME/.config~ which
-will be ignored if any other configuration location is present. This path may
-or may not have been given a higher priority in recent releases.
+Clone this repo into ~$HOME/.config/emacs~, then write the configuration by
+using ~org-babel-tangle-file~:
 
 #+BEGIN_SRC shell :eval no :tangle no
   $ git clone --depth 1 https://github.com/jcmdln/baemacs.git ~/.config/emacs
-#+END_SRC
-
-The following command bootstraps Baemacs by using org tangle ~README.org~ into
-the various config files, then loading ~early-init.el~. This step only need to
-be performed once as Baemacs will automatically ensure that changes to
-~README.org~ are reflected on start. See [[Bootstrap]] more information.
-
-#+BEGIN_SRC shell :eval no :tangle no
   $ emacs -Q --batch --eval="
   (progn
     (require 'org)
-
-    ;; Ensure we native-compile everything
-    (setq package-native-compile t)
-
-    ;; Use org to write out all our config files
-    (org-babel-tangle-file \"~/.config/emacs/README.org\")
-
-    ;; Find the /lisp dir from load-path and recursively compile its contents
-    (native-compile-async
-     (dolist (item load-path result)
-       (if (string-match-p \"/lisp$\" item)
-           (setq-local result item)))
-     'recursively)
-
-    ;; Fully load our config so that packages are installed
-    (load-file \"~/.config/emacs/early-init.el\")
-    (load-file \"~/.config/emacs/init.el\")
-
-    ;; Compile all packages installed by our config
-    (native-compile-async (concat user-emacs-directory \"elpa/\") 'recursively)
-    (native-compile-async (concat user-emacs-directory \"pkg/\") 'recursively)
-
-    ;; Wait for everything to get compiled
-    (while (or comp-files-queue
-               (> (comp-async-runnings) 0))
-      (sleep-for 1))
-
-    ;; Finished!
-    (kill-emacs))
-  "
+    (org-babel-tangle-file (concat user-emacs-directory \"README.org\"))
+  )"
 #+END_SRC
+
+When GNU/Emacs is started, any remaining configuration steps will be performed
+such as installing and compiling packages.
 
 * early-init.el
 
@@ -193,6 +134,15 @@ be performed once as Baemacs will automatically ensure that changes to
   ;; Emacs will look for this specific file before initializing the GUI and
   ;; other such things.
   ;;; Code:
+#+END_SRC
+
+** Custom
+
+Rather than Emacs customization being appended to the end of the configuration
+file, in our case ~init.el~, we may specify an alternate ~custom-file~:
+
+#+BEGIN_SRC emacs-lisp :tangle early-init.el
+  (setq custom-file (concat user-emacs-directory "custom.el"))
 #+END_SRC
 
 ** Encoding
@@ -206,14 +156,6 @@ be performed once as Baemacs will automatically ensure that changes to
 
 ** Environment
 
-Emacs will inherit your system's current environment, though we may adjust some
-key variables for quality of life.
-
-- Set Emacs as our default ~EDITOR~ when in Emacs
-- Set ~PAGER~ to an Emacs built-in, which doesn't require ansi-term
-- Unset ~PROMPT_COMMAND~, which causes issues with ssh connections
-- Attempt to get/set certain variables, in case they differ
-
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
   (setenv "EDITOR"         "emacsclient")
   (setenv "GIT_EDITOR"     "emacsclient")
@@ -225,16 +167,6 @@ key variables for quality of life.
   (setenv "TERM"           (getenv "TERM"))
 #+END_SRC
 
-** Custom
-
-Rather than Emacs customization being appended to the end of the configuration
-file, in our case ~init.el~, we may specify the location of ~custom-file~ early
-on to keep our configuration directory relatively clean.
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (setq custom-file (concat user-emacs-directory "custom.el"))
-#+END_SRC
-
 ** Package Management
 
 #+BEGIN_SRC emacs-lisp :tangle early-init.el
@@ -243,18 +175,15 @@ on to keep our configuration directory relatively clean.
   (if (fboundp 'native-compile)
       (setq package-native-compile t))
 
+  (setq package-user-dir (concat user-emacs-directory "pkg/"))
+
   (setq package-archives           '(("elpa"         . "https://elpa.gnu.org/packages/")
                                      ("melpa-stable" . "https://stable.melpa.org/packages/")
                                      ("melpa"        . "https://melpa.org/packages/"))
         package-archive-priorities '(("elpa"         . 3)
                                      ("melpa-stable" . 2)
-                                     ("melpa"        . 1))
-        package-user-dir           (concat user-emacs-directory "pkg/"))
-#+END_SRC
+                                     ("melpa"        . 1)))
 
-With the above changes made, we may now initialize the package module:
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
   (when (< emacs-major-version 27)
     (package-initialize))
 #+END_SRC
@@ -301,24 +230,6 @@ is a nice change.
 
     (if (not (file-directory-p baemacs/auto-save-dir))
         (dired-create-directory baemacs/auto-save-dir)))
-#+END_SRC
-
-*** package-utils
-
-#+BEGIN_SRC emacs-lisp :tangle early-init.el
-  (use-package package-utils
-    :commands (baemacs/update)
-    :init
-    (defun baemacs/update()
-      "Refresh package contents, then update all packages."
-      (interactive)
-
-      ;; Refresh package metadata, and upgrade all packages
-      (package-utils-upgrade-all)
-
-      ;; Native-compile all packages
-      (native-compile-async (concat user-emacs-directory "elpa") 'recursively)
-      (native-compile-async (concat user-emacs-directory "pkg") 'recursively)))
 #+END_SRC
 
 ** Disable toolbars
@@ -819,7 +730,11 @@ specific buffer, you may now do so.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package eww
-    :commands (eww eww-mode eww-reload eww-toggle-images eww-new)
+    :commands (eww
+               eww-mode
+               eww-reload
+               baemacs/eww-toggle-images
+               baemacs/eww-new)
 
     :config
     (when window-system
@@ -1066,32 +981,30 @@ readable sizes, and define a ton of filter groups.
   (use-package org
     :bind
     (:map org-mode-map
-	  ([remap backward-paragraph] . nil)
-	  ([remap forward-paragraph]  . nil)
-	  ("C-S-<down>" . nil)
-	  ("C-S-<up>"   . nil)
-	  ("M-<down>"   . nil)
-	  ("M-<up>"     . nil)
-	  ("S-<left>"   . nil)
-	  ("S-<right>"  . nil))
+          ([remap backward-paragraph] . nil)
+          ([remap forward-paragraph]  . nil)
+          ("C-S-<down>" . nil)
+          ("C-S-<up>"   . nil)
+          ("M-<down>"   . nil)
+          ("M-<up>"     . nil)
+          ("S-<left>"   . nil)
+          ("S-<right>"  . nil))
 
     :config
+    (set-face-attribute 'org-block nil :background "#111111" :extend 't)
     (setq org-src-fontify-natively  't
-	  org-src-tab-acts-natively 't
-	  org-support-shift-select  'always)
-
-    (setq org-babel-load-languages '((C . t)
-				     (awk . t)
-				     (emacs-lisp . t)
-				     (lisp . t)
-				     (makefile . t)
-				     (scheme . t)
-				     (shell . t)
-				     (sql . t)
-				     (sqlite . t)))
-
-    (set-face-attribute 'org-block nil
-			:background "#111111" :extend 't)
+          org-src-tab-acts-natively 't
+          org-support-shift-select  'always)
+    (setq org-babel-load-languages
+          '((C . t)
+            (awk . t)
+            (emacs-lisp . t)
+            (lisp . t)
+            (makefile . t)
+            (scheme . t)
+            (shell . t)
+            (sql . t)
+            (sqlite . t)))
 
     :hook
     ((org-metadown  . windmove-down)
@@ -1109,8 +1022,7 @@ readable sizes, and define a ton of filter groups.
     :init
     (add-hook 'org-mode-hook
               (lambda ()
-                (add-to-list (make-local-variable 'company-backends)
-                             'company-org-block))))
+                (add-to-list (make-local-variable 'company-backends) 'company-org-block))))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
@@ -1151,7 +1063,7 @@ readable sizes, and define a ton of filter groups.
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package scratch
-    :commands (scratch-new)
+    :commands (baemacs/scratch-new)
     :init
     (defun baemacs/scratch-new()
       "Open a new scratch buffer."
@@ -1171,7 +1083,11 @@ appreciate the additional functions.
   (use-package server
     :demand 't
     :bind ("C-x C-c" . baemacs/server-stop)
-    :commands (package-utils-upgrade-all server-start)
+    :commands (baemacs/server-kill baemacs/server-stop)
+    :config
+    (unless (and (fboundp 'server-running-p)
+                 (server-running-p))
+      (server-start))
 
     :init
     (defun baemacs/server-kill()
@@ -1184,23 +1100,18 @@ appreciate the additional functions.
       "Prompt to save buffers, then kill Emacs."
       (interactive)
       (if (y-or-n-p "Quit Emacs? ")
-          (save-buffers-kill-emacs)))
-
-    :config
-    (unless (and (fboundp 'server-running-p)
-                 (server-running-p))
-      (server-start)))
+          (save-buffers-kill-emacs))))
 #+END_SRC
 
 *** smartparens
 
 #+BEGIN_SRC emacs-lisp :tangle config.el
   (use-package smartparens
-    :hook ((eshell-mode org-mode prog-mode text-mode) . turn-on-smartparens-mode)
     :config
     (setq sp-highlight-pair-overlay     nil
           sp-highlight-wrap-overlay     nil
-          sp-highlight-wrap-tag-overlay nil))
+          sp-highlight-wrap-tag-overlay nil)
+    :hook ((eshell-mode org-mode prog-mode text-mode) . turn-on-smartparens-mode))
 #+END_SRC
 
 *** swiper
