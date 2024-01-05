@@ -56,7 +56,6 @@ automatically updates on start of GNU/Emacs.
     - [[#flyspell][flyspell]]
     - [[#gnus][gnus]]
     - [[#helpful][helpful]]
-    - [[#highlight-indent-guides][highlight-indent-guides]]
     - [[#ibuffer][ibuffer]]
     - [[#ivy][ivy]]
     - [[#magit][magit]]
@@ -833,14 +832,6 @@ much more contextual information.
            ("C-h f" . #'helpful-callable)
            ("C-h k" . #'helpful-key)
            ("C-h v" . #'helpful-variable)))
-#+END_SRC
-
-*** highlight-indent-guides
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package highlight-indent-guides
-    :config (setq highlight-indent-guides-method 'character)
-    :hook (prog-mode . highlight-indent-guides-mode))
 #+END_SRC
 
 *** ibuffer
