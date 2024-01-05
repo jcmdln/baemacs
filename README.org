@@ -53,7 +53,6 @@ automatically updates on start of GNU/Emacs.
     - [[#eshell][eshell]]
     - [[#eww][eww]]
     - [[#flycheck][flycheck]]
-    - [[#flyspell][flyspell]]
     - [[#gnus][gnus]]
     - [[#helpful][helpful]]
     - [[#ibuffer][ibuffer]]
@@ -528,9 +527,6 @@ https://github.com/emacs-circe/circe
           circe-reduce-lurker-spam   't
           circe-use-cycle-completion 't
 
-          lui-flyspell-alist         '((".*" "american"))
-          lui-flyspell-p             't
-
           lui-fill-type              nil
           lui-time-stamp-format      "%H:%M:%S"
           lui-time-stamp-position    'left-margin)
@@ -774,18 +770,6 @@ specific buffer, you may now do so.
     :hook (prog-mode . flycheck-mode))
 #+END_SRC
 
-*** flyspell
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package flyspell
-    :config
-    (setq ispell-program-name (executable-find "hunspell")
-          ispell-dictionary   "en_US")
-
-    :hook (((conf-mode markdown-mode text-mode) . flyspell-mode)
-           (prog-mode . flyspell-prog-mode)))
-#+END_SRC
-
 *** gnus
 
 I've bounced between using "real" email clients and gnus quite a few times,
@@ -949,13 +933,6 @@ readable sizes, and define a ton of filter groups.
   (use-package ivy-rich
     :commands (ivy-rich-mode)
     :hook (ivy-mode . (lambda() (ivy-rich-mode 1))))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp :tangle config.el
-  (use-package flyspell-correct-ivy
-    :after (flyspell ivy)
-    :bind ("C-\\" . flyspell-correct-wrapper)
-    :config (setq flyspell-correct-interface #'flyspell-correct-ivy))
 #+END_SRC
 
 *** magit
